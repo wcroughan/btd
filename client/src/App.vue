@@ -1,18 +1,17 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld :msg="msg" />
+    <btd-master-component />
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import btdMasterComponent from "./components/btdMasterComponent.vue";
 import axios from "axios";
 
 export default {
   name: "App",
   components: {
-    HelloWorld,
+    btdMasterComponent,
   },
   data() {
     return {
@@ -35,5 +34,6 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  background-color: teal;
 }
 </style>
