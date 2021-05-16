@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const controllers = require('./../controllers/controllers');
+module.exports = function (db) {
+    const express = require('express');
+    const router = express.Router();
+    const controllers = require('./../controllers/controllers')(db);
 
-// router.get('/list/:id', controllers.getListForId);
-router.get('/test', controllers.getTest);
+    router.get('/list/:id', controllers.getListsForId);
+    router.get('/test', controllers.getTest);
 
-module.exports = router;
+    return router;
+
+}

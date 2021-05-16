@@ -29,7 +29,7 @@ client.connect(err => {
         const btdb = client.db("testdb");
 
         try {
-            const apirouter = require('./backend/routes/routes');
+            const apirouter = require('./backend/routes/routes')(btdb);
             app.use('/api/v1/', apirouter);
 
             app.use(express.static(path.join(__dirname, 'client/dist')));

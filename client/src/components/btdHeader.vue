@@ -1,12 +1,13 @@
 <template>
   <div class="btd-header">
-    <btd-day-display :date="date" />
-    <button class="today-button">Today</button>
+    <btd-day-display :date="date" @dayChosen="dayChosen($event)" />
+    <button class="today-button" @click="todayClicked">Today</button>
     <btd-streak-info />
   </div>
 </template>
 
 <script>
+import date_util from "../utility/date_util";
 import BtdDayDisplay from "./btdDayDisplay.vue";
 import BtdStreakInfo from "./btdStreakInfo.vue";
 // import date_util from "./../utility/date_util.js";
@@ -24,14 +25,24 @@ export default {
     scrollInfo: null,
     date: Date,
   },
+  emits: ["dayChosen"],
+  methods: {
+    dayChosen(date) {
+      //   console.log("header got date", date);
+      this.$emit("dayChosen", date);
+    },
+    todayClicked() {
+      this.dayChosen(date_util.getToday());
+    },
+  },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .btd-header {
-  /* max-width: 600px; */
-  /* margin: auto; */
+  max-width: 900px;
+  margin: auto;
 
   position: fixed;
   top: 0;

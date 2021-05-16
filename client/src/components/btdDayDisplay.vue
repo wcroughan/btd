@@ -17,6 +17,7 @@ export default {
   props: {
     date: Date,
   },
+  emits: ["dayChosen"],
   computed: {
     dateText() {
       const format = [
@@ -28,8 +29,14 @@ export default {
     },
   },
   methods: {
-    yesterdayClicked() {},
-    tomorrowClicked() {},
+    yesterdayClicked() {
+      const newday = date_util.yesterday(this.date);
+      //   console.log("yesterday clicked, new date: ", newday);
+      this.$emit("dayChosen", newday);
+    },
+    tomorrowClicked() {
+      this.$emit("dayChosen", date_util.tomorrow(this.date));
+    },
   },
 };
 </script>

@@ -1,4 +1,3 @@
-
 <template>
   <div class="btd-streak-info">Streak: Idk 7 or 8 days?</div>
 </template>

@@ -1,17 +1,14 @@
-
 <template>
-  <div class="btd-list">{{ title }}{{ items }}</div>
+  <div class="btd-loading-body">Loading...</div>
 </template>
 
 <script>
 // import date_util from "./../utility/date_util.js";
 
 export default {
-  name: "btdList",
-  data() {},
-  props: {
-    title: String,
-    items: Object,
+  name: "btdLoadingBody",
+  data() {
+    return {};
   },
 };
 </script>

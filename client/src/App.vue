@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import btdMasterComponent from "./components/btdMasterComponent.vue";
+import btdMasterComponent from "./components/btdMainComponent.vue";
 import axios from "axios";
 
 export default {
