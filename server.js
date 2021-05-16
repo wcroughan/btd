@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const app = express();
 
@@ -29,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'client/dist')));
 
 app.get('*', (req, res) => {
     res.status(200).json({
+        // msg: process.env
         msg: 'Catch all'
     })
 })
@@ -36,3 +39,5 @@ app.get('*', (req, res) => {
 app.listen(port, () => {
     console.log(`BACK_END_SERVICE_PORT: ${port}`);
 });
+
+
