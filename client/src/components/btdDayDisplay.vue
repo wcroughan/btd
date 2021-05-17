@@ -25,7 +25,7 @@ export default {
         { month: "numeric" },
         { day: "numeric" },
       ];
-      return date_util.formatDate(this.date, format, "/");
+      return date_util.formatDateOld(this.date, format, "/");
     },
   },
   methods: {

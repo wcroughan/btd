@@ -2,11 +2,15 @@
   <div class="btd-main-component">
     <btd-header :date="selectedDate" @dayChosen="dayChosen($event)" />
     <btd-loading-body v-if="lists === null" />
+    <btd-no-lists-filler v-if="lists !== null && lists.length == 0" />
     <btd-list
       v-for="(list, idx) in lists"
       :key="list.id"
       :list="list"
       @itemDoneUpdate="itemDoneUpdate(idx, $event)"
+      @itemDeleted="itemDeleted(idx, $event)"
+      @itemMoved="itemMoved(idx, $event)"
+      @itemEdited="itemEdited(idx, $event)"
     />
   </div>
 </template>
@@ -17,12 +21,14 @@ import btdHeader from "./btdHeader.vue";
 import btdLoadingBody from "./btdLoadingBody.vue";
 import btdList from "./btdList.vue";
 import api_util from "../utility/api_util.js";
+import btdNoListsFiller from "./btdNoListsFiller.vue";
 
 export default {
   name: "btdMainComponent",
   components: {
     btdHeader,
     btdLoadingBody,
+    btdNoListsFiller,
     btdList,
   },
   data() {
@@ -45,6 +51,11 @@ export default {
         }
       });
     },
+    checkIfListDone(listidx) {
+      this.lists[listidx].isDone = this.lists[listidx].items.every(
+        (i) => i.isDone
+      );
+    },
     pushListToServer(list) {
       api_util.pushListToServer(list);
     },
@@ -59,6 +70,36 @@ export default {
       );
       console.log(this.lists);
       this.lists[listidx].items[itemidx].isDone = done;
+      this.checkIfListDone(listidx);
+      this.pushListToServer(this.lists[listidx]);
+    },
+    itemDeleted(listidx, itemidx) {
+      console.log("item delete for list", listidx, ", item", itemidx);
+      this.lists[listidx].items.splice(itemidx, 1);
+      this.checkIfListDone(listidx);
+      this.pushListToServer(this.lists[listidx]);
+    },
+    itemMoved(listidx, { itemidx, moveAmt }) {
+      console.log(
+        "item moved for list",
+        listidx,
+        ", item",
+        itemidx,
+        ", moveamt",
+        moveAmt
+      );
+      console.log("unimpleented");
+    },
+    itemEdited(listidx, { itemidx, newval }) {
+      console.log(
+        "item edited for list",
+        listidx,
+        ", item",
+        itemidx,
+        ", newval",
+        newval
+      );
+      this.lists[listidx].items[itemidx].text = newval;
       this.pushListToServer(this.lists[listidx]);
     },
   },
@@ -68,10 +109,10 @@ export default {
     },
   },
   mounted() {
-    // const d11 = date_util.getDateFromIdStr("20210516");
+    // const d11 = date_util.getDateFromIdStr("20210517");
     // const d12 = date_util.tomorrow(d11);
     // const pl1 = {
-    //   id: "day_20210516",
+    //   id: "day_20210517",
     //   isDone: false,
     //   isSkipped: false,
     //   items: [
@@ -88,10 +129,10 @@ export default {
     //   end: d12,
     // };
     // this.pushListToServer(pl1);
-    // const d21 = date_util.getDateFromIdStr("20210510");
-    // const d22 = date_util.getDateFromIdStr("20210517");
+    // const d21 = date_util.getDateFromIdStr("20210517");
+    // const d22 = date_util.getDateFromIdStr("20210524");
     // const pl2 = {
-    //   id: "week_20210510",
+    //   id: "week_20210517",
     //   isDone: false,
     //   isSkipped: false,
     //   items: [

@@ -14,6 +14,9 @@
         :text="item.text"
         :isDone="item.isDone"
         @itemDoneUpdate="itemDoneUpdate(idx, $event)"
+        @itemDeleted="itemDeleted(idx)"
+        @itemMoved="itemMoved(idx, $event)"
+        @itemEdited="itemEdited(idx, $event)"
         :class="item.isDone ? 'done-item' : 'pending-item'"
       />
     </div>
@@ -37,14 +40,32 @@ export default {
   props: {
     list: Object,
   },
-  emits: ["itemDoneUpdate"],
+  emits: ["itemDoneUpdate", "itemDeleted", "itemMoved", "itemEdited"],
   computed: {
     title() {
       const id = this.list.id;
-      return id;
-      // if (id.substring(0,3) === "day") {
-      // return date_util.formatDate(list)
-      // }
+      if (id.substring(0, 4) === "day_") {
+        const formatOptions = {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        };
+        return new Intl.DateTimeFormat("en-US", formatOptions).format(
+          new Date(this.list.start)
+        );
+      } else if (id.substring(0, 5) === "week_") {
+        console.log(this.list.start);
+        const formatOptions = {
+          month: "numeric",
+          day: "numeric",
+        };
+        const dtf = new Intl.DateTimeFormat("en-US", formatOptions);
+        return (
+          dtf.format(new Date(this.list.start)) +
+          " - " +
+          dtf.format(new Date(this.list.end))
+        );
+      } else return id;
     },
     numComplete() {
       return this.list.items.reduceRight(
@@ -56,6 +77,15 @@ export default {
   methods: {
     itemDoneUpdate(idx, done) {
       this.$emit("itemDoneUpdate", { itemidx: idx, done });
+    },
+    itemDeleted(idx) {
+      this.$emit("itemDeleted", idx);
+    },
+    itemMoved(idx, moveAmt) {
+      this.$emit("itemMoved", { itemidx: idx, moveAmt });
+    },
+    itemEdited(idx, newval) {
+      this.$emit("itemEdited", { itemidx: idx, newval });
     },
   },
 };

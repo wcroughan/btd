@@ -7,87 +7,94 @@
     <input type="checkbox" @change="handleCheckbox($event)" :checked="isDone" />
     <component
       class="todo-item-title"
-      :is="isDone ? 's' : 'b'"
+      ref="itemText"
+      :is="itemTitleComponentType"
       @click="textClicked"
-      >{{ text }}</component
-    >
-    <!-- TODO make this a reusable component, so can also use for list options. How to pass exact button specifications? Especially for checkboxes? -->
-    <div class="options-button-container">
-      <button
-        :class="displayOptionsButton ? 'visible-button' : 'hidden-button'"
-        @click="optionsClicked"
-        @focusin="focusChange($event)"
-        @focusout="optionsBlur($event)"
-        v-click-away="clickNotOnOptionsButton"
-      >
-        ...
+      :text="text"
+      :isDone="isDone"
+      @doneEditing="doneEditing"
+      @canceledEditing="canceledEditing"
+    />
+    <btd-options-button ref="itemOptionsMenu" :mouseHovering="mouseIn">
+      <button class="options-button" @click="editButtonClicked">edit</button>
+      <button class="options-button" @click="deleteButtonClicked">
+        delete
       </button>
-      <div
-        class="dropdown-content"
-        :class="{ 'visible-dropdown': displayDropdownOptions }"
-        @focusin="focusChange($event)"
-        @focusout="optionsBlur($event)"
-      >
-        <button>Hello</button>
-        <button>You</button>
-        <button>There</button>
-      </div>
-    </div>
+      <button class="options-button" @click="moveToYesterayClicked">
+        move to yesterday
+      </button>
+      <button class="options-button" @click="moveToTomorrowClicked">
+        move to tomorrow
+      </button>
+    </btd-options-button>
   </div>
 </template>
 
 <script>
+import btdOptionsButton from "./btdOptionsButton.vue";
 // import date_util from "./../utility/date_util.js";
+import { nextTick } from "vue";
+import btdItemTitleDisplay from "./btdItemTitleDisplay.vue";
+import btdItemTitleEdit from "./btdItemTitleEdit.vue";
 
 export default {
+  components: { btdOptionsButton, btdItemTitleDisplay, btdItemTitleEdit },
   name: "btdListItem",
   data() {
     return {
       mouseIn: false,
-      displayDropdownOptions: false,
-      focusCounter: 0,
+      isEditing: false,
     };
   },
   props: {
     text: String,
     isDone: Boolean,
   },
-  emits: ["itemDoneUpdate"],
+  emits: ["itemDoneUpdate", "itemDeleted", "itemMoved", "itemEdited"],
   computed: {
-    displayOptionsButton() {
-      return this.mouseIn || this.displayDropdownOptions;
+    itemTitleComponentType() {
+      if (this.isEditing) return "btd-item-title-edit";
+      else return "btd-item-title-display";
     },
   },
   methods: {
-    focusChange(a) {
-      console.log("focus change", a);
-    },
-    optionsBlur(a) {
-      console.log("blur", a);
-      //   this.displayDropdownOptions = false;
-    },
-    clickNotOnOptionsButton(event) {
-      if (
-        !event.path.some(
-          (e) =>
-            e.className !== undefined &&
-            e.className.includes("dropdown-content")
-        )
-      ) {
-        this.displayDropdownOptions = false;
-      }
-    },
     handleCheckbox(event) {
       this.$emit("itemDoneUpdate", event.target.checked);
     },
-    optionsClicked() {
-      this.displayDropdownOptions = !this.displayDropdownOptions;
-    },
     textClicked() {
-      this.$emit("itemDoneUpdate", !this.isDone);
+      if (!this.isEditing) this.$emit("itemDoneUpdate", !this.isDone);
     },
-    mof(a) {
-      console.log("mouseover", a);
+    titleClickAway() {
+      this.isEditing = false;
+    },
+    deleteButtonClicked() {
+      this.$emit("itemDeleted");
+    },
+    moveToYesterdayClicked() {
+      this.$emit("itemMoved", -1);
+    },
+    moveToTomorrowClicked() {
+      this.$emit("itemMoved", 1);
+    },
+    editButtonClicked() {
+      this.isEditing = !this.isEditing;
+      if (this.isEditing) {
+        console.log("hi");
+        console.log(this.$refs.itemText);
+        this.$refs.itemOptionsMenu.hideMenu();
+        nextTick(() => {
+          this.$refs.itemText.focusInput();
+        });
+      } else {
+        console.log("this shouldn't happen");
+      }
+    },
+    doneEditing(newname) {
+      this.isEditing = false;
+      this.$emit("itemEdited", newname);
+    },
+    canceledEditing() {
+      this.isEditing = false;
     },
   },
 };

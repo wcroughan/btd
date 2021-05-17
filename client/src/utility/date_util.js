@@ -11,8 +11,9 @@ module.exports = {
         const vals = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
         return vals[date.getDay()];
     },
-    formatDate(date, format, separator) {
+    formatDateOld(date, format, separator) {
         function ff(m) {
+            console.log(m);
             let f = new Intl.DateTimeFormat('en', m);
             return f.format(date);
         }
