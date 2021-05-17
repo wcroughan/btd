@@ -7,7 +7,7 @@ cd ..
 echo 3
 git add .
 echo 4
-git commit -m $1
+git commit -m "$1"
 echo 5
 git push
 echo 6
