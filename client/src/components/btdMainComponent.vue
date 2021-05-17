@@ -3,10 +3,10 @@
     <btd-header :date="selectedDate" @dayChosen="dayChosen($event)" />
     <btd-loading-body v-if="lists === null" />
     <btd-list
-      v-for="list in lists"
+      v-for="(list, idx) in lists"
       :key="list.id"
-      :title="list.title"
-      :items="list.items"
+      :list="list"
+      @itemDoneUpdate="itemDoneUpdate(idx, $event)"
     />
   </div>
 </template>
@@ -37,7 +37,7 @@ export default {
       //   console.log("main got date", date);
       this.selectedDate = date;
     },
-    updateLists(date) {
+    getListsFromServer(date) {
       api_util.getListsForDate(date, (res) => {
         console.log(res);
         if (this.selectedDate === date) {
@@ -45,14 +45,70 @@ export default {
         }
       });
     },
+    pushListToServer(list) {
+      api_util.pushListToServer(list);
+    },
+    itemDoneUpdate(listidx, { itemidx, done }) {
+      console.log(
+        "item done update for list",
+        listidx,
+        ", item",
+        itemidx,
+        "done?",
+        done
+      );
+      console.log(this.lists);
+      this.lists[listidx].items[itemidx].isDone = done;
+      this.pushListToServer(this.lists[listidx]);
+    },
   },
   watch: {
     selectedDate(newval) {
-      this.updateLists(newval);
+      this.getListsFromServer(newval);
     },
   },
   mounted() {
-    this.updateLists(this.selectedDate);
+    // const d11 = date_util.getDateFromIdStr("20210516");
+    // const d12 = date_util.tomorrow(d11);
+    // const pl1 = {
+    //   id: "day_20210516",
+    //   isDone: false,
+    //   isSkipped: false,
+    //   items: [
+    //     {
+    //       text: "daily 1",
+    //       isDone: false,
+    //     },
+    //     {
+    //       text: "daily 2",
+    //       isDone: true,
+    //     },
+    //   ],
+    //   start: d11,
+    //   end: d12,
+    // };
+    // this.pushListToServer(pl1);
+    // const d21 = date_util.getDateFromIdStr("20210510");
+    // const d22 = date_util.getDateFromIdStr("20210517");
+    // const pl2 = {
+    //   id: "week_20210510",
+    //   isDone: false,
+    //   isSkipped: false,
+    //   items: [
+    //     {
+    //       text: "weekly 1",
+    //       isDone: false,
+    //     },
+    //     {
+    //       text: "weekly 2",
+    //       isDone: true,
+    //     },
+    //   ],
+    //   start: d21,
+    //   end: d22,
+    // };
+    // this.pushListToServer(pl2);
+    this.getListsFromServer(this.selectedDate);
   },
 };
 </script>

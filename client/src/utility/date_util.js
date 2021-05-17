@@ -34,6 +34,19 @@ module.exports = {
         const diff = ret.getDate() - day + (day == 0 ? -6 : 1);
         ret.setDate(diff);
         return ret;
-    }
+    },
+    apiDateStr(date) {
+        return date.getFullYear() +
+            ("0" + (date.getMonth() + 1)).slice(-2) +
+            ("0" + date.getDate()).slice(-2)
+    },
+    getDateFromIdStr(str) {
+        const yr = parseInt(str.substring(0, 4));
+        const mo = parseInt(str.substring(4, 6)) - 1;
+        const da = parseInt(str.substring(6, 8));
+        const ret = new Date(yr, mo, da, 0, 0, 0, 0);
+        console.log("converted", str, "into", ret);
+        return ret;
+    },
 
 }

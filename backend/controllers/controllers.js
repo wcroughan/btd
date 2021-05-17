@@ -7,24 +7,39 @@ module.exports = function (db) {
                 body: "Becca is great!!!"
             })
         },
-        getListsForId(req, res, next) {
-            console.log(req.params);
+        async getListsForId(req, res, next) {
+            // console.log(req.params);
             const id1 = "day_" + req.params.id;
-            // const id2 = "week_" + req.params.id;
+            const id2 = "week_" + date_util.apiDateStr(date_util.getMonday(date_util.getDateFromIdStr(req.params.id)));
+            // console.log("searching for ", id1, id2)
 
             const filterDetail = {
-                id: id1
-            };
-            db.collection("days_info").findOne(filterDetail, (err, item) => {
-                if (err) {
-                    console.log("Couldn't get item from mongo");
-                    console.log(err);
-                    res.send({ 'error': "error occured" });
-                } else {
-                    console.log("got item from mongo", item);
-                    res.status(200).json(item);
+                id: {
+                    $in: [id1, id2]
                 }
-            })
+            };
+
+            const cursor = await db.collection("lists").find(filterDetail).sort({ id: 1 });
+            const results = await cursor.toArray();
+            // console.log("got from mongo: ", results);
+            res.status(200).json(results);
+        },
+        async pushListToServer(req, res, next) {
+            console.log(req.params, req.body);
+
+            const entryVar = req.body;
+            delete entryVar._id;
+            const entry = {
+                $set: {
+                    ...entryVar
+                }
+            }
+            const options = {
+                upsert: true
+            }
+            await db.collection("lists").updateOne(req.params, entry, options)
+
+            res.status(200).json({ success: true });
         }
     }
 

@@ -1,6 +1,8 @@
 
 <template>
-  <div class="btd-list-header"></div>
+  <div class="btd-list-header">
+    {{ numItems }}{{ numComplete }}{{ isSkipped }}{{ title }}
+  </div>
 </template>
 
 <script>
@@ -8,11 +10,19 @@
 
 export default {
   name: "btdListHeader",
-  data() {},
+  data() {
+    return {};
+  },
   props: {
-    numComplete: int,
+    numItems: Number,
+    numComplete: Number,
     isSkipped: Boolean,
-    isComplete: Boolean,
+    title: String,
+  },
+  computed: {
+    isComplete() {
+      return this.numItems === this.numComplete;
+    },
   },
 };
 </script>

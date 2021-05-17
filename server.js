@@ -26,7 +26,7 @@ client.connect(err => {
         client.close();
     } else {
         console.log("Connected to Mongo!");
-        const btdb = client.db("testdb");
+        const btdb = client.db("btd");
 
         try {
             const apirouter = require('./backend/routes/routes')(btdb);
