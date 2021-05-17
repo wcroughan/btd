@@ -11,7 +11,7 @@
       @click="textClicked"
       >{{ text }}</component
     >
-    <div class="options-button-container">
+    <div class="options-button-container" v-click-away="caw">
       <button
         :class="displayOptionsButton ? 'visible-button' : 'hidden-button'"
         @click="optionsClicked"
