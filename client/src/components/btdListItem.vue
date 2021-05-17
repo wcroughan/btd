@@ -11,12 +11,14 @@
       @click="textClicked"
       >{{ text }}</component
     >
-    <div class="options-button-container" v-click-away="caw">
+    <!-- TODO make this a reusable component, so can also use for list options. How to pass exact button specifications? Especially for checkboxes? -->
+    <div class="options-button-container">
       <button
         :class="displayOptionsButton ? 'visible-button' : 'hidden-button'"
         @click="optionsClicked"
         @focusin="focusChange($event)"
         @focusout="optionsBlur($event)"
+        v-click-away="clickNotOnOptionsButton"
       >
         ...
       </button>
@@ -42,7 +44,7 @@ export default {
   data() {
     return {
       mouseIn: false,
-      //   displayDropdownOptions: false,
+      displayDropdownOptions: false,
       focusCounter: 0,
     };
   },
@@ -52,9 +54,6 @@ export default {
   },
   emits: ["itemDoneUpdate"],
   computed: {
-    displayDropdownOptions() {
-      return this.focusCounter > 0;
-    },
     displayOptionsButton() {
       return this.mouseIn || this.displayDropdownOptions;
     },
@@ -62,21 +61,27 @@ export default {
   methods: {
     focusChange(a) {
       console.log("focus change", a);
-      this.focusCounter += 1;
     },
     optionsBlur(a) {
       console.log("blur", a);
-      this.focusCounter -= 1;
       //   this.displayDropdownOptions = false;
     },
-    caw() {
-      console.log("caw! caw!");
+    clickNotOnOptionsButton(event) {
+      if (
+        !event.path.some(
+          (e) =>
+            e.className !== undefined &&
+            e.className.includes("dropdown-content")
+        )
+      ) {
+        this.displayDropdownOptions = false;
+      }
     },
     handleCheckbox(event) {
       this.$emit("itemDoneUpdate", event.target.checked);
     },
     optionsClicked() {
-      //   this.displayDropdownOptions = !this.displayDropdownOptions;
+      this.displayDropdownOptions = !this.displayDropdownOptions;
     },
     textClicked() {
       this.$emit("itemDoneUpdate", !this.isDone);
@@ -99,12 +104,15 @@ export default {
   margin: 5px 0px;
 }
 .options-button-container {
+  position: relative;
   display: inline-block;
 }
 .dropdown-content {
   display: none;
   position: absolute;
+  right: 0;
   z-index: 1;
+  background-color: white;
 }
 .dropdown-content button {
   display: block;
@@ -113,7 +121,7 @@ export default {
   display: block;
 }
 
-@media screen and (min-width: 680px) {
+@media (pointer: fine) {
   button {
     transition: 0.1s;
   }
