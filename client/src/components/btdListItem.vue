@@ -20,7 +20,7 @@
       <button class="options-button" @click="deleteButtonClicked">
         delete
       </button>
-      <button class="options-button" @click="moveToYesterayClicked">
+      <button class="options-button" @click="moveToYesterdayClicked">
         move to yesterday
       </button>
       <button class="options-button" @click="moveToTomorrowClicked">
@@ -33,7 +33,7 @@
 <script>
 import btdOptionsButton from "./btdOptionsButton.vue";
 // import date_util from "./../utility/date_util.js";
-import { nextTick } from "vue";
+// import { nextTick } from "vue";
 import btdItemTitleDisplay from "./btdItemTitleDisplay.vue";
 import btdItemTitleEdit from "./btdItemTitleEdit.vue";
 
@@ -68,12 +68,15 @@ export default {
       this.isEditing = false;
     },
     deleteButtonClicked() {
+      this.$refs.itemOptionsMenu.hideMenu();
       this.$emit("itemDeleted");
     },
     moveToYesterdayClicked() {
+      this.$refs.itemOptionsMenu.hideMenu();
       this.$emit("itemMoved", -1);
     },
     moveToTomorrowClicked() {
+      this.$refs.itemOptionsMenu.hideMenu();
       this.$emit("itemMoved", 1);
     },
     editButtonClicked() {
@@ -82,9 +85,9 @@ export default {
         console.log("hi");
         console.log(this.$refs.itemText);
         this.$refs.itemOptionsMenu.hideMenu();
-        nextTick(() => {
-          this.$refs.itemText.focusInput();
-        });
+        // nextTick(() => {
+        //   this.$refs.itemText.focusInput();
+        // });
       } else {
         console.log("this shouldn't happen");
       }
@@ -109,10 +112,6 @@ export default {
   display: flex;
   justify-content: center;
   margin: 5px 0px;
-}
-.options-button-container {
-  position: relative;
-  display: inline-block;
 }
 .dropdown-content {
   display: none;

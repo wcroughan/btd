@@ -6,6 +6,10 @@
       :numItems="list.items.length"
       :numComplete="numComplete"
       :isSkipped="list.isSkipped"
+      @updateSkipped="updateSkipped"
+      @setAllDone="setAllDone"
+      @loadDefaultList="loadDefaultList"
+      @editDefaultList="editDefaultList"
     />
     <div class="list-body">
       <btd-list-item
@@ -20,8 +24,11 @@
         :class="item.isDone ? 'done-item' : 'pending-item'"
       />
       <component
+        class="add-item-button"
         :is="isAddingItem ? 'btd-item-title-edit' : 'button'"
-        @click="addItemClicked"
+        v-on="isAddingItem ? {} : { click: addItemClicked }"
+        @doneEditing="doneEditing"
+        @canceledEditing="canceledEditing"
         >+ Add Item</component
       >
     </div>
@@ -31,6 +38,8 @@
 <script>
 import BtdListHeader from "./btdListHeader.vue";
 import BtdListItem from "./btdListItem.vue";
+import btdItemTitleEdit from "./btdItemTitleEdit.vue";
+import { nextTick } from "vue";
 // import date_util from "../utility/date_util";
 
 export default {
@@ -38,6 +47,7 @@ export default {
   components: {
     BtdListHeader,
     BtdListItem,
+    btdItemTitleEdit,
   },
   data() {
     return {
@@ -47,7 +57,7 @@ export default {
   props: {
     list: Object,
   },
-  emits: ["itemDoneUpdate", "itemDeleted", "itemMoved", "itemEdited"],
+  emits: ["listUpdate"],
   computed: {
     title() {
       const id = this.list.id;
@@ -83,19 +93,80 @@ export default {
   },
   methods: {
     itemDoneUpdate(idx, done) {
-      this.$emit("itemDoneUpdate", { itemidx: idx, done });
+      const body = {
+        type: "itemDoneUpdate",
+        itemUpdates: [
+          {
+            idx,
+            val: done,
+          },
+        ],
+      };
+      this.$emit("listUpdate", body);
     },
     itemDeleted(idx) {
-      this.$emit("itemDeleted", idx);
+      this.$emit("listUpdate", { type: "itemDeleted", itemIdxs: [idx] });
     },
     itemMoved(idx, moveAmt) {
-      this.$emit("itemMoved", { itemidx: idx, moveAmt });
+      this.$emit("listUpdate", {
+        type: "itemMovedToList",
+        itemidx: idx,
+        moveAmt,
+      });
     },
     itemEdited(idx, newval) {
-      this.$emit("itemEdited", { itemidx: idx, newval });
+      const body = {
+        type: "itemEdited",
+        itemUpdates: [
+          {
+            idx,
+            val: newval,
+          },
+        ],
+      };
+      this.$emit("listUpdate", body);
     },
     addItemClicked() {
       if (!this.isAddingItem) this.isAddingItem = true;
+    },
+    doneEditing(text) {
+      const body = {
+        type: "itemAdded",
+        itemUpdates: [
+          {
+            val: text,
+          },
+        ],
+      };
+      this.$emit("listUpdate", body);
+      nextTick(() => (this.isAddingItem = false));
+    },
+    canceledEditing() {
+      this.isAddingItem = false;
+      nextTick(() => (this.isAddingItem = false));
+    },
+    updateSkipped(val) {
+      this.$emit("listUpdate", { type: "listSkippedUpdate", isSkipped: val });
+    },
+    setAllDone(val) {
+      const body = {
+        type: "itemDoneUpdate",
+        itemUpdates: [...Array(this.list.items.length).keys()].map((i) => {
+          return {
+            idx: i,
+            val,
+          };
+        }),
+      };
+      console.log(body);
+
+      this.$emit("listUpdate", body);
+    },
+    loadDefaultList() {
+      this.$emit("listUpdate", { type: "loadDefaultList" });
+    },
+    editDefaultList() {
+      this.$emit("listUpdate", { type: "loadDefaultList" });
     },
   },
 };
@@ -114,5 +185,8 @@ export default {
 }
 .pending-item {
   order: 0;
+}
+.add-item-button {
+  order: 2;
 }
 </style>

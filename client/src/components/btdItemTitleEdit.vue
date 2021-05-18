@@ -1,11 +1,11 @@
 <template>
-  <div class="item-title-edit">
+  <div class="btd-item-title-edit">
     <input
       ref="inputField"
       class="item-title-edit-input"
       v-click-away="clickAway"
       v-model="currentText"
-      @keyup="keylistener"
+      @keydown="keylistener"
     />
     <button @click="doneEditing">Save</button>
     <button @click="cancelEditing">Cancel</button>
@@ -30,18 +30,19 @@ export default {
       this.$refs.inputField.select();
     },
     doneEditing() {
-      console.log("done");
+      //   console.log("done");
       this.$emit("doneEditing", this.currentText);
     },
     cancelEditing() {
-      console.log("cancel");
+      //   console.log("cancel");
       this.$emit("canceledEditing", this.currentText);
     },
     clickAway(event) {
       if (
         !event.path.some(
           (e) =>
-            e.className !== undefined && e.className.includes("item-title-edit")
+            e.className !== undefined &&
+            e.className.includes("btd-item-title-edit")
         )
       ) {
         this.doneEditing();
@@ -60,6 +61,9 @@ export default {
     escapePressed() {
       this.cancelEditing();
     },
+  },
+  mounted() {
+    this.focusInput();
   },
 };
 </script>

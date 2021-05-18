@@ -7,10 +7,7 @@
       v-for="(list, idx) in lists"
       :key="list.id"
       :list="list"
-      @itemDoneUpdate="itemDoneUpdate(idx, $event)"
-      @itemDeleted="itemDeleted(idx, $event)"
-      @itemMoved="itemMoved(idx, $event)"
-      @itemEdited="itemEdited(idx, $event)"
+      @listUpdate="listUpdate(idx, $event)"
     />
   </div>
 </template>
@@ -59,47 +56,46 @@ export default {
     pushListToServer(list) {
       api_util.pushListToServer(list);
     },
-    itemDoneUpdate(listidx, { itemidx, done }) {
-      console.log(
-        "item done update for list",
-        listidx,
-        ", item",
-        itemidx,
-        "done?",
-        done
-      );
-      console.log(this.lists);
-      this.lists[listidx].items[itemidx].isDone = done;
-      this.checkIfListDone(listidx);
-      this.pushListToServer(this.lists[listidx]);
-    },
-    itemDeleted(listidx, itemidx) {
-      console.log("item delete for list", listidx, ", item", itemidx);
-      this.lists[listidx].items.splice(itemidx, 1);
-      this.checkIfListDone(listidx);
-      this.pushListToServer(this.lists[listidx]);
-    },
-    itemMoved(listidx, { itemidx, moveAmt }) {
-      console.log(
-        "item moved for list",
-        listidx,
-        ", item",
-        itemidx,
-        ", moveamt",
-        moveAmt
-      );
-      console.log("unimpleented");
-    },
-    itemEdited(listidx, { itemidx, newval }) {
-      console.log(
-        "item edited for list",
-        listidx,
-        ", item",
-        itemidx,
-        ", newval",
-        newval
-      );
-      this.lists[listidx].items[itemidx].text = newval;
+    listUpdate(listidx, update) {
+      console.log("got update for list", listidx, "body:", update);
+      const type = update.type;
+      switch (type) {
+        case "itemDoneUpdate":
+          update.itemUpdates.forEach(
+            (i) => (this.lists[listidx].items[i.idx].isDone = i.val)
+          );
+          this.checkIfListDone(listidx);
+          break;
+        case "itemDeleted":
+          update.itemIdxs.sort((a, b) => b - a);
+          update.itemIdxs.forEach((i) =>
+            this.lists[listidx].items.splice(i, 1)
+          );
+          this.checkIfListDone(listidx);
+          break;
+        case "itemEdited":
+          update.itemUpdates.forEach(
+            (i) => (this.lists[listidx].items[i.idx].text = i.val)
+          );
+          break;
+        case "itemAdded":
+          update.itemUpdates.forEach((i) =>
+            this.lists[listidx].items.push({ text: i.val, isDone: false })
+          );
+          this.checkIfListDone(listidx);
+          break;
+        case "listSkippedUpdate":
+          this.lists[listidx].isSkipped = update.isSkipped;
+          break;
+        case "loadDefaultList": //list might be done
+        case "editDefaultList":
+        case "itemMovedToList": //list might be done
+          console.log("unimplemented");
+          return;
+        default:
+          console.log("unknown list update,", type);
+          return;
+      }
       this.pushListToServer(this.lists[listidx]);
     },
   },
