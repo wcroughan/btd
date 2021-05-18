@@ -5,9 +5,23 @@
     @mouseleave="mouseIn = false"
     class="btd-list-header"
   >
-    {{ title }} {{ numComplete }}/{{ numItems
-    }}{{ isSkipped ? ": skipped" : " active" }}
-    <btd-options-button :mouseHovering="mouseIn">
+    <h1 class="header-title">
+      {{ title }}
+    </h1>
+    <div class="header-info-container">
+      <span class="header-info">
+        {{ numComplete }}/{{ numItems }}
+        <img
+          class="skipped-icon"
+          v-if="isSkipped"
+          alt="Skipped"
+          src="../assets/curved-arrow.png"
+        />
+      </span>
+      <div class="header-info-spacer-vert" />
+    </div>
+    <div class="header-spacer" />
+    <btd-options-button class="list-options" :mouseHovering="mouseIn">
       <div>
         <input type="checkbox" v-model="skipChecked" />
         <button class="options-button" @click="skipButtonClicked">Skip</button>
@@ -79,4 +93,46 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.btd-list-header {
+  display: flex;
+  justify-content: space-between;
+  /* display: inline-block; */
+  /* background-color: khaki; */
+}
+.header-title {
+  /* display: inline; */
+  /* float: left; */
+  flex-grow: 0;
+  /* background-color: lavender; */
+}
+.header-spacer {
+  flex-grow: 1;
+  /* background-color: lawngreen; */
+}
+.list-options {
+  align-self: center;
+  flex-grow: 0;
+  /* background-color: lightcoral; */
+}
+.header-info-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  justify-content: space-between;
+  /* background-color: lightskyblue; */
+  padding: 0px 20px;
+}
+.header-info {
+  flex-grow: 1;
+  /* background-color: magenta; */
+  /* padding: auto; */
+  transform: translate(0%, 40%);
+}
+.header-info-spacer-vert {
+  flex-grow: 1;
+  /* background-color: maroon; */
+}
+.skipped-icon {
+  width: 20px;
+}
 </style>

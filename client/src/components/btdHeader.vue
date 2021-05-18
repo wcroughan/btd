@@ -41,8 +41,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .btd-header {
-  max-width: 900px;
+  max-width: inherit;
   margin: auto;
+  /* max-width: 900px; */
+  /* margin: auto; */
 
   position: fixed;
   top: 0;
@@ -52,7 +54,7 @@ export default {
   display: flex;
   justify-content: center;
 
-  background-color: white;
+  /* background-color: white; */
 }
 .btd-day-display {
   order: 2;
@@ -86,7 +88,7 @@ export default {
     top: 0;
     right: 0;
     left: 0;
-    background-color: yellow;
+    /* background-color: yellow; */
   }
   .today-button {
     grid-row: 2;

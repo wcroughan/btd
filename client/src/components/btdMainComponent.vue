@@ -152,4 +152,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.btd-main-component {
+  max-width: 600px;
+  margin: auto;
+}
 </style>
