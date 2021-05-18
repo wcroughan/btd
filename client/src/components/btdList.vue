@@ -19,6 +19,11 @@
         @itemEdited="itemEdited(idx, $event)"
         :class="item.isDone ? 'done-item' : 'pending-item'"
       />
+      <component
+        :is="isAddingItem ? 'btd-item-title-edit' : 'button'"
+        @click="addItemClicked"
+        >+ Add Item</component
+      >
     </div>
   </div>
 </template>
@@ -35,7 +40,9 @@ export default {
     BtdListItem,
   },
   data() {
-    return {};
+    return {
+      isAddingItem: false,
+    };
   },
   props: {
     list: Object,
@@ -86,6 +93,9 @@ export default {
     },
     itemEdited(idx, newval) {
       this.$emit("itemEdited", { itemidx: idx, newval });
+    },
+    addItemClicked() {
+      if (!this.isAddingItem) this.isAddingItem = true;
     },
   },
 };
