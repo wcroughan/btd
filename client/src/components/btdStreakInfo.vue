@@ -1,5 +1,13 @@
 <template>
-  <div class="btd-streak-info">Streak: Idk 7 or 8 days?</div>
+  <div class="btd-streak-info">
+    <img
+      class="fire-img"
+      :class="{ greyed: streakLength === 0 }"
+      src="../assets/fire.png"
+      alt="streak"
+    />
+    {{ streakLength }}
+  </div>
 </template>
 
 <script>
@@ -8,7 +16,9 @@
 export default {
   name: "btdStreakInfo",
   data() {
-    return {};
+    return {
+      streakLength: 0,
+    };
   },
   props: {
     updateFlag: Number, // start it at 0, add 1 everytime should update. On receiving this emit, subtract one
@@ -26,4 +36,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.fire-img {
+  height: 20px;
+}
+.greyed {
+  filter: grayscale(100%);
+}
 </style>

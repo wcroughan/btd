@@ -188,5 +188,8 @@ export default {
 }
 .add-item-button {
   order: 2;
+  color: blue;
+  border-width: 0;
+  font-weight: bold;
 }
 </style>

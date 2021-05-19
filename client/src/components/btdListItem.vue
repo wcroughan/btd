@@ -114,6 +114,7 @@ export default {
   margin: 5px 0px;
   border-style: solid;
   border-width: 0px 0px 1px 0px;
+  align-items: center;
 }
 .dropdown-content {
   display: none;

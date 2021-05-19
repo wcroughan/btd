@@ -54,7 +54,7 @@ export default {
   display: flex;
   justify-content: center;
 
-  /* background-color: white; */
+  background-color: aqua;
 }
 .btd-day-display {
   order: 2;
@@ -70,6 +70,10 @@ export default {
   order: 3;
   flex-basis: 0;
   flex-grow: 1;
+  border-width: 0px;
+  color: blue;
+  font-weight: bold;
+  background-color: inherit;
 }
 
 @media screen and (max-width: 680px) {

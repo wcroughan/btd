@@ -1,12 +1,19 @@
 <template>
   <div class="options-button-container">
-    <button
+    <!-- <button
+      class="main-button"
       :class="displayOptionsButton ? 'visible-button' : 'hidden-button'"
       @click="optionsClicked"
       v-click-away="clickNotOnOptionsButton"
-    >
-      ...
-    </button>
+    > -->
+    <img
+      src="../assets/ellipsis.png"
+      class="main-button"
+      :class="displayOptionsButton ? 'visible-button' : 'hidden-button'"
+      @click="optionsClicked"
+      v-click-away="clickNotOnOptionsButton"
+    />
+    <!-- </button> -->
     <div
       class="dropdown-content"
       :class="{ 'visible-dropdown': displayDropdownOptions }"
@@ -74,6 +81,12 @@ export default {
 }
 .visible-dropdown {
   display: block;
+}
+.main-button {
+  background-color: inherit;
+  border-width: 0px;
+  /* vertical-align: super; */
+  height: 20px;
 }
 
 @media (pointer: fine) {

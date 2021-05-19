@@ -1,8 +1,18 @@
 <template>
   <div class="btd-day-display">
-    <button @click="yesterdayClicked">Yesterday</button>
+    <img
+      src="../assets/down-arrow.png"
+      @click="yesterdayClicked"
+      alt="Yesterday"
+      class="left-arrow"
+    />
     <span>{{ dateText }}</span>
-    <button @click="tomorrowClicked">Tomorrow</button>
+    <img
+      src="../assets/down-arrow.png"
+      @click="tomorrowClicked"
+      alt="Tomorrow"
+      class="right-arrow"
+    />
   </div>
 </template>
 
@@ -45,6 +55,18 @@ export default {
 <style scoped>
 .btd-day-display {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
+  align-items: center;
+  /* max-height: 20px; */
+}
+.left-arrow {
+  transform: rotateZ(90deg);
+  height: 15px;
+}
+.right-arrow {
+  transform: rotateZ(270deg);
+  height: 15px;
+  /* height: inherit; */
+  /* object-fit: contain; */
 }
 </style>
