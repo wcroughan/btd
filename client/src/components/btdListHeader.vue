@@ -22,19 +22,18 @@
     </div>
     <div class="header-spacer" />
     <btd-options-button class="list-options" :mouseHovering="mouseIn">
-      <div>
-        <input type="checkbox" v-model="skipChecked" />
+      <div class="options-button-container">
         <button class="options-button" @click="skipButtonClicked">Skip</button>
+        <button class="options-button" @click="markAllClicked">
+          {{ markAllText }}
+        </button>
+        <button class="options-button" @click="loadDefaultClicked">
+          Load Default List
+        </button>
+        <button class="options-button" @click="editDefaultClicked">
+          Edit Default List
+        </button>
       </div>
-      <button class="options-button" @click="markAllClicked">
-        {{ markAllText }}
-      </button>
-      <button class="options-button" @click="loadDefaultClicked">
-        Load Default List
-      </button>
-      <button class="options-button" @click="editDefaultClicked">
-        Edit Default List
-      </button>
     </btd-options-button>
   </div>
 </template>
@@ -50,7 +49,6 @@ export default {
   data() {
     return {
       mouseIn: false,
-      skipChecked: this.isSkipped,
     };
   },
   props: {
@@ -71,7 +69,7 @@ export default {
   },
   methods: {
     skipButtonClicked() {
-      this.skipChecked = !this.skipChecked;
+      this.$emit("updateSkipped", !this.isSkipped);
     },
     markAllClicked() {
       this.$emit("setAllDone", !this.isComplete);
@@ -81,11 +79,6 @@ export default {
     },
     editDefaultClicked() {
       this.$emit("editDefaultList");
-    },
-  },
-  watch: {
-    skipChecked(newval) {
-      this.$emit("updateSkipped", newval);
     },
   },
 };
@@ -113,6 +106,19 @@ export default {
   align-self: center;
   flex-grow: 0;
   /* background-color: lightcoral; */
+}
+.options-button-container {
+  display: flex;
+  flex-direction: column;
+}
+.options-button {
+  background-color: rgb(250, 250, 250);
+  border-width: 1px;
+  display: block;
+  white-space: nowrap;
+  padding: 5px;
+  font-size: 1em;
+  width: inherit;
 }
 .header-info-container {
   display: flex;

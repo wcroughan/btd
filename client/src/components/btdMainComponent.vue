@@ -42,7 +42,7 @@ export default {
     },
     getListsFromServer(date) {
       api_util.getListsForDate(date, (res) => {
-        console.log(res);
+        // console.log(res);
         if (this.selectedDate === date) {
           this.lists = res.data;
         }
@@ -59,6 +59,7 @@ export default {
     listUpdate(listidx, update) {
       console.log("got update for list", listidx, "body:", update);
       const type = update.type;
+      const id = this.lists[listidx].id;
       switch (type) {
         case "itemDoneUpdate":
           update.itemUpdates.forEach(
@@ -87,9 +88,21 @@ export default {
         case "listSkippedUpdate":
           this.lists[listidx].isSkipped = update.isSkipped;
           break;
-        case "loadDefaultList": //list might be done
-        case "editDefaultList":
+        case "loadDefaultList":
+          api_util.getDefaultList(id, (res) => {
+            console.log(res);
+            this.lists[listidx] = res.data;
+          });
+          api_util.deleteListFromServer(id);
+          return;
         case "itemMovedToList": //list might be done
+          api_util.addItemToList(
+            this.lists[listidx].items[update.itemIdx],
+            api_util.siblingListId(this.lists[listidx].id, update.moveAmt)
+          );
+          this.lists[listidx].items.splice(update.itemIdx, 1);
+          break;
+        case "editDefaultList":
           console.log("unimplemented");
           return;
         default:

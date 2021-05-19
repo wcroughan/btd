@@ -80,9 +80,9 @@ export default {
   z-index: 9001;
   /* background-color: white; */
 }
-.dropdown-content button {
+/* .dropdown-content button {
   display: block;
-}
+} */
 .visible-dropdown {
   display: block;
 }

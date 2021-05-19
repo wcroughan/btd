@@ -16,16 +16,18 @@
       @canceledEditing="canceledEditing"
     />
     <btd-options-button ref="itemOptionsMenu" :mouseHovering="mouseIn">
-      <button class="options-button" @click="editButtonClicked">edit</button>
-      <button class="options-button" @click="deleteButtonClicked">
-        delete
-      </button>
-      <button class="options-button" @click="moveToYesterdayClicked">
-        move to yesterday
-      </button>
-      <button class="options-button" @click="moveToTomorrowClicked">
-        move to tomorrow
-      </button>
+      <div class="options-button-container">
+        <button class="options-button" @click="editButtonClicked">edit</button>
+        <button class="options-button" @click="deleteButtonClicked">
+          delete
+        </button>
+        <button class="options-button" @click="moveToYesterdayClicked">
+          move to yesterday
+        </button>
+        <button class="options-button" @click="moveToTomorrowClicked">
+          move to tomorrow
+        </button>
+      </div>
     </btd-options-button>
   </div>
 </template>
@@ -115,22 +117,36 @@ export default {
   border-style: solid;
   border-width: 0px 0px 1px 0px;
   align-items: center;
+  font-size: 1.5em;
 }
-.dropdown-content {
+/* .dropdown-content {
   display: none;
   position: absolute;
   right: 0;
   z-index: 1;
   background-color: white;
-}
-.dropdown-content button {
+} */
+/* .dropdown-content button {
   display: block;
-}
-.visible-dropdown {
+} */
+/* .visible-dropdown {
   display: block;
+} */
+.options-button-container {
+  display: flex;
+  flex-direction: column;
+}
+.options-button {
+  background-color: rgb(250, 250, 250);
+  border-width: 1px;
+  display: block;
+  white-space: nowrap;
+  padding: 5px;
+  font-size: 1em;
+  width: inherit;
 }
 
-@media (pointer: fine) {
+/* @media (pointer: fine) {
   button {
     transition: 0.1s;
   }
@@ -140,5 +156,5 @@ export default {
   .hidden-button {
     opacity: 0;
   }
-}
+} */
 </style>

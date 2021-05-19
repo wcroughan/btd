@@ -15,5 +15,29 @@ module.exports = {
         const req = api_root + "/list/" + list.id;
         // console.log(req);
         axios.put(req, list);
+    },
+    getDefaultList(id, callback) {
+        const req = api_root + "/list/default/" + id;
+        axios.get(req).then((res) => {
+            callback(res);
+        });
+    },
+    deleteListFromServer(id) {
+        const req = api_root + "/list/" + id;
+        axios.delete(req);
+    },
+    siblingListId(id, moveAmt) {
+        const type = id.split("_")[0];
+        const jump = (type === "week") ? 7 : 1;
+        const cd = date_util.getDateFromIdStr(id.split("_")[1]);
+        const retDate = new Date(cd);
+        retDate.setDate(retDate.getDate() + moveAmt * jump);
+        console.log(id, moveAmt, retDate);
+        return type + "_" + date_util.apiDateStr(retDate);
+    },
+    addItemToList(item, id) {
+        const req = api_root + "/list/append_item/" + id;
+        console.log("frontend sending:", req, item);
+        axios.put(req, item);
     }
 }

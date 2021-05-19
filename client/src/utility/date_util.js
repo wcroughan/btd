@@ -13,7 +13,7 @@ module.exports = {
     },
     formatDateOld(date, format, separator) {
         function ff(m) {
-            console.log(m);
+            // console.log(m);
             let f = new Intl.DateTimeFormat('en', m);
             return f.format(date);
         }
@@ -51,7 +51,7 @@ module.exports = {
         const mo = parseInt(str.substring(4, 6)) - 1;
         const da = parseInt(str.substring(6, 8));
         const ret = new Date(yr, mo, da, 0, 0, 0, 0);
-        console.log("converted", str, "into", ret);
+        // console.log("converted", str, "into", ret);
         return ret;
     },
 

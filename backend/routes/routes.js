@@ -5,7 +5,10 @@ module.exports = function (db) {
 
     router.get('/test', controllers.getTest);
     router.get('/list/:id', controllers.getListsForId);
+    router.get('/list/default/:id', controllers.getDefaultList);
     router.put('/list/:id', controllers.pushListToServer);
+    router.put('/list/append_item/:id', controllers.appendItem);
+    router.delete('/list/:id', controllers.deleteListFromServer);
 
     return router;
 }

@@ -71,7 +71,7 @@ export default {
           new Date(this.list.start)
         );
       } else if (id.substring(0, 5) === "week_") {
-        console.log(this.list.start);
+        // console.log(this.list.start);
         const formatOptions = {
           month: "numeric",
           day: "numeric",
@@ -110,7 +110,7 @@ export default {
     itemMoved(idx, moveAmt) {
       this.$emit("listUpdate", {
         type: "itemMovedToList",
-        itemidx: idx,
+        itemIdx: idx,
         moveAmt,
       });
     },
@@ -158,7 +158,7 @@ export default {
           };
         }),
       };
-      console.log(body);
+      //   console.log(body);
 
       this.$emit("listUpdate", body);
     },
@@ -191,5 +191,7 @@ export default {
   color: blue;
   border-width: 0;
   font-weight: bold;
+  font-size: 1em;
+  background-color: inherit;
 }
 </style>
