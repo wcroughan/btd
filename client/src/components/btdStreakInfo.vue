@@ -36,8 +36,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.btd-streak-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .fire-img {
-  height: 20px;
+  height: 50px;
+  padding: 10px;
 }
 .greyed {
   filter: grayscale(100%);

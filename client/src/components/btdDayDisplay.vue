@@ -1,17 +1,17 @@
 <template>
   <div class="btd-day-display">
     <img
-      src="../assets/down-arrow.png"
+      src="../assets/down-arrow-red.png"
       @click="yesterdayClicked"
       alt="Yesterday"
-      class="left-arrow"
+      class="left-arrow arrow"
     />
-    <span>{{ dateText }}</span>
+    <span class="date-text">{{ dateText }}</span>
     <img
-      src="../assets/down-arrow.png"
+      src="../assets/down-arrow-red.png"
       @click="tomorrowClicked"
       alt="Tomorrow"
-      class="right-arrow"
+      class="right-arrow arrow"
     />
   </div>
 </template>
@@ -58,15 +58,22 @@ export default {
   justify-content: space-between;
   align-items: center;
   /* max-height: 20px; */
+  background-color: inherit;
+}
+.arrow {
+  height: 40px;
+  filter: hue-rotate(180deg);
+}
+.arrow:hover {
+  filter: hue-rotate(45deg);
 }
 .left-arrow {
   transform: rotateZ(90deg);
-  height: 15px;
 }
 .right-arrow {
   transform: rotateZ(270deg);
-  height: 15px;
-  /* height: inherit; */
-  /* object-fit: contain; */
+}
+.date-text:hover {
+  color: lightblue;
 }
 </style>

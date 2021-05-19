@@ -1,4 +1,3 @@
 - make a smaller curved arrow image so less to download
 - dark mode at night
 - swipe input for yesterday/tomorrow navigation
-- bug: click item menu -> edit, save. The last click also toggles the done-state of the item

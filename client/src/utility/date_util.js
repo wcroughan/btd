@@ -36,6 +36,11 @@ module.exports = {
         ret.setDate(diff);
         return ret;
     },
+    plusOneWeek(date) {
+        const ret = new Date(date);
+        ret.setDate(ret.getDate() + 7);
+        return ret;
+    },
     apiDateStr(date) {
         return date.getFullYear() +
             ("0" + (date.getMonth() + 1)).slice(-2) +

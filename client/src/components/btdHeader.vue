@@ -52,34 +52,41 @@ export default {
   left: 0;
 
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
 
-  background-color: aqua;
+  background-color: green;
+  font-size: 2em;
 }
 .btd-day-display {
   order: 2;
   flex-basis: 0;
-  flex-grow: 1;
+  flex-grow: 0.7;
+  height: 64px;
 }
 .btd-streak-info {
   order: 1;
   flex-basis: 0;
-  flex-grow: 1;
+  flex-grow: 0;
 }
 .today-button {
   order: 3;
   flex-basis: 0;
-  flex-grow: 1;
+  flex-grow: 0;
   border-width: 0px;
   color: blue;
   font-weight: bold;
+  font-size: 0.7em;
   background-color: inherit;
+}
+.today-button:hover {
+  color: lightblue;
 }
 
 @media screen and (max-width: 680px) {
   .btd-header {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    /* grid-template-rows: 64px 64px; */
 
     max-width: 600px;
     margin: auto;
