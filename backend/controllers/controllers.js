@@ -1,4 +1,3 @@
-const { getDefaultList } = require('../../client/src/utility/api_util.js');
 const date_util = require('./../../client/src/utility/date_util.js');
 
 module.exports = function (db) {
