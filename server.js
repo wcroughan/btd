@@ -6,12 +6,14 @@ const { MongoClient } = require('mongodb');
 const dotenv = require('dotenv');
 dotenv.config();
 
+
 const app = express();
 const port = process.env.PORT || 5000;
 app.use((req, res, next) => {
     console.log(`Request_Endpoint: ${req.method} ${req.url}`);
     next();
 });
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
@@ -29,6 +31,9 @@ client.connect(err => {
         const btdb = client.db("btd");
 
         try {
+            const authrouter = require('./backend/auth/auth')(btdb)
+            app.use(authrouter);
+
             const apirouter = require('./backend/routes/routes')(btdb);
             app.use('/api/v1/', apirouter);
 

@@ -37,14 +37,16 @@ export default {
       lists: null,
     };
   },
-  props: {},
+  props: {
+    authToken: String,
+  },
   methods: {
     dayChosen(date) {
       //   console.log("main got date", date);
       this.selectedDate = date;
     },
     getListsFromServer(date) {
-      api_util.getListsForDate(date, (res) => {
+      api_util.getListsForDate(this.authToken, date, (res) => {
         // console.log(res);
         if (this.selectedDate === date) {
           this.lists = res.data;
@@ -60,7 +62,7 @@ export default {
       );
     },
     pushListToServer(list) {
-      api_util.pushListToServer(list);
+      api_util.pushListToServer(this.authToken, list);
     },
     listUpdate(listidx, update) {
       console.log("got update for list", listidx, "body:", update);
@@ -95,16 +97,21 @@ export default {
           this.lists[listidx].isSkipped = update.isSkipped;
           break;
         case "loadDefaultList":
-          api_util.getDefaultList(id, (res) => {
+          api_util.getDefaultList(this.authToken, id, (res) => {
             console.log(res);
             this.lists[listidx] = res.data;
           });
-          api_util.deleteListFromServer(id);
+          api_util.deleteListFromServer(this.authToken, id);
           return;
         case "itemMovedToList": //list might be done
           api_util.addItemToList(
+            this.authToken,
             this.lists[listidx].items[update.itemIdx],
-            api_util.siblingListId(this.lists[listidx].id, update.moveAmt)
+            api_util.siblingListId(
+              this.authToken,
+              this.lists[listidx].id,
+              update.moveAmt
+            )
           );
           this.lists[listidx].items.splice(update.itemIdx, 1);
           this.checkIfListDone(listidx);
