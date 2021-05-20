@@ -21,7 +21,11 @@
       <div class="header-info-spacer-vert" />
     </div>
     <div class="header-spacer" />
-    <btd-options-button class="list-options" :mouseHovering="mouseIn">
+    <btd-options-button
+      class="list-options"
+      ref="optionsButton"
+      :mouseHovering="mouseIn"
+    >
       <div class="options-button-container">
         <button class="options-button" @click="skipButtonClicked">Skip</button>
         <button class="options-button" @click="markAllClicked">
@@ -69,15 +73,19 @@ export default {
   },
   methods: {
     skipButtonClicked() {
+      this.$refs.optionsButton.hideMenu();
       this.$emit("updateSkipped", !this.isSkipped);
     },
     markAllClicked() {
+      this.$refs.optionsButton.hideMenu();
       this.$emit("setAllDone", !this.isComplete);
     },
     loadDefaultClicked() {
+      this.$refs.optionsButton.hideMenu();
       this.$emit("loadDefaultList");
     },
     editDefaultClicked() {
+      this.$refs.optionsButton.hideMenu();
       this.$emit("editDefaultList");
     },
   },

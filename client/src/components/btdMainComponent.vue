@@ -9,6 +9,7 @@
       :list="list"
       @listUpdate="listUpdate(idx, $event)"
     />
+    <btd-edit-default-modal ref="editDefaultModal" />
   </div>
 </template>
 
@@ -19,6 +20,7 @@ import btdLoadingBody from "./btdLoadingBody.vue";
 import btdList from "./btdList.vue";
 import api_util from "../utility/api_util.js";
 import btdNoListsFiller from "./btdNoListsFiller.vue";
+import btdEditDefaultModal from "./btdEditDefaultModal.vue";
 
 export default {
   name: "btdMainComponent",
@@ -27,6 +29,7 @@ export default {
     btdLoadingBody,
     btdNoListsFiller,
     btdList,
+    btdEditDefaultModal,
   },
   data() {
     return {
@@ -48,7 +51,9 @@ export default {
         }
       });
     },
-    displayEditDefaultList(type) {},
+    displayEditDefaultList(type) {
+      this.$refs.editDefaultModal.show(type);
+    },
     checkIfListDone(listidx) {
       this.lists[listidx].isDone = this.lists[listidx].items.every(
         (i) => i.isDone
@@ -120,46 +125,7 @@ export default {
     },
   },
   mounted() {
-    // const d11 = date_util.getDateFromIdStr("20210517");
-    // const d12 = date_util.tomorrow(d11);
-    // const pl1 = {
-    //   id: "day_20210517",
-    //   isDone: false,
-    //   isSkipped: false,
-    //   items: [
-    //     {
-    //       text: "daily 1",
-    //       isDone: false,
-    //     },
-    //     {
-    //       text: "daily 2",
-    //       isDone: true,
-    //     },
-    //   ],
-    //   start: d11,
-    //   end: d12,
-    // };
-    // this.pushListToServer(pl1);
-    // const d21 = date_util.getDateFromIdStr("20210517");
-    // const d22 = date_util.getDateFromIdStr("20210524");
-    // const pl2 = {
-    //   id: "week_20210517",
-    //   isDone: false,
-    //   isSkipped: false,
-    //   items: [
-    //     {
-    //       text: "weekly 1",
-    //       isDone: false,
-    //     },
-    //     {
-    //       text: "weekly 2",
-    //       isDone: true,
-    //     },
-    //   ],
-    //   start: d21,
-    //   end: d22,
-    // };
-    // this.pushListToServer(pl2);
+    // this.$refs.editDefaultModal.show("day_ji");
     this.getListsFromServer(this.selectedDate);
   },
 };

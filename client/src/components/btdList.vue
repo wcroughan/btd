@@ -166,7 +166,7 @@ export default {
       this.$emit("listUpdate", { type: "loadDefaultList" });
     },
     editDefaultList() {
-      this.$emit("listUpdate", { type: "loadDefaultList" });
+      this.$emit("listUpdate", { type: "editDefaultList" });
     },
   },
 };

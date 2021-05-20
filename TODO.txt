@@ -1,3 +1,4 @@
+- make editing the default list that draggable library, and also when an empty field loses focus it dissapears, and always have an empty field at the end
 - make a smaller curved arrow image so less to download
 - dark mode at night
 - swipe input for yesterday/tomorrow navigation
