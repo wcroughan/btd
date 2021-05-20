@@ -48,6 +48,7 @@ export default {
         }
       });
     },
+    displayEditDefaultList(type) {},
     checkIfListDone(listidx) {
       this.lists[listidx].isDone = this.lists[listidx].items.every(
         (i) => i.isDone
@@ -101,9 +102,10 @@ export default {
             api_util.siblingListId(this.lists[listidx].id, update.moveAmt)
           );
           this.lists[listidx].items.splice(update.itemIdx, 1);
+          this.checkIfListDone(listidx);
           break;
         case "editDefaultList":
-          console.log("unimplemented");
+          this.displayEditDefaultList(this.lists[listidx].id.split("_")[0]);
           return;
         default:
           console.log("unknown list update,", type);
