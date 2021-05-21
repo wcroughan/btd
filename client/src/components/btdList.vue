@@ -80,7 +80,7 @@ export default {
         return (
           dtf.format(new Date(this.list.start)) +
           " - " +
-          dtf.format(new Date(this.list.end))
+          dtf.format(new Date(this.list.end) - 1)
         );
       } else return id;
     },

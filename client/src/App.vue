@@ -53,8 +53,13 @@ export default {
         .split(";")
         .find((row) => row.trim().startsWith("atkn="))
         .split("=")[1];
-      this.authInfo.loggedIn = true;
-      console.log("found a token. authinfo", this.authInfo);
+      if (this.authInfo.atkn.length > 0) {
+        console.log(this.authInfo.atkn.length, this.authInfo.atkn);
+        this.authInfo.loggedIn = true;
+        console.log("found a token. authinfo", this.authInfo);
+      } else {
+        this.authInfo.loggedIn = false;
+      }
     }
   },
   mounted() {
@@ -71,7 +76,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #002447;
   margin-top: 60px;
   /* background-color: teal; */
 }

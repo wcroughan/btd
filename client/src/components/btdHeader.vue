@@ -54,7 +54,7 @@ export default {
   display: flex;
   justify-content: space-around;
 
-  background-color: green;
+  background-color: #53d3d1;
   font-size: 2em;
 }
 .btd-day-display {
@@ -73,7 +73,7 @@ export default {
   flex-basis: 0;
   flex-grow: 0;
   border-width: 0px;
-  color: blue;
+  /* color: blue; */
   font-weight: bold;
   font-size: 0.7em;
   background-color: inherit;
