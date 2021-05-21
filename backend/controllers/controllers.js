@@ -1,10 +1,10 @@
 const date_util = require('./../../client/src/utility/date_util.js');
 
 module.exports = function (db) {
-    getDefaultListInternal = function (id, callback) {
-        const datestr = id.split("_")[1];
-        const type = id.split("_")[0];
-        console.log("looking for default list for id", id);
+    getDefaultListInternal = function (userid, listid, callback) {
+        const datestr = listid.split("_")[1];
+        const type = listid.split("_")[0];
+        console.log("looking for default list for listid", listid);
 
         const detail = {
             id: type + "_default"
@@ -27,10 +27,15 @@ module.exports = function (db) {
                 console.log(err);
                 callback(err, { 'error': "error occured" });
             } else {
+                if (item === null) {
+                    //No default list in the first place
+                    // TODO
+                }
                 delete item._id;
-                item.id = id;
+                item.id = listid;
                 item.start = start;
                 item.end = end;
+                item.userid = userid;
                 callback(false, item);
             }
         });
@@ -51,7 +56,8 @@ module.exports = function (db) {
             const filterDetail = {
                 id: {
                     $in: [id1, id2]
-                }
+                },
+                userid: req.uid
             };
 
             const cursor = await db.collection("lists").find(filterDetail).sort({ id: 1 });
@@ -71,7 +77,8 @@ module.exports = function (db) {
             const defaultDetail = {
                 id: {
                     $in: needIds
-                }
+                },
+                userid: req.uid
             };
 
             const day_start = date_util.getDateFromIdStr(req.params.id);
@@ -119,6 +126,7 @@ module.exports = function (db) {
         async appendItem(req, res, next) {
             console.log(req.params, req.body);
             const id = req.params.id;
+            const userid = req.uid;
 
             const entryVar = req.body;
             const entry = {
@@ -129,7 +137,7 @@ module.exports = function (db) {
                 }
             }
             console.log("entry", entry, "id:", id);
-            const result = await db.collection("lists").updateOne({ id }, entry);
+            const result = await db.collection("lists").updateOne({ id, userid }, entry);
 
             if (result.matchedCount === 0) {
                 //There wasn't a list there in the first place, gotta create it
@@ -168,7 +176,8 @@ module.exports = function (db) {
                 return;
             }
             const detail = {
-                id: req.params.id
+                id: req.params.id,
+                userid: req.uid
             }
 
             db.collection("lists").deleteOne(detail);
