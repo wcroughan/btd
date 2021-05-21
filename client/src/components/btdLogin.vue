@@ -26,23 +26,23 @@ export default {
   methods: {
     async createAccount() {
       const hpw = await api_util.getHash(this.pwd);
-      console.log("creating account with ", this.email, hpw);
+      //   console.log("creating account with ", this.email, hpw);
       api_util.createAccount(this.email, hpw, this.createAccountCallback);
     },
     createAccountCallback(res) {
-      console.log(res.data);
+      //   console.log(res.data);
       if (res.data.success) {
-        console.log("success, logggin in");
+        // console.log("success, logggin in");
         this.login();
       }
     },
     async login() {
       const hpw = await api_util.getHash(this.pwd);
-      console.log("logging in with ", this.email, hpw);
+      //   console.log("logging in with ", this.email, hpw);
       api_util.login(this.email, hpw, this.loginCallback);
     },
     loginCallback(res) {
-      console.log(res);
+      //   console.log(res);
       if (res.data.success) {
         this.$emit("setAuthToken", {
           loggedIn: true,

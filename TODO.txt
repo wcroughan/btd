@@ -2,3 +2,7 @@
 - make a smaller curved arrow image so less to download
 - dark mode at night
 - swipe input for yesterday/tomorrow navigation
+- getListsForId needs to be reworked iwth the following:
+    - getListsForDatestr instead
+    - Searches by gt/lt start/end
+    - Each list should have a separate "category" field (do I need datestr too?). Then can search by date, then have a list of required list categories that a default is generated for as well

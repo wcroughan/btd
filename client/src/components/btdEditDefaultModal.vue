@@ -12,6 +12,7 @@
           v-model="item.text"
           :key="idx"
         />
+        <input ref="lastInput" @input="lastInputChange" />
       </div>
       <div class="modal-footer">
         <button @click="save">Save</button>
@@ -33,6 +34,7 @@ export default {
       list: {},
     };
   },
+  inject: ["authToken"],
   methods: {
     show(type) {
       console.log("showing modal with type", type);
@@ -43,7 +45,7 @@ export default {
       this.displayModal = false;
       this.list.id = this.listType + "_default";
       this.list.items.forEach((i) => (i.isDone = false));
-      api_util.pushListToServer(this.list);
+      api_util.pushListToServer(this.authToken.value, this.list);
       this.listType = "";
     },
     cancel() {
@@ -52,11 +54,18 @@ export default {
       this.listType = "";
     },
     getListFromServer(type) {
-      console.log("getting list from server:", type);
-      api_util.getDefaultList(type + "_edit", (list) => {
+      console.log("default editor getting list from server:", type);
+      api_util.getDefaultList(this.authToken.value, type + "_edit", (list) => {
         console.log("got from server:", list);
         this.list = list.data;
       });
+    },
+    lastInputChange(newval) {
+      console.log("change: ", newval);
+      if (newval.length > 0) {
+        this.list.items.push({ text: newval, isDone: false });
+        this.$refs.lastInput.value = "";
+      }
     },
   },
   watch: {

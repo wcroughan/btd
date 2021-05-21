@@ -1,10 +1,10 @@
 const date_util = require('./../../client/src/utility/date_util.js');
 
 module.exports = function (db) {
-    getDefaultListInternal = function (userid, listid, callback) {
+    getDefaultListInternal = async function (userid, listid, callback) {
+        console.log("looking for default list for userid", userid, ", listid", listid, "and callback", callback);
         const datestr = listid.split("_")[1];
         const type = listid.split("_")[0];
-        console.log("looking for default list for listid", listid);
 
         const detail = {
             id: type + "_default"
@@ -22,23 +22,41 @@ module.exports = function (db) {
             return;
         }
 
-        db.collection("lists").findOne(detail, (err, item) => {
-            if (err) {
-                console.log(err);
-                callback(err, { 'error': "error occured" });
-            } else {
-                if (item === null) {
-                    //No default list in the first place
-                    // TODO
+        if (callback === undefined) {
+            let item = await db.collection("lists").findOne(detail);
+            if (item === null) {
+                item = {
+                    items: [],
                 }
-                delete item._id;
-                item.id = listid;
-                item.start = start;
-                item.end = end;
-                item.userid = userid;
-                callback(false, item);
             }
-        });
+            delete item._id;
+            item.id = listid;
+            item.start = start;
+            item.end = end;
+            item.userid = userid;
+            console.log("returning default item:", item)
+            return item;
+        } else {
+            db.collection("lists").findOne(detail, (err, item) => {
+                if (err) {
+                    console.log(err);
+                    callback(err, { 'error': "error occured" });
+                } else {
+                    if (item === null) {
+                        item = {
+                            items: [],
+                        }
+                    }
+                    delete item._id;
+                    item.id = listid;
+                    item.start = start;
+                    item.end = end;
+                    item.userid = userid;
+                    console.log("running callback with default item:", item)
+                    callback(false, item);
+                }
+            });
+        }
     };
 
     return {
@@ -70,41 +88,19 @@ module.exports = function (db) {
                 return;
             }
             const needIds = [];
-            if (!results.some((r) => r.id.includes("week_")))
-                needIds.push("week_default");
-            if (!results.some((r) => r.id.includes("day_")))
-                needIds.push("day_default");
-            const defaultDetail = {
-                id: {
-                    $in: needIds
-                },
-                userid: req.uid
-            };
+            console.log("initial results:", results);
+            if (!results.some((r) => r.id.includes("week_"))) {
+                const weekList = await getDefaultListInternal(req.uid, id2);
+                results.push(weekList);
+            }
+            if (!results.some((r) => r.id.includes("day_"))) {
+                const dayList = await getDefaultListInternal(req.uid, id1);
+                results.push(dayList);
+            }
 
-            const day_start = date_util.getDateFromIdStr(req.params.id);
-            const day_end = date_util.tomorrow(day_start);
-            const week_start = date_util.getMonday(day_start);
-            const week_end = date_util.plusOneWeek(week_start);
-
-            const defaultcursor = await db.collection("lists").find(defaultDetail);
-            const defaultresults = await defaultcursor.toArray();
-            defaultresults.forEach(element => {
-                if (element.id.includes("day_")) {
-                    element.start = day_start;
-                    element.end = day_end;
-                    delete element._id;
-                    element.id = id1;
-                } else if (element.id.includes("week_")) {
-                    element.start = week_start;
-                    element.end = week_end;
-                    delete element._id;
-                    element.id = id2;
-                }
-            });
-            const resArray = defaultresults.concat(results).sort((a, b) => (a.id > b.id) ? 1 : -1);
+            const resArray = results.sort((a, b) => (a.id > b.id) ? 1 : -1);
             console.log("got default lists, returning the following:", resArray);
             res.status(200).json(resArray);
-
         },
         async pushListToServer(req, res, next) {
             console.log(req.params, req.body);
@@ -141,7 +137,7 @@ module.exports = function (db) {
 
             if (result.matchedCount === 0) {
                 //There wasn't a list there in the first place, gotta create it
-                this.getDefaultListInternal(id, (err, item) => {
+                this.getDefaultListInternal(req.uid, id, (err, item) => {
                     if (err) {
                         console.log(err);
                         res.send({ 'error': "error occured" });
@@ -160,7 +156,7 @@ module.exports = function (db) {
             }
         },
         getDefaultList(req, res, next) {
-            this.getDefaultListInternal(req.params.id, (err, item) => {
+            this.getDefaultListInternal(req.uid, req.params.id, (err, item) => {
                 if (err) {
                     console.log(err);
                     res.send({ 'error': "error occured" });

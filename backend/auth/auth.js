@@ -54,7 +54,7 @@ module.exports = function (db) {
                 }
                 const inres = await db.collection("auth").insertOne(authDoc);
                 console.log("logged in user with email", email, "auth", inres.insertedId);
-                res.send({ 'success': true, auth_token: inres.insertedId });
+                res.send({ 'success': true, auth_token: inres.insertedId, expireDate });
             } else {
                 console.log("login failure");
                 res.send({ 'success': false });

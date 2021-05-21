@@ -41,14 +41,14 @@ module.exports = {
         const cd = date_util.getDateFromIdStr(id.split("_")[1]);
         const retDate = new Date(cd);
         retDate.setDate(retDate.getDate() + moveAmt * jump);
-        console.log(id, moveAmt, retDate);
+        // console.log(id, moveAmt, retDate);
         return type + "_" + date_util.apiDateStr(retDate);
     },
     addItemToList(auth_token, item, id) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "/list/append_item/" + id + `?${params}`;
-        console.log("frontend sending:", req, item);
+        // console.log("frontend sending:", req, item);
         axios.put(req, item);
     },
     createAccount(email, hpw, callback) {
@@ -66,6 +66,7 @@ module.exports = {
     async getHash(str) {
         const sdat = new TextEncoder().encode(str);
         const hs = await crypto.subtle.digest("SHA-256", sdat);
+        // console.log(hs)
         return bson.Binary(hs)
     }
 }

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <btd-main-component v-if="loggedIn" :authToken="auth_token" />
-    <btd-login v-if="!loggedIn" @setAuthToken="setAuthToken" />
+    <btd-main-component v-if="authInfo.loggedIn" />
+    <btd-login v-if="!authInfo.loggedIn" @setAuthToken="setAuthToken" />
   </div>
 </template>
 
@@ -9,6 +9,7 @@
 import btdMainComponent from "./components/btdMainComponent.vue";
 import axios from "axios";
 import BtdLogin from "./components/btdLogin.vue";
+import { computed } from "vue";
 
 export default {
   name: "App",
@@ -19,17 +20,42 @@ export default {
   data() {
     return {
       msg: "Loading",
-      auth_token: null,
-      loggedIn: false,
+      authInfo: {
+        loggedIn: false,
+        atkn: "",
+      },
+    };
+  },
+  provide() {
+    return {
+      authToken: computed(() => this.authInfo.atkn),
     };
   },
   methods: {
     setAuthToken(tknInfo) {
-      this.loggedIn = tknInfo.loggedIn;
       if (tknInfo.loggedIn) {
-        this.auth_token = tknInfo.auth_token;
+        this.authInfo.atkn = tknInfo.auth_token;
+        console.log("setting authtoken", this.authInfo.atkn);
+        document.cookie = `atkn=${this.authInfo.atkn} ; expires=${tknInfo.expireDate}`;
+        console.log("cookie: ", document.cookie);
+      } else {
+        this.authInfo.atkn = "";
+        document.cookie = `atkn="" ; expires=""`;
+        console.log("cookie: ", document.cookie);
       }
+      this.authInfo.loggedIn = tknInfo.loggedIn;
     },
+  },
+  created() {
+    console.log("cookie: ", document.cookie);
+    if (document.cookie.split(";").some((c) => c.trim().startsWith("atkn="))) {
+      this.authInfo.atkn = document.cookie
+        .split(";")
+        .find((row) => row.trim().startsWith("atkn="))
+        .split("=")[1];
+      this.authInfo.loggedIn = true;
+      console.log("found a token. authinfo", this.authInfo);
+    }
   },
   mounted() {
     axios.get("/api/v1/test").then((res) => {

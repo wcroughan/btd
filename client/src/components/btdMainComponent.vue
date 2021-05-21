@@ -37,17 +37,20 @@ export default {
       lists: null,
     };
   },
-  props: {
-    authToken: String,
-  },
+  inject: ["authToken"],
   methods: {
     dayChosen(date) {
       //   console.log("main got date", date);
       this.selectedDate = date;
     },
     getListsFromServer(date) {
-      api_util.getListsForDate(this.authToken, date, (res) => {
-        // console.log(res);
+      //   console.log(
+      //     "getting list for date",
+      //     date,
+      //     "with toke",
+      //     this.authToken.value
+      //   );
+      api_util.getListsForDate(this.authToken.value, date, (res) => {
         if (this.selectedDate === date) {
           this.lists = res.data;
         }
@@ -62,10 +65,10 @@ export default {
       );
     },
     pushListToServer(list) {
-      api_util.pushListToServer(this.authToken, list);
+      api_util.pushListToServer(this.authToken.value, list);
     },
     listUpdate(listidx, update) {
-      console.log("got update for list", listidx, "body:", update);
+      //   console.log("got update for list", listidx, "body:", update);
       const type = update.type;
       const id = this.lists[listidx].id;
       switch (type) {
@@ -97,18 +100,18 @@ export default {
           this.lists[listidx].isSkipped = update.isSkipped;
           break;
         case "loadDefaultList":
-          api_util.getDefaultList(this.authToken, id, (res) => {
+          api_util.getDefaultList(this.authToken.value, id, (res) => {
             console.log(res);
             this.lists[listidx] = res.data;
           });
-          api_util.deleteListFromServer(this.authToken, id);
+          api_util.deleteListFromServer(this.authToken.value, id);
           return;
         case "itemMovedToList": //list might be done
           api_util.addItemToList(
-            this.authToken,
+            this.authToken.value,
             this.lists[listidx].items[update.itemIdx],
             api_util.siblingListId(
-              this.authToken,
+              this.authToken.value,
               this.lists[listidx].id,
               update.moveAmt
             )
@@ -132,7 +135,7 @@ export default {
     },
   },
   mounted() {
-    // this.$refs.editDefaultModal.show("day_ji");
+    // console.log("main comp mounted");
     this.getListsFromServer(this.selectedDate);
   },
 };
