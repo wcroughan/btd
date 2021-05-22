@@ -38,6 +38,7 @@ import btdOptionsButton from "./btdOptionsButton.vue";
 // import { nextTick } from "vue";
 import btdItemTitleDisplay from "./btdItemTitleDisplay.vue";
 import btdItemTitleEdit from "./btdItemTitleEdit.vue";
+import { nextTick } from "@vue/runtime-core";
 
 export default {
   components: { btdOptionsButton, btdItemTitleDisplay, btdItemTitleEdit },
@@ -71,7 +72,9 @@ export default {
     },
     deleteButtonClicked() {
       this.$refs.itemOptionsMenu.hideMenu();
-      this.$emit("itemDeleted");
+      nextTick(() => {
+        this.$emit("itemDeleted");
+      });
     },
     moveToYesterdayClicked() {
       this.$refs.itemOptionsMenu.hideMenu();

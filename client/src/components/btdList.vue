@@ -1,4 +1,3 @@
-
 <template>
   <div class="btd-list">
     <btd-list-header
@@ -15,7 +14,7 @@
       <transition-group name="list">
         <btd-list-item
           v-for="(item, idx) in list.items"
-          :key="idx"
+          :key="item.id"
           :text="item.text"
           :isDone="item.isDone"
           @itemDoneUpdate="itemDoneUpdate(idx, $event)"
@@ -198,11 +197,11 @@ export default {
 }
 
 .list-leave-active {
-  transition: all 0.7s ease;
+  transition: all 0.7s ease, opacity 0.6s;
 }
 .list-leave-to {
   transform: translateX(-100%);
-  /* opacity: 0; */
+  opacity: 0;
 }
 .list-move {
   transition: transform 0.2s ease;

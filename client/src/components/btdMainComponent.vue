@@ -95,7 +95,15 @@ export default {
           break;
         case "itemAdded":
           update.itemUpdates.forEach((i) =>
-            this.lists[listidx].items.push({ text: i.val, isDone: false })
+            this.lists[listidx].items.push({
+              text: i.val,
+              isDone: false,
+              id:
+                this.lists[listidx].items.reduceRight(
+                  (a, v) => Math.max(a, v.id),
+                  0
+                ) + 1,
+            })
           );
           this.checkIfListDone(listidx);
           break;
