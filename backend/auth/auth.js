@@ -67,7 +67,7 @@ module.exports = function (db) {
         //check auth token and pass on info to next function
         if (req.query.auth_token === undefined) {
             console.log("Needs auth, but no auth_token present", req.query)
-            res.send({ 'error': "errror occured" });
+            res.send({ 'error': "Needs auth, but no auth_token present" });
             return;
         }
 
