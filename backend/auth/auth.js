@@ -1,12 +1,12 @@
 const api_root = "/api/v1/";
-const no_auth_routes = ["test"].map(v => api_root + v);
+// const no_auth_routes = ["test"].map(v => api_root + v);
 const LOGIN_TIMEOUT_DAYS = 1;
 var ObjectID = require('mongodb').ObjectID;
 
 module.exports = function (db) {
     return async function (req, res, next) {
         req.authenticated = false;
-        if (req.method === "GET" && no_auth_routes.includes(req.url)) {
+        if (req.method === "GET" && !req.url.includes(api_root)) {
             //No auth required
             next();
             return;

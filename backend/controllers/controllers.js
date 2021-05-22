@@ -141,13 +141,13 @@ module.exports = function (db) {
                 this.getDefaultListInternal(req.uid, id, (err, item) => {
                     if (err) {
                         console.log(err);
-                        res.send({ 'error': "error occured" });
+                        res.send({ 'error': "db error occured" });
                     } else {
                         item.items.push(req.body);
                         db.collection("lists").insertOne(item, (err) => {
                             if (err) {
                                 console.log(err);
-                                res.send({ 'error': "error occured" });
+                                res.send({ 'error': "db error occured" });
                             } else {
                                 res.status(200).json({ success: true });
                             }
@@ -160,7 +160,7 @@ module.exports = function (db) {
             this.getDefaultListInternal(req.uid, req.params.id, (err, item) => {
                 if (err) {
                     console.log(err);
-                    res.send({ 'error': "error occured" });
+                    res.send({ 'error': "db error occured" });
                 } else {
                     res.status(200).json(item)
                 }
@@ -169,7 +169,7 @@ module.exports = function (db) {
         deleteListFromServer(req, res, next) {
             if (req.params.id.includes("default")) {
                 console.log("Won't delete default list even when asked");
-                res.send({ 'error': "error occured" });
+                res.send({ 'error': "db error occured" });
                 return;
             }
             const detail = {
