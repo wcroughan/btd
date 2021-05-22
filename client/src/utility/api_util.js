@@ -8,7 +8,7 @@ module.exports = {
     getListsForDate(auth_token, date, callback) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "/list/" + date_util.apiDateStr(date) + `?${params}`;
+        const req = api_root + "list/" + date_util.apiDateStr(date) + `?${params}`;
         // console.log(req);
         axios.get(req).then((res) => {
             callback(res);
@@ -17,14 +17,14 @@ module.exports = {
     pushListToServer(auth_token, list) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "/list/" + list.id + `?${params}`;
+        const req = api_root + "list/" + list.id + `?${params}`;
         // console.log(req);
         axios.put(req, list);
     },
     getDefaultList(auth_token, id, callback) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "/list/default/" + id + `?${params}`;
+        const req = api_root + "list/default/" + id + `?${params}`;
         axios.get(req).then((res) => {
             callback(res);
         });
@@ -32,7 +32,7 @@ module.exports = {
     deleteListFromServer(auth_token, id) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "/list/" + id + `?${params}`;
+        const req = api_root + "list/" + id + `?${params}`;
         axios.delete(req);
     },
     siblingListId(id, moveAmt) {
@@ -47,20 +47,20 @@ module.exports = {
     addItemToList(auth_token, item, id) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "/list/append_item/" + id + `?${params}`;
+        const req = api_root + "list/append_item/" + id + `?${params}`;
         // console.log("frontend sending:", req, item);
         axios.put(req, item);
     },
     createAccount(email, hpw, callback) {
         const reqParamObj = { email, hpw };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "/createUser" + `?${params}`;
+        const req = api_root + "createUser" + `?${params}`;
         axios.get(req).then(callback);
     },
     login(email, hpw, callback) {
         const reqParamObj = { email, hpw };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "/login" + `?${params}`;
+        const req = api_root + "login" + `?${params}`;
         axios.get(req).then(callback);
     },
     async getHash(str) {
