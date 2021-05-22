@@ -11,6 +11,8 @@
           v-for="(item, idx) in list.items"
           v-model="item.text"
           :key="idx"
+          :ref="setItemRef"
+          @blur="checkIfShouldDelete(idx)"
         />
         <input ref="lastInput" @input="lastInputChange" />
       </div>
@@ -24,6 +26,8 @@
 
 <script>
 import api_util from "../utility/api_util";
+import { nextTick } from "vue";
+
 export default {
   name: "btdEditDefaultModal",
   components: {},
@@ -32,10 +36,33 @@ export default {
       displayModal: false,
       listType: "",
       list: {},
+      itemRefs: [],
     };
   },
   inject: ["authToken"],
+  emits: ["editMade"],
   methods: {
+    setItemRef(el) {
+      //   console.log("setting item ref", el);
+      if (el) this.itemRefs.push(el);
+    },
+    checkIfShouldDelete(idx) {
+      console.log(
+        "check if deleting ",
+        idx,
+        "list items = ",
+        this.list.items,
+        "value",
+        this.itemRefs[idx].value,
+        "len",
+        this.itemRefs[idx].value.length
+      );
+      if (this.itemRefs[idx].value.length === 0) {
+        // this.itemRefs.splice(idx, 1);
+        this.itemRefs = [];
+        this.list.items.splice(idx, 1);
+      }
+    },
     show(type) {
       console.log("showing modal with type", type);
       this.listType = type;
@@ -47,6 +74,7 @@ export default {
       this.list.items.forEach((i) => (i.isDone = false));
       api_util.pushListToServer(this.authToken.value, this.list);
       this.listType = "";
+      this.$emit("editMade");
     },
     cancel() {
       console.log("hiding modal");
@@ -60,11 +88,16 @@ export default {
         this.list = list.data;
       });
     },
-    lastInputChange(newval) {
+    lastInputChange(event) {
+      const newval = event.target.value;
       console.log("change: ", newval);
       if (newval.length > 0) {
         this.list.items.push({ text: newval, isDone: false });
         this.$refs.lastInput.value = "";
+        this.itemRefs = [];
+        nextTick(() => {
+          this.itemRefs[this.itemRefs.length - 1].focus();
+        });
       }
     },
   },

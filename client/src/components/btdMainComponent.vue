@@ -9,7 +9,7 @@
       :list="list"
       @listUpdate="listUpdate(idx, $event)"
     />
-    <btd-edit-default-modal ref="editDefaultModal" />
+    <btd-edit-default-modal ref="editDefaultModal" @editMade="refreshList" />
   </div>
 </template>
 
@@ -39,6 +39,9 @@ export default {
   },
   inject: ["authToken"],
   methods: {
+    refreshList() {
+      this.getListsFromServer(this.selectedDate);
+    },
     dayChosen(date) {
       //   console.log("main got date", date);
       this.selectedDate = date;

@@ -47,16 +47,16 @@ export default {
     },
   },
   created() {
-    console.log("cookie: ", document.cookie);
+    // console.log("cookie: ", document.cookie);
     if (document.cookie.split(";").some((c) => c.trim().startsWith("atkn="))) {
       this.authInfo.atkn = document.cookie
         .split(";")
         .find((row) => row.trim().startsWith("atkn="))
         .split("=")[1];
       if (this.authInfo.atkn.length > 0) {
-        console.log(this.authInfo.atkn.length, this.authInfo.atkn);
+        // console.log(this.authInfo.atkn.length, this.authInfo.atkn);
         this.authInfo.loggedIn = true;
-        console.log("found a token. authinfo", this.authInfo);
+        // console.log("found a token. authinfo", this.authInfo);
       } else {
         this.authInfo.loggedIn = false;
       }

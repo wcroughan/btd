@@ -107,6 +107,7 @@ module.exports = function (db) {
 
             const entryVar = req.body;
             delete entryVar._id;
+            entryVar.userid = req.uid;
             const entry = {
                 $set: {
                     ...entryVar
