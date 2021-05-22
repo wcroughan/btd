@@ -12,17 +12,19 @@
       @editDefaultList="editDefaultList"
     />
     <div class="list-body">
-      <btd-list-item
-        v-for="(item, idx) in list.items"
-        :key="idx"
-        :text="item.text"
-        :isDone="item.isDone"
-        @itemDoneUpdate="itemDoneUpdate(idx, $event)"
-        @itemDeleted="itemDeleted(idx)"
-        @itemMoved="itemMoved(idx, $event)"
-        @itemEdited="itemEdited(idx, $event)"
-        :class="item.isDone ? 'done-item' : 'pending-item'"
-      />
+      <transition-group name="list">
+        <btd-list-item
+          v-for="(item, idx) in list.items"
+          :key="idx"
+          :text="item.text"
+          :isDone="item.isDone"
+          @itemDoneUpdate="itemDoneUpdate(idx, $event)"
+          @itemDeleted="itemDeleted(idx)"
+          @itemMoved="itemMoved(idx, $event)"
+          @itemEdited="itemEdited(idx, $event)"
+          :class="item.isDone ? 'done-item' : 'pending-item'"
+        />
+      </transition-group>
       <component
         class="add-item-button"
         :is="isAddingItem ? 'btd-item-title-edit' : 'button'"
@@ -193,5 +195,16 @@ export default {
   font-weight: bold;
   font-size: 1em;
   background-color: inherit;
+}
+
+.list-leave-active {
+  transition: all 0.7s ease;
+}
+.list-leave-to {
+  transform: translateX(-100%);
+  /* opacity: 0; */
+}
+.list-move {
+  transition: transform 0.2s ease;
 }
 </style>

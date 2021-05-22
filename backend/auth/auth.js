@@ -12,6 +12,20 @@ module.exports = function (db) {
             return;
         }
 
+        if (req.method === "GET" && req.url.includes(api_root + "checktkn")) {
+            const authDetail = { _id: ObjectID(req.query.tkn) };
+            const authres = await db.collection("auth").findOne(authDetail);
+            if (authres === null || new Date() > authres.expireDate) {
+                console.log("no auth found for tkn", authDetail, authres);
+                res.json({ 'success': true, 'authenticated': false });
+                return;
+            } else {
+                console.log("auth found for tkn", authDetail, authres);
+                res.json({ 'success': true, 'authenticated': true });
+                return
+            }
+        }
+
         if (req.method === "GET" && req.url.includes(api_root + "createUser")) {
             const email = req.query.email;
             const hpw = req.query.hpw;

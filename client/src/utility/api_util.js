@@ -72,5 +72,17 @@ module.exports = {
         //And in general sounds like there's more concerns here so in long run would be better just to use an outside library like 0auth
 
         return str;
+    },
+    async checkAuthToken(tkn, callback) {
+        const reqParamObj = { tkn };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "checktkn" + `?${params}`;
+        if (callback !== undefined) {
+            axios.get(req).then(callback);
+        }
+        else {
+            const ret = await axios.get(req);
+            return ret;
+        }
     }
 }

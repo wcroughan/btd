@@ -7,7 +7,8 @@ module.exports = function (db) {
         const type = listid.split("_")[0];
 
         const detail = {
-            id: type + "_default"
+            id: type + "_default",
+            userid
         };
         let start;
         let end;

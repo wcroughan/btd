@@ -10,6 +10,7 @@ import btdMainComponent from "./components/btdMainComponent.vue";
 import axios from "axios";
 import BtdLogin from "./components/btdLogin.vue";
 import { computed } from "vue";
+import api_util from "./utility/api_util";
 
 export default {
   name: "App",
@@ -55,7 +56,11 @@ export default {
         .split("=")[1];
       if (this.authInfo.atkn.length > 0) {
         // console.log(this.authInfo.atkn.length, this.authInfo.atkn);
-        this.authInfo.loggedIn = true;
+        api_util.checkAuthToken(this.authInfo.atkn, (res) => {
+          if (res.data.success && res.data.authenticated)
+            this.authInfo.loggedIn = true;
+          else this.authInfo.loggedIn = false;
+        });
         // console.log("found a token. authinfo", this.authInfo);
       } else {
         this.authInfo.loggedIn = false;

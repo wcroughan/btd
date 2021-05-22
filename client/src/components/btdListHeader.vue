@@ -9,15 +9,20 @@
       {{ title }}
     </h1>
     <div class="header-info-container">
-      <span class="header-info">
-        {{ numComplete }}/{{ numItems }}
-        <img
-          class="skipped-icon"
-          v-if="isSkipped"
-          alt="Skipped"
-          src="../assets/curved-arrow.png"
-        />
-      </span>
+      <div class="completion-container">
+        <transition name="completion-status" mode="out-in">
+          <span v-if="!isComplete" class="header-info">
+            {{ numComplete }}/{{ numItems }}
+          </span>
+          <img v-else src="../assets/check.png" class="checkimg" />
+        </transition>
+      </div>
+      <img
+        class="skipped-icon"
+        v-if="isSkipped"
+        alt="Skipped"
+        src="../assets/curved-arrow.png"
+      />
       <div class="header-info-spacer-vert" />
     </div>
     <div class="header-spacer" />
@@ -136,7 +141,7 @@ export default {
   /* background-color: lightskyblue; */
   padding: 0px 20px;
 }
-.header-info {
+.completion-container {
   flex-grow: 1;
   /* background-color: magenta; */
   /* padding: auto; */
@@ -148,5 +153,18 @@ export default {
 }
 .skipped-icon {
   width: 20px;
+}
+.checkimg {
+  width: 30px;
+}
+.completion-status-enter-active {
+  transition: all 0.4s ease;
+}
+/* .completion-status-leave-active {
+  transition: all 0.4s ease;
+} */
+.completion-status-enter-from,
+.completion-status-leave-to {
+  transform: rotateZ(-360deg) scale(0);
 }
 </style>
