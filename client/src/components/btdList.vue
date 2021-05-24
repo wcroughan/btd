@@ -11,10 +11,15 @@
       @editDefaultList="editDefaultList"
     />
     <div class="list-body">
+      <transition-group name="testlist">
+        <p v-for="item in testitems" :key="item">{{ item }}</p>
+      </transition-group>
+      <button @click="b1c">remove</button>
+      <button @click="b2c">shuffle</button>
       <transition-group name="list">
         <btd-list-item
           v-for="item in itemsNotDone"
-          :key="item.id"
+          :key="list.id + '_' + item.id"
           :text="item.text"
           :isDone="item.isDone"
           @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
@@ -54,6 +59,7 @@ import BtdListItem from "./btdListItem.vue";
 import btdItemTitleEdit from "./btdItemTitleEdit.vue";
 import { nextTick } from "vue";
 // import date_util from "../utility/date_util";
+const _ = require("underscore");
 
 export default {
   name: "btdList",
@@ -65,6 +71,7 @@ export default {
   data() {
     return {
       isAddingItem: false,
+      testitems: [1, 2, 3, 4, 5],
     };
   },
   props: {
@@ -111,6 +118,12 @@ export default {
     },
   },
   methods: {
+    b1c() {
+      this.testitems.splice(1, 1);
+    },
+    b2c() {
+      this.testitems = _.shuffle(this.testitems);
+    },
     itemDoneUpdate(id, done) {
       const body = {
         type: "itemDoneUpdate",
@@ -231,4 +244,16 @@ export default {
 /* .list-item-holder {
   display: inline-block;
 } */
+
+.testlist-move {
+  transition: transform 1s ease;
+}
+.testlist-leave-to {
+  transform: translateX(-50px);
+  opacity: 0;
+}
+.testlist-leave-active {
+  position: absolute;
+  transition: transform 1s ease, opacity 0.8s ease;
+}
 </style>
