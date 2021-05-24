@@ -74,68 +74,70 @@ export default {
       //   console.log("got update for list", listidx, "body:", update);
       const type = update.type;
       const id = this.lists[listidx].id;
-      switch (type) {
-        case "itemDoneUpdate":
-          update.itemUpdates.forEach(
-            (i) => (this.lists[listidx].items[i.idx].isDone = i.val)
-          );
-          this.checkIfListDone(listidx);
-          break;
-        case "itemDeleted":
-          update.itemIdxs.sort((a, b) => b - a);
-          update.itemIdxs.forEach((i) =>
-            this.lists[listidx].items.splice(i, 1)
-          );
-          this.checkIfListDone(listidx);
-          break;
-        case "itemEdited":
-          update.itemUpdates.forEach(
-            (i) => (this.lists[listidx].items[i.idx].text = i.val)
-          );
-          break;
-        case "itemAdded":
-          update.itemUpdates.forEach((i) =>
-            this.lists[listidx].items.push({
-              text: i.val,
-              isDone: false,
-              id:
-                this.lists[listidx].items.reduceRight(
-                  (a, v) => Math.max(a, v.id),
-                  0
-                ) + 1,
-            })
-          );
-          this.checkIfListDone(listidx);
-          break;
-        case "listSkippedUpdate":
-          this.lists[listidx].isSkipped = update.isSkipped;
-          break;
-        case "loadDefaultList":
-          api_util.getDefaultList(this.authToken.value, id, (res) => {
-            console.log(res);
-            this.lists[listidx] = res.data;
-          });
-          api_util.deleteListFromServer(this.authToken.value, id);
-          return;
-        case "itemMovedToList": //list might be done
-          api_util.addItemToList(
+      if (type === "itemDoneUpdate") {
+        update.itemUpdates.forEach(
+          (i) =>
+            (this.lists[listidx].items.find((it) => i.id === it.id).isDone =
+              i.val)
+        );
+        this.checkIfListDone(listidx);
+      } else if (type === "itemDeleted") {
+        const idxs = update.itemIds.map((i) =>
+          this.lists[listidx].items.findIndex((it) => it.id === i)
+        );
+
+        idxs.sort((a, b) => b - a);
+        idxs.forEach((i) => this.lists[listidx].items.splice(i, 1));
+        this.checkIfListDone(listidx);
+      } else if (type === "itemEdited") {
+        update.itemUpdates.forEach(
+          (i) =>
+            (this.lists[listidx].items.find((it) => i.id === it.id).text =
+              i.val)
+        );
+      } else if (type === "itemAdded") {
+        update.itemUpdates.forEach((i) =>
+          this.lists[listidx].items.push({
+            text: i.val,
+            isDone: false,
+            id:
+              this.lists[listidx].items.reduceRight(
+                (a, v) => Math.max(a, v.id),
+                0
+              ) + 1,
+          })
+        );
+        this.checkIfListDone(listidx);
+      } else if (type === "listSkippedUpdate") {
+        this.lists[listidx].isSkipped = update.isSkipped;
+      } else if (type === "loadDefaultList") {
+        api_util.getDefaultList(this.authToken.value, id, (res) => {
+          console.log(res);
+          this.lists[listidx] = res.data;
+        });
+        api_util.deleteListFromServer(this.authToken.value, id);
+        return;
+      } else if (type === "itemMovedToList") {
+        const idx = this.lists[listidx].items.findIndex(
+          (it) => it.id === update.itemId
+        );
+        api_util.addItemToList(
+          this.authToken.value,
+          this.lists[listidx].items[idx],
+          api_util.siblingListId(
             this.authToken.value,
-            this.lists[listidx].items[update.itemIdx],
-            api_util.siblingListId(
-              this.authToken.value,
-              this.lists[listidx].id,
-              update.moveAmt
-            )
-          );
-          this.lists[listidx].items.splice(update.itemIdx, 1);
-          this.checkIfListDone(listidx);
-          break;
-        case "editDefaultList":
-          this.displayEditDefaultList(this.lists[listidx].id.split("_")[0]);
-          return;
-        default:
-          console.log("unknown list update,", type);
-          return;
+            this.lists[listidx].id,
+            update.moveAmt
+          )
+        );
+        this.lists[listidx].items.splice(idx, 1);
+        this.checkIfListDone(listidx);
+      } else if (type === "editDefaultList") {
+        this.displayEditDefaultList(this.lists[listidx].id.split("_")[0]);
+        return;
+      } else {
+        console.log("unknown list update,", type);
+        return;
       }
       this.pushListToServer(this.lists[listidx]);
     },

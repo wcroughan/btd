@@ -1,11 +1,5 @@
 <template>
   <div class="options-button-container">
-    <!-- <button
-      class="main-button"
-      :class="displayOptionsButton ? 'visible-button' : 'hidden-button'"
-      @click="optionsClicked"
-      v-click-away="clickNotOnOptionsButton"
-    > -->
     <img
       src="../assets/ellipsis.png"
       class="main-button"
@@ -13,7 +7,6 @@
       @click="optionsClicked"
       v-click-away="clickNotOnOptionsButton"
     />
-    <!-- </button> -->
     <div
       class="non-menu-mask"
       :class="{ 'visible-mask': displayDropdownOptions }"
@@ -28,8 +21,6 @@
 </template>
 
 <script>
-// import date_util from "./../utility/date_util.js";
-
 export default {
   name: "btdListItem",
   data() {
@@ -78,11 +69,7 @@ export default {
   position: absolute;
   right: 0;
   z-index: 9001;
-  /* background-color: white; */
 }
-/* .dropdown-content button {
-  display: block;
-} */
 .visible-dropdown {
   display: block;
 }

@@ -4,7 +4,7 @@
     @mouseenter="mouseIn = true"
     @mouseleave="mouseIn = false"
   >
-    <input type="checkbox" @change="handleCheckbox($event)" :checked="isDone" />
+    <!-- <input type="checkbox" @change="handleCheckbox($event)" :checked="isDone" /> -->
     <component
       class="todo-item-title"
       ref="itemText"
@@ -110,9 +110,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.todo-item-title {
-  flex-grow: 1;
-}
 .btd-list-item {
   display: flex;
   justify-content: center;
@@ -122,19 +119,9 @@ export default {
   align-items: center;
   font-size: 1.5em;
 }
-/* .dropdown-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  z-index: 1;
-  background-color: white;
-} */
-/* .dropdown-content button {
-  display: block;
-} */
-/* .visible-dropdown {
-  display: block;
-} */
+.todo-item-title {
+  flex-grow: 1;
+}
 .options-button-container {
   display: flex;
   flex-direction: column;
@@ -148,16 +135,4 @@ export default {
   font-size: 1em;
   width: inherit;
 }
-
-/* @media (pointer: fine) {
-  button {
-    transition: 0.1s;
-  }
-  .visible-button {
-    opacity: 100;
-  }
-  .hidden-button {
-    opacity: 0;
-  }
-} */
 </style>
