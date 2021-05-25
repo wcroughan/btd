@@ -71,7 +71,11 @@ export default {
     save() {
       this.displayModal = false;
       this.list.id = this.listType + "_default";
-      this.list.items.forEach((i) => (i.isDone = false));
+      this.list.items.forEach((i, idx) => {
+        i.isDone = false;
+        i.id = idx;
+      });
+      console.log(this.list);
       api_util.pushListToServer(this.authToken.value, this.list);
       this.listType = "";
       this.$emit("editMade");

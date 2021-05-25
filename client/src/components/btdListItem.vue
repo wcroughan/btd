@@ -124,7 +124,6 @@ export default {
 
 .todo-item-title {
   flex-grow: 1;
-  background-color: yellow;
 }
 .options-button-container {
   display: flex;

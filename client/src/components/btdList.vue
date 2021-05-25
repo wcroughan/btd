@@ -11,28 +11,6 @@
       @editDefaultList="editDefaultList"
     />
     <div class="list-body">
-      <div
-        v-for="item in list.items"
-        :key="list.id + '_' + item.id + '_test_1'"
-        @click="itemDoneUpdate(item.id, !item.isDone)"
-      >
-        {{ item }}
-      </div>
-      <p>divider</p>
-      <transition-group name="testlist">
-        <div
-          v-for="item in itemsNotDone"
-          class="test-item"
-          :key="list.id + '_' + item.id + '_test'"
-        >
-          <h3>
-            {{ item }}
-          </h3>
-          <h2>
-            {{ item }}
-          </h2>
-        </div>
-      </transition-group>
       <transition-group name="list">
         <btd-list-item
           v-for="item in itemsNotDone"
@@ -47,26 +25,37 @@
           :class="item.isDone ? 'done-item' : 'pending-item'"
         />
       </transition-group>
-      <component
-        class="add-item-button"
-        :is="isAddingItem ? 'btd-item-title-edit' : 'button'"
-        v-on="isAddingItem ? {} : { click: addItemClicked }"
-        @doneEditing="doneEditing"
-        @canceledEditing="canceledEditing"
-        key="-1"
-        >+ Add Item</component
-      >
-      <btd-list-item
-        v-for="item in itemsDone"
-        :key="list.id + '_' + item.id + '_nd'"
-        :text="item.text"
-        :isDone="item.isDone"
-        @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
-        @itemDeleted="itemDeleted(item.id)"
-        @itemMoved="itemMoved(item.id, $event)"
-        @itemEdited="itemEdited(item.id, $event)"
-        :class="item.isDone ? 'done-item' : 'pending-item'"
-      />
+      <div class="list-footer">
+        <component
+          class="add-item-button"
+          :is="isAddingItem ? 'btd-item-title-edit' : 'button'"
+          v-on="isAddingItem ? {} : { click: addItemClicked }"
+          @doneEditing="doneEditing"
+          @canceledEditing="canceledEditing"
+          key="list.id + '_-1'"
+          >+ Add Item</component
+        >
+        <button @click="showCompleted = !showCompleted">
+          {{
+            showCompleted
+              ? "Hide Completed"
+              : `Show Completed (${itemsDone.length})`
+          }}
+        </button>
+      </div>
+      <div class="completed-container" v-if="showCompleted">
+        <btd-list-item
+          v-for="item in itemsDone"
+          :key="list.id + '_' + item.id + '_nd'"
+          :text="item.text"
+          :isDone="item.isDone"
+          @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
+          @itemDeleted="itemDeleted(item.id)"
+          @itemMoved="itemMoved(item.id, $event)"
+          @itemEdited="itemEdited(item.id, $event)"
+          class="done-item"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -90,6 +79,7 @@ export default {
     return {
       isAddingItem: false,
       testitems: [1, 2, 3, 4, 5],
+      showCompleted: false,
     };
   },
   props: {
@@ -232,7 +222,7 @@ export default {
 .pending-item {
   order: 0;
 }
-.add-item-button {
+.list-footer > button {
   order: 1;
   color: blue;
   border-width: 0;
@@ -243,35 +233,24 @@ export default {
   /* transition: transform 0.2s ease; */
 }
 
+.list-enter-active {
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
 .list-leave-active {
   position: absolute;
-  transition: transform 1.7s ease, opacity 1.6s ease;
+  transition: transform 0.3s ease, opacity 0.2s ease;
 }
+.list-enter-from,
 .list-leave-to {
   transform: translateX(-150px);
   opacity: 0;
 }
 .list-move {
-  transition: transform 1.2s ease;
-}
-.testlist-leave-active {
-  position: absolute;
-  transition: transform 1.7s ease, opacity 1.6s ease;
-}
-.testlist-leave-to {
-  transform: translateX(-150px);
-  opacity: 0;
-}
-.testlist-move {
-  transition: transform 1.2s ease;
+  transition: transform 0.25s ease;
 }
 
-.test-item {
+.list-footer {
   display: flex;
-  justify-content: center;
-  /* margin: 5px 0px; */
-  align-items: center;
-  width: 600px;
-  /* position: relative; */
+  justify-content: space-between;
 }
 </style>
