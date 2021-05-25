@@ -55,4 +55,10 @@ export default {
 </script>
 
 <style>
+#btd-login {
+  max-width: 600px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
 </style>

@@ -1,6 +1,10 @@
 <template>
   <div class="btd-main-component">
-    <btd-header :date="selectedDate" @dayChosen="dayChosen($event)" />
+    <btd-header
+      :date="selectedDate"
+      @dayChosen="dayChosen($event)"
+      @logout="$emit('logout')"
+    />
     <btd-loading-body v-if="lists === null" />
     <btd-no-lists-filler v-if="lists !== null && lists.length == 0" />
     <btd-list
@@ -38,6 +42,7 @@ export default {
     };
   },
   inject: ["authToken"],
+  emits: ["logout"],
   methods: {
     refreshList() {
       this.getListsFromServer(this.selectedDate);

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <btd-main-component v-if="authInfo.loggedIn" />
+    <btd-main-component v-if="authInfo.loggedIn" @logout="logout" />
     <btd-login v-if="!authInfo.loggedIn" @setAuthToken="setAuthToken" />
   </div>
 </template>
@@ -33,6 +33,11 @@ export default {
     };
   },
   methods: {
+    logout() {
+      this.authInfo.atkn = "";
+      document.cookie = `atkn= ; expires=${new Date()}`;
+      this.authInfo.loggedIn = false;
+    },
     setAuthToken(tknInfo) {
       if (tknInfo.loggedIn) {
         this.authInfo.atkn = tknInfo.auth_token;

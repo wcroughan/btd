@@ -22,7 +22,6 @@
           @itemDeleted="itemDeleted(item.id)"
           @itemMoved="itemMoved(item.id, $event)"
           @itemEdited="itemEdited(item.id, $event)"
-          :class="item.isDone ? 'done-item' : 'pending-item'"
         />
       </transition-group>
       <div class="list-footer">
@@ -37,6 +36,7 @@
           >+ Add Item</component
         >
         <button
+          v-show="itemsDone.length > 0"
           @click="showCompleted = !showCompleted"
           class="show-completed-button"
         >
@@ -213,18 +213,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .list-body {
-  /* display: flex; */
-  /* flex-direction: column; */
-  max-width: 600px;
-  margin: auto;
   position: relative;
 }
 .done-item {
-  order: 2;
   font-size: 0.8em;
-}
-.pending-item {
-  order: 0;
 }
 .list-footer {
   display: flex;
@@ -241,6 +233,13 @@ export default {
   padding-bottom: 20px;
 }
 
+.show-completed-button {
+  flex-grow: 0;
+}
+.growedit {
+  flex-grow: 1;
+}
+
 .list-enter-active {
   transition: transform 0.4s ease, opacity 0.3s ease;
 }
@@ -255,13 +254,5 @@ export default {
 }
 .list-move {
   transition: transform 0.25s ease;
-}
-
-.show-completed-button {
-  flex-grow: 0;
-}
-.growedit {
-  flex-grow: 1;
-  /* background-color: lawngreen; */
 }
 </style>

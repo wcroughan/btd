@@ -35,7 +35,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.strike {
+/* .strike {
   text-decoration: line-through;
-}
+} */
 </style>

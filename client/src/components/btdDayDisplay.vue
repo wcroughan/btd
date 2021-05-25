@@ -6,14 +6,14 @@
       alt="Yesterday"
       class="left-arrow arrow"
     />
-    <btd-options-button :showOnlyOnHover="false" menuAlign="center">
+    <btd-dropdown menuAlign="center">
       <template v-slot:button>
         <span class="date-text">{{ dateText }}</span>
       </template>
-      <template v-slot:menu>
+      <template v-slot:content>
         <h2>hello</h2>
       </template>
-    </btd-options-button>
+    </btd-dropdown>
     <img
       src="../assets/down-arrow-red.png"
       @click="tomorrowClicked"
@@ -25,11 +25,13 @@
 
 <script>
 import date_util from "./../utility/date_util.js";
-import BtdOptionsButton from "./btdOptionsButton.vue";
+import btdDropdown from "./btdDropdown.vue";
 
 export default {
   name: "btdDayDisplay",
-  components: { BtdOptionsButton },
+  components: {
+    btdDropdown,
+  },
   data() {
     return {};
   },
@@ -84,5 +86,9 @@ export default {
 }
 .date-text:hover {
   color: lightblue;
+}
+.dp {
+  position: absolute;
+  opacity: 0;
 }
 </style>

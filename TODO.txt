@@ -11,3 +11,6 @@
 - Use composition API to make an API handler with provides for data and update methods and an API child that gets those using inject so don't have to have emit chains. Note more info might have to be passed down, can have list provide listid etc (not necessarily thorugh composition api)
 - update item id on move?
 - allow swipe left to mark (un)done
+- animation for list footer moving smoothly
+- backend needs to handle weird input without crashing (like weird auth tokens that ObjectID won't accept)
+- small animations for dropdown menu opening and closing. Maybe like a drawer effect where it expands out from the button?
