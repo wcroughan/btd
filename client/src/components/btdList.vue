@@ -13,20 +13,24 @@
     <div class="list-body">
       <div
         v-for="item in list.items"
-        class="test-item"
-        :key="list.id + '_' + item.id + '_test'"
+        :key="list.id + '_' + item.id + '_test_1'"
         @click="itemDoneUpdate(item.id, !item.isDone)"
       >
         {{ item }}
       </div>
+      <p>divider</p>
       <transition-group name="testlist">
         <div
           v-for="item in itemsNotDone"
           class="test-item"
           :key="list.id + '_' + item.id + '_test'"
-          @click="itemDoneUpdate(item.id, !item.isDone)"
         >
-          {{ item }}
+          <h3>
+            {{ item }}
+          </h3>
+          <h2>
+            {{ item }}
+          </h2>
         </div>
       </transition-group>
       <transition-group name="list">
@@ -260,5 +264,14 @@ export default {
 }
 .testlist-move {
   transition: transform 1.2s ease;
+}
+
+.test-item {
+  display: flex;
+  justify-content: center;
+  /* margin: 5px 0px; */
+  align-items: center;
+  width: 600px;
+  /* position: relative; */
 }
 </style>

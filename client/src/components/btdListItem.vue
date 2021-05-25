@@ -113,7 +113,7 @@ export default {
 .btd-list-item {
   display: flex;
   justify-content: center;
-  margin: 5px 0px;
+  /* margin: 5px 0px; */
   border-style: solid;
   border-width: 0px 0px 1px 0px;
   align-items: center;
