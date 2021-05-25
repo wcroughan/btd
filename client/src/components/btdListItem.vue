@@ -118,9 +118,13 @@ export default {
   border-width: 0px 0px 1px 0px;
   align-items: center;
   font-size: 1.5em;
+  width: 600px;
+  position: relative;
 }
+
 .todo-item-title {
   flex-grow: 1;
+  background-color: yellow;
 }
 .options-button-container {
   display: flex;

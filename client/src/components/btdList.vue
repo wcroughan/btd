@@ -11,15 +11,29 @@
       @editDefaultList="editDefaultList"
     />
     <div class="list-body">
+      <div
+        v-for="item in list.items"
+        class="test-item"
+        :key="list.id + '_' + item.id + '_test'"
+        @click="itemDoneUpdate(item.id, !item.isDone)"
+      >
+        {{ item }}
+      </div>
       <transition-group name="testlist">
-        <p v-for="item in testitems" :key="item">{{ item }}</p>
+        <div
+          v-for="item in itemsNotDone"
+          class="test-item"
+          :key="list.id + '_' + item.id + '_test'"
+          @click="itemDoneUpdate(item.id, !item.isDone)"
+        >
+          {{ item }}
+        </div>
       </transition-group>
-      <button @click="b1c">remove</button>
-      <button @click="b2c">shuffle</button>
       <transition-group name="list">
         <btd-list-item
           v-for="item in itemsNotDone"
-          :key="list.id + '_' + item.id"
+          class="list-item"
+          :key="list.id + '_' + item.id + '_nd'"
           :text="item.text"
           :isDone="item.isDone"
           @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
@@ -40,7 +54,7 @@
       >
       <btd-list-item
         v-for="item in itemsDone"
-        :key="item.id"
+        :key="list.id + '_' + item.id + '_nd'"
         :text="item.text"
         :isDone="item.isDone"
         @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
@@ -59,7 +73,7 @@ import BtdListItem from "./btdListItem.vue";
 import btdItemTitleEdit from "./btdItemTitleEdit.vue";
 import { nextTick } from "vue";
 // import date_util from "../utility/date_util";
-const _ = require("underscore");
+// const _ = require("underscore");
 
 export default {
   name: "btdList",
@@ -118,12 +132,6 @@ export default {
     },
   },
   methods: {
-    b1c() {
-      this.testitems.splice(1, 1);
-    },
-    b2c() {
-      this.testitems = _.shuffle(this.testitems);
-    },
     itemDoneUpdate(id, done) {
       const body = {
         type: "itemDoneUpdate",
@@ -185,7 +193,7 @@ export default {
         type: "itemDoneUpdate",
         itemUpdates: [...Array(this.list.items.length).keys()].map((i) => {
           return {
-            idx: i,
+            id: this.list.items[i].id,
             val,
           };
         }),
@@ -207,10 +215,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .list-body {
-  display: flex;
-  flex-direction: column;
+  /* display: flex; */
+  /* flex-direction: column; */
   max-width: 600px;
   margin: auto;
+  position: relative;
 }
 .done-item {
   order: 2;
@@ -232,28 +241,24 @@ export default {
 
 .list-leave-active {
   position: absolute;
-  transition: transform 0.7s ease, opacity 0.6s ease;
+  transition: transform 1.7s ease, opacity 1.6s ease;
 }
 .list-leave-to {
-  transform: translateX(-30px);
+  transform: translateX(-150px);
   opacity: 0;
 }
 .list-move {
   transition: transform 1.2s ease;
 }
-/* .list-item-holder {
-  display: inline-block;
-} */
-
-.testlist-move {
-  transition: transform 1s ease;
-}
-.testlist-leave-to {
-  transform: translateX(-50px);
-  opacity: 0;
-}
 .testlist-leave-active {
   position: absolute;
-  transition: transform 1s ease, opacity 0.8s ease;
+  transition: transform 1.7s ease, opacity 1.6s ease;
+}
+.testlist-leave-to {
+  transform: translateX(-150px);
+  opacity: 0;
+}
+.testlist-move {
+  transition: transform 1.2s ease;
 }
 </style>
