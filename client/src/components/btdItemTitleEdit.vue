@@ -3,7 +3,6 @@
     <input
       ref="inputField"
       class="item-title-edit-input"
-      v-click-away="clickAway"
       v-model="currentText"
       @keydown="keylistener"
     />
@@ -36,17 +35,6 @@ export default {
     cancelEditing() {
       //   console.log("cancel");
       this.$emit("canceledEditing", this.currentText);
-    },
-    clickAway(event) {
-      if (
-        !event.path.some(
-          (e) =>
-            e.className !== undefined &&
-            e.className.includes("btd-item-title-edit")
-        )
-      ) {
-        this.doneEditing();
-      }
     },
     keylistener(e) {
       if (e.key === "Escape") {

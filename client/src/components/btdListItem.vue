@@ -16,18 +16,22 @@
       @canceledEditing="canceledEditing"
     />
     <btd-options-button ref="itemOptionsMenu" :mouseHovering="mouseIn">
-      <div class="options-button-container">
-        <button class="options-button" @click="editButtonClicked">edit</button>
-        <button class="options-button" @click="deleteButtonClicked">
-          delete
-        </button>
-        <button class="options-button" @click="moveToYesterdayClicked">
-          move to yesterday
-        </button>
-        <button class="options-button" @click="moveToTomorrowClicked">
-          move to tomorrow
-        </button>
-      </div>
+      <template v-slot:menu>
+        <div class="options-button-container">
+          <button class="options-button" @click="editButtonClicked">
+            edit
+          </button>
+          <button class="options-button" @click="deleteButtonClicked">
+            delete
+          </button>
+          <button class="options-button" @click="moveToYesterdayClicked">
+            move to yesterday
+          </button>
+          <button class="options-button" @click="moveToTomorrowClicked">
+            move to tomorrow
+          </button>
+        </div>
+      </template>
     </btd-options-button>
   </div>
 </template>
@@ -130,7 +134,7 @@ export default {
   flex-direction: column;
 }
 .options-button {
-  background-color: rgb(250, 250, 250);
+  background-color: white;
   border-width: 1px;
   display: block;
   white-space: nowrap;

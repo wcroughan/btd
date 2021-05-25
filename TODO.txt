@@ -6,3 +6,8 @@
     - getListsForDatestr instead
     - Searches by gt/lt start/end
     - Each list should have a separate "category" field (do I need datestr too?). Then can search by date, then have a list of required list categories that a default is generated for as well
+- header rework
+- change blue list footer buttons to some kind of grey blue
+- Use composition API to make an API handler with provides for data and update methods and an API child that gets those using inject so don't have to have emit chains. Note more info might have to be passed down, can have list provide listid etc (not necessarily thorugh composition api)
+- update item id on move?
+- allow swipe left to mark (un)done
