@@ -70,4 +70,15 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.btd-item-title-edit {
+  display: flex;
+}
+
+.btd-item-title-edit > button {
+  flex-grow: 0;
+}
+.item-title-edit-input {
+  flex-grow: 1;
+  font-size: 1.5em;
+}
 </style>

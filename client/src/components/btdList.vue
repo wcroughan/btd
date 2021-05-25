@@ -28,6 +28,7 @@
       <div class="list-footer">
         <component
           class="add-item-button"
+          :class="isAddingItem ? 'growedit' : ''"
           :is="isAddingItem ? 'btd-item-title-edit' : 'button'"
           v-on="isAddingItem ? {} : { click: addItemClicked }"
           @doneEditing="doneEditing"
@@ -35,7 +36,10 @@
           key="list.id + '_-1'"
           >+ Add Item</component
         >
-        <button @click="showCompleted = !showCompleted">
+        <button
+          @click="showCompleted = !showCompleted"
+          class="show-completed-button"
+        >
           {{
             showCompleted
               ? "Hide Completed"
@@ -222,15 +226,19 @@ export default {
 .pending-item {
   order: 0;
 }
+.list-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* transition: transform 0.2s ease; */
+}
 .list-footer > button {
-  order: 1;
   color: blue;
   border-width: 0;
   font-weight: bold;
   font-size: 1em;
   background-color: inherit;
   padding-bottom: 20px;
-  /* transition: transform 0.2s ease; */
 }
 
 .list-enter-active {
@@ -249,8 +257,11 @@ export default {
   transition: transform 0.25s ease;
 }
 
-.list-footer {
-  display: flex;
-  justify-content: space-between;
+.show-completed-button {
+  flex-grow: 0;
+}
+.growedit {
+  flex-grow: 1;
+  /* background-color: lawngreen; */
 }
 </style>
