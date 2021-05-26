@@ -33,10 +33,28 @@
           <button @click="deleteButtonClicked">delete</button>
         </section>
         <section class="dropdown-option">
-          <button @click="moveToTomorrowClicked">move to tomorrow</button>
+          <button @click="moveToTomorrowClicked">
+            move to
+            {{
+              type === "day"
+                ? "tomorrow"
+                : type === "week"
+                ? "next week"
+                : "next list"
+            }}
+          </button>
         </section>
         <section class="dropdown-option">
-          <button @click="moveToYesterdayClicked">move to yesterday</button>
+          <button @click="moveToYesterdayClicked">
+            move to
+            {{
+              type === "day"
+                ? "yesterday"
+                : type === "week"
+                ? "last week"
+                : "previous list"
+            }}
+          </button>
         </section>
       </template>
     </btd-dropdown>
@@ -70,6 +88,7 @@ export default {
   props: {
     text: String,
     isDone: Boolean,
+    type: String,
   },
   emits: ["itemDoneUpdate", "itemDeleted", "itemMoved", "itemEdited"],
   computed: {
@@ -86,23 +105,27 @@ export default {
       if (!this.isEditing) this.$emit("itemDoneUpdate", !this.isDone);
     },
     deleteButtonClicked() {
-      this.$refs.itemOptionsMenu.hideMenu();
+      //   this.$refs.itemOptionsMenu.hideMenu(false);
       nextTick(() => {
         this.$emit("itemDeleted");
       });
     },
     moveToYesterdayClicked() {
-      this.$refs.itemOptionsMenu.hideMenu();
-      this.$emit("itemMoved", -1);
+      //   this.$refs.itemOptionsMenu.hideMenu(false);
+      nextTick(() => {
+        this.$emit("itemMoved", -1);
+      });
     },
     moveToTomorrowClicked() {
-      this.$refs.itemOptionsMenu.hideMenu();
-      this.$emit("itemMoved", 1);
+      //   this.$refs.itemOptionsMenu.hideMenu(false);
+      nextTick(() => {
+        this.$emit("itemMoved", 1);
+      });
     },
     editButtonClicked() {
       this.isEditing = true;
       //   console.log(this.$refs.itemText);
-      this.$refs.itemOptionsMenu.hideMenu();
+      //   this.$refs.itemOptionsMenu.hideMenu();
       // nextTick(() => {
       //   this.$refs.itemText.focusInput();
       // });
@@ -126,12 +149,16 @@ export default {
 .btd-list-item {
   display: flex;
   justify-content: space-between;
-  /* margin: 5px 0px; */
+  margin: 10px 0px;
   border-style: solid;
   border-width: 0px 0px 1px 0px;
+  border-color: rgb(200, 200, 200);
   align-items: center;
   max-width: 600px;
   position: relative;
+}
+.btd-list-item:last-child {
+  border-bottom-width: 0px;
 }
 
 .todo-item-title {

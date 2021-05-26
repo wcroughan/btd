@@ -9,7 +9,13 @@
         </div>
         <div class="form-row" key="1">
           <label for="username">Username:</label
-          ><input @keydown.enter="goButton" id="username" v-model="username" />
+          ><input
+            @keydown.enter="goButton"
+            id="username"
+            ref="username"
+            v-model="username"
+            tabindex="1"
+          />
         </div>
         <div class="form-row" key="2">
           <label for="pwd">Password:</label
@@ -18,6 +24,7 @@
             id="pwd"
             type="password"
             v-model="pwd"
+            tabindex="2"
           />
         </div>
         <div v-if="addingAccount" class="form-row" key="3">
@@ -27,14 +34,30 @@
             id="cpwd"
             type="password"
             v-model="cpwd"
+            tabindex="3"
+          />
+        </div>
+        <div class="form-row-check" key="5">
+          <div class="spacer" />
+          <label for="stayin">Keep me signed in</label
+          ><input
+            type="checkbox"
+            @keydown.enter="goButton"
+            id="stayin"
+            v-model="stayin"
+            tabindex="4"
           />
         </div>
 
         <div class="form-buttons" key="4">
-          <button id="switchbutton" @click="addingAccount = !addingAccount">
+          <button
+            id="switchbutton"
+            @click="addingAccount = !addingAccount"
+            tabindex="6"
+          >
             {{ addingAccount ? "Sign in" : "Create Account" }}
           </button>
-          <button id="gobutton" @click="goButton">
+          <button id="gobutton" @click="goButton" tabindex="5">
             {{ addingAccount ? "Create Account" : "Sign In" }}
           </button>
         </div>
@@ -58,6 +81,7 @@ export default {
       addingAccount: false,
       warning: "",
       showWarning: false,
+      stayin: false,
     };
   },
   methods: {
@@ -106,15 +130,22 @@ export default {
     loginCallback(res) {
       //   console.log(res);
       if (res.data.success) {
+        console.log(res.data);
+        let expireDate = new Date();
+        if (this.stayin) expireDate = new Date(res.data.expireDate);
         this.$emit("setAuthToken", {
           loggedIn: true,
           auth_token: res.data.auth_token,
+          expireDate,
         });
       } else {
         this.warning = "username or password incorrect";
         this.showWarning = true;
       }
     },
+  },
+  mounted() {
+    this.$refs.username.focus();
   },
 };
 </script>
@@ -142,6 +173,12 @@ export default {
 /* .form-row > input {
   flex-grow: 1;
 } */
+.form-row-check {
+  display: flex;
+  position: relative;
+  margin-bottom: 10px;
+  min-width: 350px;
+}
 .form-buttons {
   display: flex;
   justify-content: space-between;
@@ -192,5 +229,9 @@ export default {
   color: blue;
   border-width: 0px;
   font-weight: bold;
+}
+
+.spacer {
+  flex-grow: 1;
 }
 </style>

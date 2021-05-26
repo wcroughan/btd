@@ -1,9 +1,50 @@
 const api_root = "/api/v1/";
 // const no_auth_routes = ["test"].map(v => api_root + v);
-const LOGIN_TIMEOUT_DAYS = 1;
+const LOGIN_TIMEOUT_DAYS = 30;
 var ObjectID = require('mongodb').ObjectID;
 
 module.exports = function (db) {
+    const createUser = async function (email, hpw) {
+        console.log("creating new user")
+        newUserDetail = { email, hpw };
+        const user = await db.collection("users").insertOne(newUserDetail);
+        console.log(user);
+
+        const dayentry = {
+            id: "day_default",
+            userid: user.insertedId,
+            items: [
+                {
+                    id: 0,
+                    text: "Start a todo list",
+                    isDone: true
+                },
+                {
+                    id: 1,
+                    text: "Tap an item to mark it as completed",
+                    isDone: false
+                },
+                {
+                    id: 2,
+                    text: "Edit the default list by clicking the ellipses to the right of the list title",
+                    isDone: false
+                },
+            ]
+        };
+        const weekentry = {
+            id: "week_default",
+            userid: user.insertedId,
+            items: [
+                {
+                    id: 0,
+                    text: "Skip leg day",
+                    isDone: false
+                },
+            ]
+        }
+        await db.collection("lists").insertMany([dayentry, weekentry]);
+    };
+
     return async function (req, res, next) {
         req.authenticated = false;
         if (req.method === "GET" && !req.url.includes(api_root)) {
@@ -41,8 +82,7 @@ module.exports = function (db) {
                 // console.log("user already exists");
                 res.send({ 'error': "User already exists" });
             } else {
-                newUserDetail = { email, hpw };
-                await db.collection("users").insertOne(newUserDetail);
+                await createUser(email, hpw);
                 res.status(200).json({ "success": true });
             }
             return;

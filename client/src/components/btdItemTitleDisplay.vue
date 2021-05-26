@@ -39,6 +39,8 @@ export default {
   white-space: normal;
   word-wrap: break-word;
   max-width: 95%;
+  padding-left: 1em;
+  text-indent: -1em;
 }
 /* .strike {
   text-decoration: line-through;

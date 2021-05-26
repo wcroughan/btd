@@ -18,6 +18,7 @@
           :key="list.id + '_' + item.id + '_nd'"
           :text="item.text"
           :isDone="item.isDone"
+          :type="listType"
           @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
           @itemDeleted="itemDeleted(item.id)"
           @itemMoved="itemMoved(item.id, $event)"
@@ -93,6 +94,9 @@ export default {
   },
   emits: ["listUpdate"],
   computed: {
+    listType() {
+      return this.list.id.split("_")[0];
+    },
     itemsDone() {
       return this.list.items.filter((v) => v.isDone);
     },
@@ -219,7 +223,14 @@ export default {
 }
 .list-item {
   font-size: 2rem;
+  width: 100%;
 }
+@media only screen and (min-width: 600px) {
+  .list-item {
+    font-size: 1.5rem;
+  }
+}
+
 .done-item {
   font-size: 1.3rem;
 }
@@ -250,11 +261,12 @@ export default {
 }
 .list-leave-active {
   position: absolute;
-  transition: transform 0.3s ease, opacity 0.2s ease;
+  /* top: 0px; */
+  transition: transform 1.3s ease, opacity 1.2s ease;
 }
 .list-enter-from,
 .list-leave-to {
-  transform: translateX(-100%);
+  transform: translateX(-100px);
   opacity: 0;
 }
 .list-move {

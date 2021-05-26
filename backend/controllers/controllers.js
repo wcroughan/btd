@@ -25,9 +25,6 @@ module.exports = function (db) {
             return;
         }
 
-        // start = '' + start;
-        // end = '' + end;
-
         if (callback === undefined) {
             let item = await db.collection("lists").findOne(detail);
             if (item === null) {
