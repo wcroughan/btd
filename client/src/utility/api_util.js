@@ -36,6 +36,7 @@ module.exports = {
         axios.delete(req);
     },
     siblingListId(id, moveAmt) {
+        // console.log(id, moveAmt)
         const type = id.split("_")[0];
         const jump = (type === "week") ? 7 : 1;
         const cd = date_util.getDateFromIdStr(id.split("_")[1]);

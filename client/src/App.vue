@@ -43,11 +43,11 @@ export default {
         this.authInfo.atkn = tknInfo.auth_token;
         console.log("setting authtoken", this.authInfo.atkn);
         document.cookie = `atkn=${this.authInfo.atkn} ; expires=${tknInfo.expireDate}`;
-        console.log("cookie: ", document.cookie);
+        // console.log("cookie: ", document.cookie);
       } else {
         this.authInfo.atkn = "";
         document.cookie = `atkn="" ; expires=""`;
-        console.log("cookie: ", document.cookie);
+        // console.log("cookie: ", document.cookie);
       }
       this.authInfo.loggedIn = tknInfo.loggedIn;
     },

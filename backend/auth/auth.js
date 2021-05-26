@@ -16,11 +16,12 @@ module.exports = function (db) {
             const authDetail = { _id: ObjectID(req.query.tkn) };
             const authres = await db.collection("auth").findOne(authDetail);
             if (authres === null || new Date() > authres.expireDate) {
-                console.log("no auth found for tkn", authDetail, authres);
+                // console.log("no auth found for tkn", authDetail, authres);
+                console.log("check token failed")
                 res.json({ 'success': true, 'authenticated': false });
                 return;
             } else {
-                console.log("auth found for tkn", authDetail, authres);
+                // console.log("auth found for tkn", authDetail, authres);
                 res.json({ 'success': true, 'authenticated': true });
                 return
             }
@@ -89,7 +90,8 @@ module.exports = function (db) {
         const authres = await db.collection("auth").findOne(authDetail);
         if (authres !== null) {
             if (new Date() < authres.expireDate) {
-                console.log("auth success:", authres);
+                // console.log("auth success:", authres);
+                console.log("auth success");
                 req.authenticated = true;
                 req.uid = authres.uid;
                 next();

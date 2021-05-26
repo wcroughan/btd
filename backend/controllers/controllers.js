@@ -1,8 +1,10 @@
 const date_util = require('./../../client/src/utility/date_util.js');
+const _ = require('underscore')
+const misc_util = require('./../../client/src/utility/misc_util.js')
 
 module.exports = function (db) {
     getDefaultListInternal = async function (userid, listid, callback) {
-        console.log("looking for default list for userid", userid, ", listid", listid, "and callback", callback);
+        // console.log("looking for default list for userid", userid, ", listid", listid, "and callback", callback);
         const datestr = listid.split("_")[1];
         const type = listid.split("_")[0];
 
@@ -23,6 +25,9 @@ module.exports = function (db) {
             return;
         }
 
+        // start = '' + start;
+        // end = '' + end;
+
         if (callback === undefined) {
             let item = await db.collection("lists").findOne(detail);
             if (item === null) {
@@ -35,7 +40,7 @@ module.exports = function (db) {
             item.start = start;
             item.end = end;
             item.userid = userid;
-            console.log("returning default item:", item)
+            // console.log("returning default item:", item)
             return item;
         } else {
             db.collection("lists").findOne(detail, (err, item) => {
@@ -53,7 +58,7 @@ module.exports = function (db) {
                     item.start = start;
                     item.end = end;
                     item.userid = userid;
-                    console.log("running callback with default item:", item)
+                    // console.log("running callback with default item:", item)
                     callback(false, item);
                 }
             });
@@ -81,15 +86,15 @@ module.exports = function (db) {
 
             const cursor = await db.collection("lists").find(filterDetail).sort({ id: 1 });
             const results = await cursor.toArray();
-            console.log(results);
+            // console.log(results);
 
             if (results.length === 2) {
-                console.log("got both lists, returning the following:", results);
+                // console.log("got both lists, returning the following:", results);
                 res.status(200).json(results);
                 return;
             }
             const needIds = [];
-            console.log("initial results:", results);
+            // console.log("initial results:", results);
             if (!results.some((r) => r.id.includes("week_"))) {
                 const weekList = await getDefaultListInternal(req.uid, id2);
                 results.push(weekList);
@@ -100,15 +105,17 @@ module.exports = function (db) {
             }
 
             const resArray = results.sort((a, b) => (a.id > b.id) ? 1 : -1);
-            console.log("got default lists, returning the following:", resArray);
+            // console.log("got default lists, returning the following:", resArray);
             res.status(200).json(resArray);
         },
         async pushListToServer(req, res, next) {
-            console.log(req.params, req.body);
+            // console.log(req.params, req.body);
 
             const entryVar = req.body;
             delete entryVar._id;
             entryVar.userid = req.uid;
+            entryVar.start = new Date(entryVar.start)
+            entryVar.end = new Date(entryVar.end)
             const entry = {
                 $set: {
                     ...entryVar
@@ -122,40 +129,35 @@ module.exports = function (db) {
             res.status(200).json({ success: true });
         },
         async appendItem(req, res, next) {
-            console.log(req.params, req.body);
+            // console.log("append item", req.params, req.body);
             const id = req.params.id;
             const userid = req.uid;
 
-            const entryVar = req.body;
+            let updatedlist = await db.collection("lists").findOne({ id, userid });
+            if (updatedlist === null) {
+                //Inserting into new list, initialize with default
+                updatedlist = await this.getDefaultListInternal(req.uid, id);
+            }
+
+            const newitem = req.body;
+            newitem.id = misc_util.getUniqueItemId(updatedlist.items);
+            updatedlist.items.push(newitem);
+            delete updatedlist._id;
+            updatedlist.start = new Date(updatedlist.start)
+            updatedlist.end = new Date(updatedlist.end)
             const entry = {
-                $push: {
-                    items: {
-                        ...entryVar
-                    }
+                $set: {
+                    ...updatedlist
                 }
             }
-            console.log("entry", entry, "id:", id);
-            const result = await db.collection("lists").updateOne({ id, userid }, entry);
-
-            if (result.matchedCount === 0) {
-                //There wasn't a list there in the first place, gotta create it
-                this.getDefaultListInternal(req.uid, id, (err, item) => {
-                    if (err) {
-                        console.log(err);
-                        res.send({ 'error': "db error occured" });
-                    } else {
-                        item.items.push(req.body);
-                        db.collection("lists").insertOne(item, (err) => {
-                            if (err) {
-                                console.log(err);
-                                res.send({ 'error': "db error occured" });
-                            } else {
-                                res.status(200).json({ success: true });
-                            }
-                        })
-                    }
-                })
+            const config = {
+                upsert: true
             }
+
+            // console.log("entry", entry, "id:", id);
+            const r = await db.collection("lists").updateOne({ id, userid }, entry, config);
+            // console.log(r);
+            res.status(200).json({ success: true });
         },
         getDefaultList(req, res, next) {
             this.getDefaultListInternal(req.uid, req.params.id, (err, item) => {

@@ -1,11 +1,44 @@
 <template>
   <div id="btd-login">
-    <img src="../assets/logo.png" />
+    <img src="../assets/logo.png" class="logo" />
     <div id="login-form">
-      Email:<input v-model="email" /><br />
-      Password:<input type="password" v-model="pwd" /><br />
-      <button @click="createAccount">Create Account</button>
-      <button @click="login">Login</button>
+      <transition-group name="formtrans">
+        <div class="warning" v-if="showWarning" key="-1">
+          <img src="../assets/warning.png" class="warning-icon" />
+          <span>{{ warning }}</span>
+        </div>
+        <div class="form-row" key="1">
+          <label for="username">Username:</label
+          ><input @keydown.enter="goButton" id="username" v-model="username" />
+        </div>
+        <div class="form-row" key="2">
+          <label for="pwd">Password:</label
+          ><input
+            @keydown.enter="goButton"
+            id="pwd"
+            type="password"
+            v-model="pwd"
+          />
+        </div>
+        <div v-if="addingAccount" class="form-row" key="3">
+          <label for="cpwd">Confirm password:</label
+          ><input
+            @keydown.enter="goButton"
+            id="cpwd"
+            type="password"
+            v-model="cpwd"
+          />
+        </div>
+
+        <div class="form-buttons" key="4">
+          <button id="switchbutton" @click="addingAccount = !addingAccount">
+            {{ addingAccount ? "Sign in" : "Create Account" }}
+          </button>
+          <button id="gobutton" @click="goButton">
+            {{ addingAccount ? "Create Account" : "Sign In" }}
+          </button>
+        </div>
+      </transition-group>
     </div>
   </div>
 </template>
@@ -19,27 +52,56 @@ export default {
   emits: ["setAuthToken"],
   data() {
     return {
-      email: "",
+      username: "",
       pwd: "",
+      cpwd: "",
+      addingAccount: false,
+      warning: "",
+      showWarning: false,
     };
   },
   methods: {
+    goButton() {
+      this.addingAccount ? this.createAccount() : this.login();
+    },
     async createAccount() {
+      if (this.username.length === 0) {
+        this.warning = "missing username";
+        this.showWarning = true;
+        return;
+      }
+      if (this.cpwd !== this.pwd) {
+        this.warning = "passwords don't match";
+        this.showWarning = true;
+        return;
+      }
       const hpw = await api_util.getHash(this.pwd);
-      //   console.log("creating account with ", this.email, hpw);
-      api_util.createAccount(this.email, hpw, this.createAccountCallback);
+      //   console.log("creating account with ", this.username, hpw);
+      api_util.createAccount(this.username, hpw, this.createAccountCallback);
     },
     createAccountCallback(res) {
       //   console.log(res.data);
       if (res.data.success) {
         // console.log("success, logggin in");
         this.login();
+      } else if (res.data.error !== undefined) {
+        console.log(res.data);
+        this.warning = res.data.error;
+        this.showWarning = true;
+      } else {
+        this.warning = "Unknown error, failed to create account";
+        this.showWarning = true;
       }
     },
     async login() {
+      if (this.username.length === 0) {
+        this.warning = "missing username";
+        this.showWarning = true;
+        return;
+      }
       const hpw = await api_util.getHash(this.pwd);
-      //   console.log("logging in with ", this.email, hpw);
-      api_util.login(this.email, hpw, this.loginCallback);
+      //   console.log("logging in with ", this.username, hpw);
+      api_util.login(this.username, hpw, this.loginCallback);
     },
     loginCallback(res) {
       //   console.log(res);
@@ -48,6 +110,9 @@ export default {
           loggedIn: true,
           auth_token: res.data.auth_token,
         });
+      } else {
+        this.warning = "username or password incorrect";
+        this.showWarning = true;
       }
     },
   },
@@ -60,5 +125,72 @@ export default {
   margin: auto;
   display: flex;
   flex-direction: column;
+}
+#login-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  margin: auto;
+}
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 10px;
+  min-width: 350px;
+}
+/* .form-row > input {
+  flex-grow: 1;
+} */
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.formtrans-enter-from {
+  transform: translateY(-50%) scaleY(0);
+}
+.formtrans-leave-to {
+  opacity: 0;
+}
+/* .formtrans-leave-active, */
+.formtrans-enter-active {
+  transition: all 0.5s ease;
+}
+.formtrans-leave-active {
+  position: absolute;
+}
+.formtrans-move {
+  transition: transform 0.5s ease, opacity 0.05s ease;
+}
+
+.warning {
+  display: flex;
+  justify-content: center;
+  color: red;
+  margin-bottom: 15px;
+  align-items: center;
+}
+.warning-icon {
+  height: 30px;
+}
+
+.logo {
+  max-width: 300px;
+  margin: auto;
+  margin-bottom: 30px;
+}
+
+#switchbutton {
+  background-color: inherit;
+  color: blue;
+  border-width: 0px;
+}
+#gobutton {
+  font-size: 1.3rem;
+  background-color: inherit;
+  color: blue;
+  border-width: 0px;
+  font-weight: bold;
 }
 </style>

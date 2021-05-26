@@ -117,7 +117,6 @@ export default {
         this.lists[listidx].isSkipped = update.isSkipped;
       } else if (type === "loadDefaultList") {
         api_util.getDefaultList(this.authToken.value, id, (res) => {
-          console.log(res);
           this.lists[listidx] = res.data;
         });
         api_util.deleteListFromServer(this.authToken.value, id);
@@ -129,11 +128,7 @@ export default {
         api_util.addItemToList(
           this.authToken.value,
           this.lists[listidx].items[idx],
-          api_util.siblingListId(
-            this.authToken.value,
-            this.lists[listidx].id,
-            update.moveAmt
-          )
+          api_util.siblingListId(this.lists[listidx].id, update.moveAmt)
         );
         this.lists[listidx].items.splice(idx, 1);
         this.checkIfListDone(listidx);

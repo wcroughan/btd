@@ -20,7 +20,7 @@
       class="menu-button"
       ref="itemOptionsMenu"
       :closeOnAnyClick="true"
-      v-show="mouseIn && !isEditing"
+      v-show="(persistentOptions || mouseIn) && !isEditing"
     >
       <template v-slot:button>
         <img src="../assets/ellipsis.png" class="menu-icon" />
@@ -33,10 +33,10 @@
           <button @click="deleteButtonClicked">delete</button>
         </section>
         <section class="dropdown-option">
-          <button @click="moveToYesterdayClicked">move to yesterday</button>
+          <button @click="moveToTomorrowClicked">move to tomorrow</button>
         </section>
         <section class="dropdown-option">
-          <button @click="moveToTomorrowClicked">move to tomorrow</button>
+          <button @click="moveToYesterdayClicked">move to yesterday</button>
         </section>
       </template>
     </btd-dropdown>
@@ -64,6 +64,7 @@ export default {
     return {
       mouseIn: false,
       isEditing: false,
+      persistentOptions: false,
     };
   },
   props: {
@@ -100,8 +101,7 @@ export default {
     },
     editButtonClicked() {
       this.isEditing = true;
-      console.log("hi");
-      console.log(this.$refs.itemText);
+      //   console.log(this.$refs.itemText);
       this.$refs.itemOptionsMenu.hideMenu();
       // nextTick(() => {
       //   this.$refs.itemText.focusInput();
@@ -115,6 +115,9 @@ export default {
       this.isEditing = false;
     },
   },
+  mounted() {
+    this.persistentOptions = !window.matchMedia("(pointer: fine)").matches;
+  },
 };
 </script>
 
@@ -122,12 +125,12 @@ export default {
 <style scoped>
 .btd-list-item {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   /* margin: 5px 0px; */
   border-style: solid;
   border-width: 0px 0px 1px 0px;
   align-items: center;
-  width: 600px;
+  max-width: 600px;
   position: relative;
 }
 

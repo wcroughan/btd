@@ -30,7 +30,7 @@
       class="menu-button"
       ref="menuDropdown"
       :closeOnAnyClick="false"
-      v-show="mouseIn"
+      v-show="persistentOptions || mouseIn"
     >
       <template v-slot:button>
         <img src="../assets/ellipsis.png" class="menu-icon" />
@@ -70,6 +70,7 @@ export default {
   data() {
     return {
       mouseIn: false,
+      persistentOptions: false,
     };
   },
   props: {
@@ -103,6 +104,9 @@ export default {
       this.$refs.menuDropdown.hideMenu();
       this.$emit("editDefaultList");
     },
+  },
+  mounted() {
+    this.persistentOptions = !window.matchMedia("(pointer: fine)").matches;
   },
 };
 </script>

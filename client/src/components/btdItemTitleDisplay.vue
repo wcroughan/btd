@@ -5,8 +5,8 @@
       :class="{ strike: isDone }"
       @mousedown="mousedown"
     >
-      &nbsp;&nbsp;{{ text }}&nbsp;&nbsp;</span
-    >
+      &nbsp;&nbsp;{{ text }}&nbsp;&nbsp;
+    </span>
   </div>
 </template>
 
@@ -35,6 +35,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.item-title-display {
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 95%;
+}
 /* .strike {
   text-decoration: line-through;
 } */
