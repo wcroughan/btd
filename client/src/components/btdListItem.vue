@@ -149,7 +149,8 @@ export default {
 .btd-list-item {
   display: flex;
   justify-content: space-between;
-  margin: 10px 0px;
+  /* margin: 10px 0px; */
+  /* Note can't have a margin here or animation stops working!! */
   border-style: solid;
   border-width: 0px 0px 1px 0px;
   border-color: rgb(200, 200, 200);
