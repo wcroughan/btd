@@ -106,7 +106,8 @@ export default {
     },
   },
   mounted() {
-    this.persistentOptions = !window.matchMedia("(pointer: fine)").matches;
+    // this.persistentOptions = !window.matchMedia("(pointer: fine)").matches;
+    this.persistentOptions = true;
   },
 };
 </script>

@@ -1,5 +1,9 @@
 Before shipping:
 - header rework: finish calendar widget and connect to backend, update streak info and make that dropdown calendar too
+- "keep me signed in" options, longer default persistence of cookie
+- If new user, populate default lists with:
+    - Current day list: make a todo list (done). Tap an item to mark as done (not done).
+    - Change the default list by clicking the ellipses to the right of the list title
 
 Should implement at some point:
 - swipe input for yesterday/tomorrow navigation
