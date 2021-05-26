@@ -25,9 +25,15 @@
       <div class="header-info-spacer-vert" />
     </div>
     <div class="header-spacer" />
-    <btd-dropdown menuAlign="right" class="menu-button" :closeOnAnyClick="true">
+    <btd-dropdown
+      menuAlign="right"
+      class="menu-button"
+      ref="menuDropdown"
+      :closeOnAnyClick="false"
+      v-show="mouseIn"
+    >
       <template v-slot:button>
-        <img src="../assets/menu.png" class="menu-icon" />
+        <img src="../assets/ellipsis.png" class="menu-icon" />
       </template>
       <template v-slot:content>
         <section class="dropdown-option">
@@ -90,9 +96,11 @@ export default {
       this.$emit("setAllDone", !this.isComplete);
     },
     loadDefaultClicked() {
+      this.$refs.menuDropdown.hideMenu();
       this.$emit("loadDefaultList");
     },
     editDefaultClicked() {
+      this.$refs.menuDropdown.hideMenu();
       this.$emit("editDefaultList");
     },
   },

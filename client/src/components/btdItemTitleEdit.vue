@@ -28,12 +28,14 @@ export default {
       this.$refs.inputField.focus();
       this.$refs.inputField.select();
     },
-    doneEditing() {
+    doneEditing(event) {
       //   console.log("done");
+      event.stopPropagation();
       this.$emit("doneEditing", this.currentText);
     },
-    cancelEditing() {
+    cancelEditing(event) {
       //   console.log("cancel");
+      event.stopPropagation();
       this.$emit("canceledEditing", this.currentText);
     },
     keylistener(e) {
@@ -44,10 +46,10 @@ export default {
       }
     },
     enterPressed() {
-      this.doneEditing();
+      this.$emit("doneEditing", this.currentText);
     },
     escapePressed() {
-      this.cancelEditing();
+      this.$emit("canceledEditing", this.currentText);
     },
   },
   mounted() {
@@ -67,6 +69,7 @@ export default {
 }
 .item-title-edit-input {
   flex-grow: 1;
-  font-size: 1.5em;
+  /* font-size: 1.5em; */
+  font-size: inherit;
 }
 </style>

@@ -14,3 +14,6 @@
 - animation for list footer moving smoothly
 - backend needs to handle weird input without crashing (like weird auth tokens that ObjectID won't accept)
 - small animations for dropdown menu opening and closing. Maybe like a drawer effect where it expands out from the button?
+- keyboard shortcuts!
+- done items can jiggle when hovered and not hovered (recreate with 4 not done and 1 done)
+- center aligned dropdowns get all screwy with animations

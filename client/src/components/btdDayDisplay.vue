@@ -6,12 +6,12 @@
       alt="Yesterday"
       class="left-arrow arrow"
     />
-    <btd-dropdown menuAlign="center">
+    <btd-dropdown menuAlign="center" :closeOnAnyClick="false">
       <template v-slot:button>
         <span class="date-text">{{ dateText }}</span>
       </template>
       <template v-slot:content>
-        <h2>hello</h2>
+        <btd-calendar :date="date" />
       </template>
     </btd-dropdown>
     <img
@@ -26,11 +26,13 @@
 <script>
 import date_util from "./../utility/date_util.js";
 import btdDropdown from "./btdDropdown.vue";
+import btdCalendar from "./btdCalendar.vue";
 
 export default {
   name: "btdDayDisplay",
   components: {
     btdDropdown,
+    btdCalendar,
   },
   data() {
     return {};

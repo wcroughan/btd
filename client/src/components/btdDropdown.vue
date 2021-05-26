@@ -3,12 +3,19 @@
     <div @click="showMenu = !showMenu">
       <slot name="button" />
     </div>
-    <div class="btd-modal" v-if="showMenu" @click="maskClickHandler">
-      <div class="back-mask"></div>
-      <div class="modal-content" :class="menuAlign + '-align-modal'">
-        <slot name="content" />
+    <div class="back-mask" v-if="showMenu" @click="maskClickHandler"></div>
+    <transition name="modal">
+      <div
+        class="btd-modal"
+        v-if="showMenu"
+        @click="menuClickHandler"
+        :class="menuAlign + '-align-modal'"
+      >
+        <div class="modal-content">
+          <slot name="content" />
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -31,10 +38,11 @@ export default {
     },
   },
   methods: {
+    menuClickHandler() {
+      if (this.closeOnAnyClick) this.showMenu = false;
+    },
     maskClickHandler(event) {
-      if (this.closeOnAnyClick) {
-        this.showMenu = false;
-      } else if (
+      if (
         !event.path.some(
           (e) =>
             e.className !== undefined && e.className.includes("modal-content")
@@ -67,7 +75,7 @@ export default {
   left: 0;
   height: 100%;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.3);
   z-index: -1;
 }
 
@@ -81,9 +89,10 @@ export default {
   padding: 5px 12px;
 }
 .right-align-modal {
-  transform: translateX(calc(-100% + 20px));
+  right: 0px;
 }
 .center-align-modal {
+  left: 50%;
   transform: translateX(-50%);
 }
 
@@ -109,5 +118,26 @@ export default {
   padding: 0;
   outline: none;
   cursor: pointer;
+}
+
+.modal-enter-from {
+  transform: translateY(-50%) scaleY(0);
+}
+.modal-enter-active {
+  transition: all 0.1s;
+}
+.modal-leave-active {
+  animation: rollbounce 0.1s reverse;
+}
+@keyframes rollbounce {
+  0% {
+    transform: translateY(-50%) scaleY(0);
+  }
+  60% {
+    transform: translateY(10%) scaleY(1.2);
+  }
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
 }
 </style>

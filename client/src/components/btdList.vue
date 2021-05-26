@@ -47,19 +47,21 @@
           }}
         </button>
       </div>
-      <div class="completed-container" v-if="showCompleted">
-        <btd-list-item
-          v-for="item in itemsDone"
-          :key="list.id + '_' + item.id + '_nd'"
-          :text="item.text"
-          :isDone="item.isDone"
-          @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
-          @itemDeleted="itemDeleted(item.id)"
-          @itemMoved="itemMoved(item.id, $event)"
-          @itemEdited="itemEdited(item.id, $event)"
-          class="done-item"
-        />
-      </div>
+      <transition name="donelist">
+        <div class="completed-container" v-if="showCompleted">
+          <btd-list-item
+            v-for="item in itemsDone"
+            :key="list.id + '_' + item.id + '_nd'"
+            :text="item.text"
+            :isDone="item.isDone"
+            @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
+            @itemDeleted="itemDeleted(item.id)"
+            @itemMoved="itemMoved(item.id, $event)"
+            @itemEdited="itemEdited(item.id, $event)"
+            class="done-item"
+          />
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -215,8 +217,11 @@ export default {
 .list-body {
   position: relative;
 }
+.list-item {
+  font-size: 2rem;
+}
 .done-item {
-  font-size: 0.8em;
+  font-size: 1.3rem;
 }
 .list-footer {
   display: flex;
@@ -249,10 +254,19 @@ export default {
 }
 .list-enter-from,
 .list-leave-to {
-  transform: translateX(-150px);
+  transform: translateX(-100%);
   opacity: 0;
 }
 .list-move {
   transition: transform 0.25s ease;
+}
+
+.donelist-enter-from,
+.donelist-leave-to {
+  transform: translateY(-50%) scaleY(0);
+}
+.donelist-enter-active,
+.donelist-leave-active {
+  transition: all 0.15s;
 }
 </style>

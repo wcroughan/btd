@@ -15,24 +15,31 @@
       @doneEditing="doneEditing"
       @canceledEditing="canceledEditing"
     />
-    <btd-options-button ref="itemOptionsMenu" :mouseHovering="mouseIn">
-      <template v-slot:menu>
-        <div class="options-button-container">
-          <button class="options-button" @click="editButtonClicked">
-            edit
-          </button>
-          <button class="options-button" @click="deleteButtonClicked">
-            delete
-          </button>
-          <button class="options-button" @click="moveToYesterdayClicked">
-            move to yesterday
-          </button>
-          <button class="options-button" @click="moveToTomorrowClicked">
-            move to tomorrow
-          </button>
-        </div>
+    <btd-dropdown
+      menuAlign="right"
+      class="menu-button"
+      ref="itemOptionsMenu"
+      :closeOnAnyClick="true"
+      v-show="mouseIn && !isEditing"
+    >
+      <template v-slot:button>
+        <img src="../assets/ellipsis.png" class="menu-icon" />
       </template>
-    </btd-options-button>
+      <template v-slot:content>
+        <section class="dropdown-option">
+          <button @click="editButtonClicked">edit</button>
+        </section>
+        <section class="dropdown-option">
+          <button @click="deleteButtonClicked">delete</button>
+        </section>
+        <section class="dropdown-option">
+          <button @click="moveToYesterdayClicked">move to yesterday</button>
+        </section>
+        <section class="dropdown-option">
+          <button @click="moveToTomorrowClicked">move to tomorrow</button>
+        </section>
+      </template>
+    </btd-dropdown>
   </div>
 </template>
 
@@ -43,10 +50,16 @@ import btdOptionsButton from "./btdOptionsButton.vue";
 import btdItemTitleDisplay from "./btdItemTitleDisplay.vue";
 import btdItemTitleEdit from "./btdItemTitleEdit.vue";
 import { nextTick } from "@vue/runtime-core";
+import BtdDropdown from "./btdDropdown.vue";
 
 export default {
-  components: { btdOptionsButton, btdItemTitleDisplay, btdItemTitleEdit },
   name: "btdListItem",
+  components: {
+    btdOptionsButton,
+    btdItemTitleDisplay,
+    btdItemTitleEdit,
+    BtdDropdown,
+  },
   data() {
     return {
       mouseIn: false,
@@ -71,9 +84,6 @@ export default {
     textClicked() {
       if (!this.isEditing) this.$emit("itemDoneUpdate", !this.isDone);
     },
-    titleClickAway() {
-      this.isEditing = false;
-    },
     deleteButtonClicked() {
       this.$refs.itemOptionsMenu.hideMenu();
       nextTick(() => {
@@ -89,17 +99,13 @@ export default {
       this.$emit("itemMoved", 1);
     },
     editButtonClicked() {
-      this.isEditing = !this.isEditing;
-      if (this.isEditing) {
-        console.log("hi");
-        console.log(this.$refs.itemText);
-        this.$refs.itemOptionsMenu.hideMenu();
-        // nextTick(() => {
-        //   this.$refs.itemText.focusInput();
-        // });
-      } else {
-        console.log("this shouldn't happen");
-      }
+      this.isEditing = true;
+      console.log("hi");
+      console.log(this.$refs.itemText);
+      this.$refs.itemOptionsMenu.hideMenu();
+      // nextTick(() => {
+      //   this.$refs.itemText.focusInput();
+      // });
     },
     doneEditing(newname) {
       this.isEditing = false;
@@ -121,25 +127,16 @@ export default {
   border-style: solid;
   border-width: 0px 0px 1px 0px;
   align-items: center;
-  font-size: 1.5em;
   width: 600px;
   position: relative;
 }
 
 .todo-item-title {
   flex-grow: 1;
+  font-size: inherit;
 }
-.options-button-container {
-  display: flex;
-  flex-direction: column;
-}
-.options-button {
-  background-color: white;
-  border-width: 1px;
-  display: block;
-  white-space: nowrap;
-  padding: 5px;
-  font-size: 1em;
-  width: inherit;
+
+.menu-icon {
+  max-height: 20px;
 }
 </style>
