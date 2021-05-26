@@ -262,7 +262,7 @@ export default {
 .list-leave-active {
   position: absolute;
   /* top: 0px; */
-  transition: transform 1.3s ease, opacity 1.2s ease;
+  transition: transform 0.3s ease, opacity 0.2s ease;
 }
 .list-enter-from,
 .list-leave-to {
