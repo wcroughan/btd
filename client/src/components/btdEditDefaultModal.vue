@@ -100,6 +100,10 @@ export default {
     save() {
       this.displayModal = false;
       this.list.id = this.listType + "_default";
+      delete this.list.start;
+      delete this.list.end;
+      delete this.list.isDone;
+      delete this.list.isSkipped;
       this.list.items.forEach((i, idx) => {
         i.isDone = false;
         i.id = idx;

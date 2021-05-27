@@ -2,13 +2,33 @@ const date_util = require('./../../client/src/utility/date_util.js');
 const _ = require('underscore')
 const misc_util = require('./../../client/src/utility/misc_util.js')
 
+Object.defineProperty(global, '__stack', {
+    get: function () {
+        var orig = Error.prepareStackTrace;
+        Error.prepareStackTrace = function (_, stack) { return stack; };
+        var err = new Error;
+        Error.captureStackTrace(err, arguments.callee);
+        var stack = err.stack;
+        Error.prepareStackTrace = orig;
+        return stack;
+    }
+});
+
+Object.defineProperty(global, '__line', {
+    get: function () {
+        return __stack[1].getLineNumber();
+    }
+});
+
+
+
 module.exports = function (db) {
     isSkippedByDefault = function (date) {
         return date.getDay() === 6 || date.getDay() === 0;
     };
 
     getDefaultListInternal = async function (userid, listid, callback) {
-        // console.log("looking for default list for userid", userid, ", listid", listid, "and callback", callback);
+        // console.log(__line, "looking for default list for userid", userid, ", listid", listid, "and callback", callback);
         const datestr = listid.split("_")[1];
         const type = listid.split("_")[0];
 
@@ -25,7 +45,7 @@ module.exports = function (db) {
             start = date_util.getMonday(date_util.getDateFromIdStr(datestr));
             end = date_util.plusOneWeek(start);
         } else {
-            console.log("unknown type", type);
+            console.log(__line, "unknown type", type);
             return;
         }
 
@@ -43,12 +63,12 @@ module.exports = function (db) {
             item.userid = userid;
             item.isDone = item.items.length === 0;
             item.isSkipped = isSkippedByDefault(start);
-            // console.log("returning default item:", item)
+            // console.log(__line, "returning default item:", item)
             return item;
         } else {
             db.collection("lists").findOne(detail, (err, item) => {
                 if (err) {
-                    console.log(err);
+                    console.log(__line, err);
                     callback(err, { 'error': "error occured" });
                 } else {
                     if (item === null) {
@@ -63,7 +83,7 @@ module.exports = function (db) {
                     item.userid = userid;
                     item.isDone = item.items.length === 0;
                     item.isSkipped = isSkippedByDefault(start);
-                    // console.log("running callback with default item:", item)
+                    // console.log(__line, "running callback with default item:", item)
                     callback(false, item);
                 }
             });
@@ -77,10 +97,10 @@ module.exports = function (db) {
             })
         },
         async getListsForId(req, res, next) {
-            // console.log(req.params);
+            // console.log(__line, req.params);
             const id1 = "day_" + req.params.id;
             const id2 = "week_" + date_util.apiDateStr(date_util.getMonday(date_util.getDateFromIdStr(req.params.id)));
-            // console.log("searching for ", id1, id2)
+            // console.log(__line, "searching for ", id1, id2)
 
             const filterDetail = {
                 id: {
@@ -91,15 +111,15 @@ module.exports = function (db) {
 
             const cursor = await db.collection("lists").find(filterDetail).sort({ id: 1 });
             const results = await cursor.toArray();
-            // console.log(results);
+            // console.log(__line, results);
 
             if (results.length === 2) {
-                // console.log("got both lists, returning the following:", results);
+                // console.log(__line, "got both lists, returning the following:", results);
                 res.status(200).json(results);
                 return;
             }
             const needIds = [];
-            // console.log("initial results:", results);
+            // console.log(__line, "initial results:", results);
             if (!results.some((r) => r.id.includes("week_"))) {
                 const weekList = await getDefaultListInternal(req.uid, id2);
                 results.push(weekList);
@@ -110,17 +130,19 @@ module.exports = function (db) {
             }
 
             const resArray = results.sort((a, b) => (a.id > b.id) ? 1 : -1);
-            // console.log("got default lists, returning the following:", resArray);
+            // console.log(__line, "got default lists, returning the following:", resArray);
             res.status(200).json(resArray);
         },
         async pushListToServer(req, res, next) {
-            // console.log(req.params, req.body);
+            // console.log(__line, req.params, req.body);
 
             const entryVar = req.body;
             delete entryVar._id;
             entryVar.userid = req.uid;
-            entryVar.start = new Date(entryVar.start)
-            entryVar.end = new Date(entryVar.end)
+            if (entryVar.start !== undefined) {
+                entryVar.start = new Date(entryVar.start)
+                entryVar.end = new Date(entryVar.end)
+            }
             const entry = {
                 $set: {
                     ...entryVar
@@ -134,7 +156,7 @@ module.exports = function (db) {
             res.status(200).json({ success: true });
         },
         async appendItem(req, res, next) {
-            // console.log("append item", req.params, req.body);
+            // console.log(__line, "append item", req.params, req.body);
             const id = req.params.id;
             const userid = req.uid;
 
@@ -159,15 +181,16 @@ module.exports = function (db) {
                 upsert: true
             }
 
-            // console.log("entry", entry, "id:", id);
+            // console.log(__line, "entry", entry, "id:", id);
             const r = await db.collection("lists").updateOne({ id, userid }, entry, config);
-            // console.log(r);
+            // console.log(__line, r);
             res.status(200).json({ success: true });
         },
         getDefaultList(req, res, next) {
+            // console.log(__line, req.params);
             this.getDefaultListInternal(req.uid, req.params.id, (err, item) => {
                 if (err) {
-                    console.log(err);
+                    console.log(__line, err);
                     res.send({ 'error': "db error occured" });
                 } else {
                     res.status(200).json(item)
@@ -175,8 +198,9 @@ module.exports = function (db) {
             });
         },
         deleteListFromServer(req, res, next) {
+            // console.log(__line, req.params);
             if (req.params.id.includes("default")) {
-                console.log("Won't delete default list even when asked");
+                console.log(__line, "Won't delete default list even when asked");
                 res.send({ 'error': "db error occured" });
                 return;
             }
@@ -189,13 +213,13 @@ module.exports = function (db) {
 
         },
         async getDaysInfo(req, res, next) {
+            // console.log(__line, req.query);
             const projection = {
                 isDone: 1,
                 isSkipped: 1,
                 id: 1,
                 _id: 0
             }
-            console.log(req.query)
             const detail = {
                 userid: req.uid,
                 start: {
@@ -205,10 +229,11 @@ module.exports = function (db) {
             }
             const dbres = await db.collection("lists").find(detail).project(projection);
             const resArray = await dbres.toArray();
-            console.log(resArray);
+            // console.log(__line, resArray);
             res.status(200).json(resArray)
         },
         async getStreakLength(req, res, next) {
+            // console.log(__line, req.query);
             const batch_size = 30;
 
             const d = new Date(req.query.date);
@@ -261,13 +286,13 @@ module.exports = function (db) {
                     $gt: d2
                 },
             }
-            // console.log("detail", detail)
+            // console.log(__line, "detail", detail)
             let dbres = await db.collection("lists").find(detail).project(projection).sort({ start: -1 });
             resArray = await dbres.toArray();
-            // console.log("resarray", resArray)
+            // console.log(__line, "resarray", resArray)
             let raidx = 0;
             while (true) {
-                // console.log("cd", cd)
+                // console.log(__line, "cd", cd)
                 if (cd.getTime() <= d2.getTime()) {
                     d2.setDate(d2.getDate() - batch_size)
                     d1.setDate(d1.getDate() - batch_size)
@@ -278,31 +303,31 @@ module.exports = function (db) {
                             $gt: d2
                         },
                     }
-                    // console.log(detail)
+                    // console.log(__line, detail)
                     dbres = await db.collection("lists").find(detail).project(projection).sort({ start: -1 });
                     resArray = await dbres.toArray();
-                    // console.log("resArray", resArray)
+                    // console.log(__line, "resArray", resArray)
                     raidx = 0;
                 }
                 rai = resArray[raidx];
                 if (rai !== undefined && rai.end.getTime() === cd.getTime()) {
                     raidx++;
                     if (rai.isSkipped) {
-                        // console.log("Found and skipped")
+                        // console.log(__line, "Found and skipped")
                     } else if (rai.isDone) {
-                        // console.log("Found and done")
+                        // console.log(__line, "Found and done")
                         len++;
                     } else {
-                        // console.log("found and streak done")
+                        // console.log(__line, "found and streak done")
                         break;
                     }
                 } else {
                     const cd_start = new Date(cd);
                     cd_start.setDate(cd.getDate() - 1);
                     if (isSkippedByDefault(cd_start)) {
-                        // console.log("not found, skipped")
+                        // console.log(__line, "not found, skipped")
                     } else {
-                        // console.log("not found, not skipped")
+                        // console.log(__line, "not found, not skipped")
                         break;
                     }
                 }

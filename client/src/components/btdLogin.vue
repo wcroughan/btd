@@ -15,6 +15,8 @@
             ref="username"
             v-model.trim="username"
             tabindex="1"
+            autocomplete="off"
+            autocapitalize="none"
           />
         </div>
         <div class="form-row" key="2">

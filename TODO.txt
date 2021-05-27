@@ -1,8 +1,7 @@
 Before shipping:
-- bug where list and day display can show different days. Happened around 1am, list showed yesterday, day display was correct current day.
-- Also week title might be wrong? During same glitch as above, day display says 6/6, day list shows 6/5, and week shows 5/30-6/6. Go forward one day and week switches to 6/6-6/13
 
 Should implement at some point:
+- Check again at 1am if dates are out of sync
 - figure out this reactivity stuff so can just use date object directly in btdCalendar as opposed to converting to and from a string
 - swipe input on header/day display for yesterday/tomorrow navigation
 - getListsForId needs to be reworked iwth the following:

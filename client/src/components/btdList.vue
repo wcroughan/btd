@@ -106,16 +106,17 @@ export default {
     },
     title() {
       const id = this.list.id;
-      if (id.substring(0, 4) === "day_") {
+      const type = id.split("_")[0];
+      const datestr = id.split("_")[1];
+      if (type === "day") {
         const formatOptions = {
           weekday: "short",
           month: "short",
           day: "numeric",
         };
-        return new Intl.DateTimeFormat("en-US", formatOptions).format(
-          date_util.getDateFromIdStr(id)
-        );
-      } else if (id.substring(0, 5) === "week_") {
+        const d = date_util.getDateFromIdStr(datestr);
+        return new Intl.DateTimeFormat("en-US", formatOptions).format(d);
+      } else if (type === "week") {
         // console.log(this.list.start);
         const formatOptions = {
           month: "numeric",
@@ -123,11 +124,11 @@ export default {
         };
         const dtf = new Intl.DateTimeFormat("en-US", formatOptions);
         return (
-          dtf.format(date_util.getDateFromIdStr(id)) +
+          dtf.format(date_util.getDateFromIdStr(datestr)) +
           " - " +
           dtf.format(
             date_util.plusOneWeek(
-              date_util.yesterday(date_util.getDateFromIdStr(id))
+              date_util.yesterday(date_util.getDateFromIdStr(datestr))
             )
           )
         );
@@ -230,6 +231,7 @@ export default {
   font-size: 2rem;
   width: 100%;
   padding: 10px 0px;
+  user-select: none;
 }
 @media only screen and (min-width: 600px) {
   .list-item {
@@ -239,6 +241,7 @@ export default {
 
 .done-item {
   font-size: 1.3rem;
+  user-select: none;
 }
 .list-footer {
   display: flex;
