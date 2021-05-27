@@ -10,6 +10,18 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 app.use((req, res, next) => {
+    if (req.header('host') === `localhost:${port}`) {
+        //just testing
+        next();
+    } else if (req.header('x-forwarded-proto') !== 'https') {
+        //on heroku, not secure
+        res.redirect(`https://${req.header('host')}${req.url}`)
+    } else {
+        //on heroku, secure
+        next();
+    }
+});
+app.use((req, res, next) => {
     console.log(`Request_Endpoint: ${req.method} ${req.url}`);
     next();
 });
