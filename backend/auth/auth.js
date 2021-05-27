@@ -131,7 +131,7 @@ module.exports = function (db) {
         if (authres !== null) {
             if (new Date() < authres.expireDate) {
                 // console.log("auth success:", authres);
-                console.log("auth success");
+                console.log("auth success", authres.uid);
                 req.authenticated = true;
                 req.uid = authres.uid;
                 next();

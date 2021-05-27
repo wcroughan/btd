@@ -134,8 +134,12 @@ module.exports = function (db) {
             res.status(200).json(resArray);
         },
         async pushListToServer(req, res, next) {
-            // console.log(__line, req.params, req.body);
+            console.log(__line, req.params, req.body);
 
+            const detail = {
+                id: req.params.id,
+                userid: req.uid,
+            }
             const entryVar = req.body;
             delete entryVar._id;
             entryVar.userid = req.uid;
