@@ -13,7 +13,7 @@
       </btd-dropdown>
     </div>
     <btd-day-display :date="date" @dayChosen="dayChosen($event)" />
-    <btd-streak-info />
+    <btd-streak-info :date="date" @dayChosen="dayChosen($event)" />
   </div>
 </template>
 
@@ -68,6 +68,8 @@ export default {
   background-color: #53d3d1;
   font-size: 2em;
   z-index: 1;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 .btd-day-display {
   flex-basis: 0;

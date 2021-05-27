@@ -11,14 +11,6 @@ module.exports = {
         const vals = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
         return vals[date.getDay()];
     },
-    formatDateOld(date, format, separator) {
-        function ff(m) {
-            // console.log(m);
-            let f = new Intl.DateTimeFormat('en', m);
-            return f.format(date);
-        }
-        return format.map(ff).join(separator);
-    },
     tomorrow(date) {
         const ret = new Date(date);
         ret.setDate(ret.getDate() + 1);

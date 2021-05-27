@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <btd-main-component v-if="authInfo.loggedIn" @logout="logout" />
-    <btd-login v-if="!authInfo.loggedIn" @setAuthToken="setAuthToken" />
+    <btd-login v-else @setAuthToken="setAuthToken" />
   </div>
 </template>
 
@@ -41,12 +41,12 @@ export default {
     setAuthToken(tknInfo) {
       if (tknInfo.loggedIn) {
         this.authInfo.atkn = tknInfo.auth_token;
-        console.log("setting authtoken", this.authInfo.atkn);
-        console.log(tknInfo.expireDate);
+        // console.log("setting authtoken", this.authInfo.atkn);
+        // console.log(tknInfo.expireDate);
         document.cookie = `atkn=${
           this.authInfo.atkn
         } ; expires=${tknInfo.expireDate.toUTCString()}`;
-        console.log("cookie: ", document.cookie);
+        // console.log("cookie: ", document.cookie);
       } else {
         this.authInfo.atkn = "";
         document.cookie = `atkn= ; expires=`;
@@ -90,7 +90,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
   color: #002447;
-  margin-top: 60px;
-  /* background-color: teal; */
+  margin-top: 80px;
+  /* background-color: #53d3d1; */
+}
+body {
+  background-color: #a6f1ef;
 }
 </style>

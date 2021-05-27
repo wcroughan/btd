@@ -1,35 +1,73 @@
 <template>
-  <div class="btd-streak-info">
-    <img
-      class="fire-img"
-      :class="{ greyed: streakLength === 0 }"
-      src="../assets/fire.png"
-      alt="streak"
-    />
-    {{ streakLength }}
-  </div>
+  <btd-dropdown menuAlign="right" :closeOnAnyClick="false">
+    <template v-slot:button>
+      <div class="btd-streak-info">
+        <img
+          class="fire-img"
+          :class="{ greyed: !todayGood }"
+          src="../assets/fire.png"
+          alt="streak"
+        />
+        {{ streakLength }}
+      </div>
+    </template>
+    <template v-slot:content>
+      <btd-calendar
+        :initialDate="date"
+        @dayChosen="$emit('dayChosen', $event)"
+      />
+    </template>
+  </btd-dropdown>
 </template>
 
 <script>
-// import date_util from "./../utility/date_util.js";
+import btdDropdown from "./btdDropdown.vue";
+import btdCalendar from "./btdCalendar.vue";
+import { inject } from "vue";
+import api_util from "./../utility/api_util.js";
 
 export default {
   name: "btdStreakInfo",
+  components: {
+    btdDropdown,
+    btdCalendar,
+  },
   data() {
     return {
       streakLength: 0,
+      todayGood: false,
+      date: new Date(),
     };
   },
-  props: {
-    updateFlag: Number, // start it at 0, add 1 everytime should update. On receiving this emit, subtract one
+  inject: ["authToken"],
+  setup() {
+    const updateFlag = inject("streakUpdateFlag");
+    const updateReceived = inject("streakUpdateReceived");
+    return {
+      updateFlag,
+      updateReceived,
+    };
   },
-  emits: ["updateDone"],
+  emits: ["updateDone", "dayChosen"],
+  methods: {
+    getStreakLengthFromServer() {
+      api_util.getStreakLength(this.authToken.value, this.date, (l) => {
+        this.streakLength = l.data.len;
+        this.todayGood = l.data.todayGood;
+      });
+    },
+  },
   watch: {
     updateFlag(newval) {
       if (newval > 0) {
-        console.log("time to update the streak!");
+        // console.log("time to update the streak! val", this.updateFlag);
+        this.getStreakLengthFromServer();
+        this.updateReceived();
       }
     },
+  },
+  mounted() {
+    this.getStreakLengthFromServer();
   },
 };
 </script>

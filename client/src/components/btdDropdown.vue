@@ -20,13 +20,11 @@
 </template>
 
 <script>
-import { nextTick } from "@vue/runtime-core";
 export default {
   name: "btdDropdown",
   data() {
     return {
       showMenu: false,
-      animated: true,
     };
   },
   props: {
@@ -53,19 +51,8 @@ export default {
         this.showMenu = false;
       }
     },
-    hideMenu(animated) {
-      console.log(nextTick, animated);
-      //   if (animated !== undefined && animated === false && false) {
-      //     this.animated = false;
-      //     nextTick(() => {
-      //       this.showMenu = false;
-      //       nextTick(() => {
-      //         this.animated = true;
-      //       });
-      //     });
-      //   } else {
+    hideMenu() {
       this.showMenu = false;
-      //   }
     },
   },
 };

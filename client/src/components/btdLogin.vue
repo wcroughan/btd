@@ -13,7 +13,7 @@
             @keydown.enter="goButton"
             id="username"
             ref="username"
-            v-model="username"
+            v-model.trim="username"
             tabindex="1"
           />
         </div>
@@ -101,7 +101,11 @@ export default {
       }
       const hpw = await api_util.getHash(this.pwd);
       //   console.log("creating account with ", this.username, hpw);
-      api_util.createAccount(this.username, hpw, this.createAccountCallback);
+      api_util.createAccount(
+        this.username.toLowerCase(),
+        hpw,
+        this.createAccountCallback
+      );
     },
     createAccountCallback(res) {
       //   console.log(res.data);
@@ -125,12 +129,12 @@ export default {
       }
       const hpw = await api_util.getHash(this.pwd);
       //   console.log("logging in with ", this.username, hpw);
-      api_util.login(this.username, hpw, this.loginCallback);
+      api_util.login(this.username.toLowerCase(), hpw, this.loginCallback);
     },
     loginCallback(res) {
       //   console.log(res);
       if (res.data.success) {
-        console.log(res.data);
+        // console.log(res.data);
         let expireDate = new Date();
         if (this.stayin) expireDate = new Date(res.data.expireDate);
         this.$emit("setAuthToken", {
@@ -220,13 +224,13 @@ export default {
 
 #switchbutton {
   background-color: inherit;
-  color: blue;
+  color: rgb(60, 60, 211);
   border-width: 0px;
 }
 #gobutton {
   font-size: 1.3rem;
   background-color: inherit;
-  color: blue;
+  color: rgb(60, 60, 211);
   border-width: 0px;
   font-weight: bold;
 }

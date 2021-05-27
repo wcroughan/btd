@@ -3,6 +3,10 @@ const _ = require('underscore')
 const misc_util = require('./../../client/src/utility/misc_util.js')
 
 module.exports = function (db) {
+    isSkippedByDefault = function (date) {
+        return date.getDay() === 6 || date.getDay() === 0;
+    };
+
     getDefaultListInternal = async function (userid, listid, callback) {
         // console.log("looking for default list for userid", userid, ", listid", listid, "and callback", callback);
         const datestr = listid.split("_")[1];
@@ -37,6 +41,8 @@ module.exports = function (db) {
             item.start = start;
             item.end = end;
             item.userid = userid;
+            item.isDone = item.items.length === 0;
+            item.isSkipped = isSkippedByDefault(start);
             // console.log("returning default item:", item)
             return item;
         } else {
@@ -55,6 +61,8 @@ module.exports = function (db) {
                     item.start = start;
                     item.end = end;
                     item.userid = userid;
+                    item.isDone = item.items.length === 0;
+                    item.isSkipped = isSkippedByDefault(start);
                     // console.log("running callback with default item:", item)
                     callback(false, item);
                 }
@@ -119,9 +127,9 @@ module.exports = function (db) {
                 }
             }
             const options = {
-                upsert: true
+                upsert: true,
             }
-            await db.collection("lists").updateOne(req.params, entry, options)
+            await db.collection("lists").findOneAndUpdate(req.params, entry, options)
 
             res.status(200).json({ success: true });
         },
@@ -179,7 +187,131 @@ module.exports = function (db) {
 
             db.collection("lists").deleteOne(detail);
 
+        },
+        async getDaysInfo(req, res, next) {
+            const projection = {
+                isDone: 1,
+                isSkipped: 1,
+                id: 1,
+                _id: 0
+            }
+            console.log(req.query)
+            const detail = {
+                userid: req.uid,
+                start: {
+                    $lte: new Date(req.query.d2),
+                    $gte: new Date(req.query.d1)
+                },
+            }
+            const dbres = await db.collection("lists").find(detail).project(projection);
+            const resArray = await dbres.toArray();
+            console.log(resArray);
+            res.status(200).json(resArray)
+        },
+        async getStreakLength(req, res, next) {
+            const batch_size = 30;
+
+            const d = new Date(req.query.date);
+            d.setHours(0, 0, 0, 0);
+            const projection = {
+                isDone: 1,
+                isSkipped: 1,
+                end: 1,
+                id: 1,
+                _id: 0
+            }
+
+            const d1 = new Date(d);
+            let d2 = new Date(d);
+            d2.setDate(d2.getDate() - batch_size)
+            let resArray;
+            let len = 0;
+            let todayGood;
+
+            const todayDetail = {
+                userid: req.uid,
+                start: d
+            }
+            const today = await db.collection("lists").findOne(todayDetail);
+            if (today === null) {
+                todayGood = isSkippedByDefault(d);
+            } else {
+                todayGood = today.isDone || today.isSkipped;
+                if (!today.isSkipped && today.isDone) len++;
+            }
+
+            const weekstart = date_util.getMonday(d);
+            const weekend = date_util.plusOneWeek(weekstart);
+            const thisweekDetail = {
+                userid: req.uid,
+                start: weekstart,
+                end: weekend
+            }
+            const thisweek = await db.collection("lists").findOne(thisweekDetail);
+            if (thisweek !== null && thisweek.isDone) {
+                len++;
+            }
+
+            let cd = new Date(d1);
+            let rai = undefined;
+            let detail = {
+                userid: req.uid,
+                end: {
+                    $lte: d1,
+                    $gt: d2
+                },
+            }
+            // console.log("detail", detail)
+            let dbres = await db.collection("lists").find(detail).project(projection).sort({ start: -1 });
+            resArray = await dbres.toArray();
+            // console.log("resarray", resArray)
+            let raidx = 0;
+            while (true) {
+                // console.log("cd", cd)
+                if (cd.getTime() <= d2.getTime()) {
+                    d2.setDate(d2.getDate() - batch_size)
+                    d1.setDate(d1.getDate() - batch_size)
+                    detail = {
+                        userid: req.uid,
+                        end: {
+                            $lte: d1,
+                            $gt: d2
+                        },
+                    }
+                    // console.log(detail)
+                    dbres = await db.collection("lists").find(detail).project(projection).sort({ start: -1 });
+                    resArray = await dbres.toArray();
+                    // console.log("resArray", resArray)
+                    raidx = 0;
+                }
+                rai = resArray[raidx];
+                if (rai !== undefined && rai.end.getTime() === cd.getTime()) {
+                    raidx++;
+                    if (rai.isSkipped) {
+                        // console.log("Found and skipped")
+                    } else if (rai.isDone) {
+                        // console.log("Found and done")
+                        len++;
+                    } else {
+                        // console.log("found and streak done")
+                        break;
+                    }
+                } else {
+                    const cd_start = new Date(cd);
+                    cd_start.setDate(cd.getDate() - 1);
+                    if (isSkippedByDefault(cd_start)) {
+                        // console.log("not found, skipped")
+                    } else {
+                        // console.log("not found, not skipped")
+                        break;
+                    }
+                }
+                cd.setDate(cd.getDate() - 1);
+            }
+
+            res.status(200).json({ len, todayGood })
         }
+
 
     }
 

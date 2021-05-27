@@ -224,6 +224,7 @@ export default {
 .list-item {
   font-size: 2rem;
   width: 100%;
+  padding: 10px 0px;
 }
 @media only screen and (min-width: 600px) {
   .list-item {
@@ -241,7 +242,7 @@ export default {
   /* transition: transform 0.2s ease; */
 }
 .list-footer > button {
-  color: blue;
+  color: rgb(60, 60, 211);
   border-width: 0;
   font-weight: bold;
   font-size: 1em;
@@ -280,5 +281,14 @@ export default {
 .donelist-enter-active,
 .donelist-leave-active {
   transition: all 0.15s;
+}
+
+.btd-list {
+  /* border: 2px solid black; */
+  border-radius: 20px;
+  margin-bottom: 20px;
+  padding: 10px;
+  /* box-shadow: 10px 10px 0 0 rgba(black, 0.03); */
+  background-color: white;
 }
 </style>

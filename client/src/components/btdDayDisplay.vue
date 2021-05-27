@@ -11,7 +11,10 @@
         <span class="date-text">{{ dateText }}</span>
       </template>
       <template v-slot:content>
-        <btd-calendar :date="date" />
+        <btd-calendar
+          :initialDate="date"
+          @dayChosen="$emit('dayChosen', $event)"
+        />
       </template>
     </btd-dropdown>
     <img
@@ -43,12 +46,12 @@ export default {
   emits: ["dayChosen"],
   computed: {
     dateText() {
-      const format = [
-        { year: "numeric" },
-        { month: "numeric" },
-        { day: "numeric" },
-      ];
-      return date_util.formatDateOld(this.date, format, "/");
+      const formatOptions = {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+      };
+      return new Intl.DateTimeFormat("en-US", formatOptions).format(this.date);
     },
   },
   methods: {

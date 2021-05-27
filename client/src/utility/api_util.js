@@ -85,5 +85,33 @@ module.exports = {
             const ret = await axios.get(req);
             return ret;
         }
+    },
+    async getDaysInfo(auth_token, d1, d2, callback) {
+        const reqParamObj = { auth_token, d1, d2 };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "daysinfo/" + `?${params}`;
+        // console.log(req);
+        if (callback !== undefined) {
+            axios.get(req).then((res) => {
+                callback(res);
+            });
+        } else {
+            const ret = await axios.get(req);
+            return ret;
+        }
+    },
+    async getStreakLength(auth_token, date, callback) {
+        const reqParamObj = { auth_token, date };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "streaklength/" + `?${params}`;
+        // console.log(req);
+        if (callback !== undefined) {
+            axios.get(req).then((res) => {
+                callback(res);
+            });
+        } else {
+            const ret = await axios.get(req);
+            return ret;
+        }
     }
 }

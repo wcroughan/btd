@@ -42,7 +42,9 @@
           </button>
         </section>
         <section class="dropdown-option">
-          <button @click="skipButtonClicked">Skip</button>
+          <button @click="skipButtonClicked">
+            {{ isSkipped ? "Don't Skip" : "Skip" }}
+          </button>
         </section>
         <section class="dropdown-option">
           <button @click="loadDefaultClicked">Load Default List</button>

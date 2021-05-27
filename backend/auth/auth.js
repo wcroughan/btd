@@ -21,7 +21,7 @@ module.exports = function (db) {
                 },
                 {
                     id: 1,
-                    text: "Tap an item to mark it as completed",
+                    text: "Tap/click an item to mark it as completed",
                     isDone: false
                 },
                 {

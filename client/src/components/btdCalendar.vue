@@ -1,9 +1,24 @@
 <template>
   <div class="btd-calendar">
     <div class="cal-head">
-      <div class="left-button"></div>
-      <div class="cal-title"></div>
-      <div class="right-button"></div>
+      <div class="left-button">
+        <img
+          src="../assets/down-arrow-red.png"
+          @click="lastMonthClicked"
+          alt="Last Month"
+          class="left-arrow arrow"
+        />
+      </div>
+      <span class="cal-title">{{ title }}</span>
+      <div class="right-button">
+        <img
+          src="../assets/down-arrow-red.png"
+          @click="nextMonthClicked"
+          alt="Next Month"
+          class="right-arrow arrow"
+        />
+      </div>
+      <span class="today-button" @click="todayClicked">Today</span>
     </div>
     <table class="cal-body">
       <tr>
@@ -17,9 +32,16 @@
         <th>Week</th>
       </tr>
       <tr v-for="(row, idx) in daystable" :key="'tr_' + idx">
-        <td v-for="(day, ridx) in row" :key="day + '' + ridx">
-          <div class="day" :class="dayinfo[dstr(day)].classes">
-            {{ day.getDate() }}
+        <td v-for="day in row" :key="day.idstr">
+          <div
+            class="day"
+            :class="[
+              dayinfo[day.idstr].classes,
+              day.type === 'week' ? 'week' : 'day',
+            ]"
+            @click="dayClicked(day)"
+          >
+            {{ dayText(day) }}
           </div>
         </td>
       </tr>
@@ -28,23 +50,68 @@
 </template>
 
 <script>
+import api_util from "../utility/api_util";
+import date_util from "../utility/date_util";
 const _ = require("underscore");
 
 export default {
   name: "btdCalendar",
   components: {},
   props: {
-    date: null,
+    initialDate: null,
   },
+  inject: ["authToken"],
+  emits: ["dayChosen"],
   data() {
     return {
+      //   date: new Date(this.initialDate),
+      datestr: "" + new Date(this.initialDate),
       daystable: [[], []],
       dayinfo: {},
     };
   },
+  computed: {
+    title() {
+      const formatOptions = {
+        month: "long",
+        year: "numeric",
+      };
+      //   return new Intl.DateTimeFormat("en-US", formatOptions).format(this.date);
+      return new Intl.DateTimeFormat("en-US", formatOptions).format(
+        new Date(this.datestr)
+      );
+    },
+  },
   methods: {
+    dayText(day) {
+      if (day.type === "day") return day.d.getDate();
+      else {
+        const d2 = new Date(day.d);
+        d2.setDate(d2.getDate() + 6);
+        return day.d.getDate() + " - " + d2.getDate();
+      }
+    },
+    todayClicked() {
+      this.datestr = "" + new Date();
+      this.$emit("dayChosen", new Date());
+    },
+    dayClicked(day) {
+      this.$emit("dayChosen", new Date(day.d));
+    },
+    lastMonthClicked() {
+      const d = new Date(this.datestr);
+      d.setMonth(d.getMonth() - 1);
+      this.datestr = "" + d;
+      //   this.setDaysTableForDate();
+    },
+    nextMonthClicked() {
+      const d = new Date(this.datestr);
+      d.setMonth(d.getMonth() + 1);
+      this.datestr = "" + d;
+      //   this.setDaysTableForDate();
+    },
     setDaysTableForDate() {
-      const d = new Date(this.date);
+      const d = new Date(this.datestr);
       d.setDate(1);
       d.setHours(0, 0, 0, 0);
       const d1 = new Date(d);
@@ -65,37 +132,61 @@ export default {
         const days = _.range(0, 7).map((dy) => {
           const di = new Date(d1);
           di.setDate(di.getDate() + 7 * wk + dy);
-          return di;
+          return this.dayTableObject(di, "day");
         });
         const dii = new Date(d1);
         dii.setDate(dii.getDate() + 7 * wk);
-        days.push(dii);
+        days.push(this.dayTableObject(dii, "week"));
         return days;
       });
       this.daystable.flat().forEach((v) => this.fillDateInfo(v));
-      console.log(
-        "TODO: api_util call for dates info between d1 & d2, callback updates dayinfo"
-      );
+      api_util.getDaysInfo(this.authToken.value, d1, d2, (info) => {
+        info.data.forEach((v) => {
+          //   console.log(
+          //     "changing dayinfo id",
+          //     v.id,
+          //     "from",
+          //     this.dayinfo[v.id],
+          //     "to",
+          //     v
+          //   );
+          this.dayinfo[v.id].classes = {
+            ...this.dayinfo[v.id].classes,
+            done: v.isDone,
+            skip: v.isSkipped,
+          };
+        });
+      });
       //   console.log(this.dayinfo);
     },
     dstr(d) {
       return "" + d;
     },
+    dayTableObject(d, type) {
+      return {
+        d,
+        idstr: type + "_" + date_util.apiDateStr(d),
+        type,
+      };
+    },
     fillDateInfo(d) {
-      console.log("TODO: date_util call here");
-      //   const datestr = this.dstr(d);
-      const datestr = "" + d;
-      if (this.dayinfo[datestr] === undefined) {
-        this.dayinfo[datestr] = {
+      const nd = new Date();
+      if (this.dayinfo[d.idstr] === undefined) {
+        this.dayinfo[d.idstr] = {
           d,
           classes: {
-            done: Math.random() < 0.5,
-            skip: d.getDay() == 6 || d.getDay() == 0,
-            future: d > new Date(),
-            type: "day",
+            done: false,
+            skip: d.d.getDay() == 6 || d.d.getDay() == 0,
+            future: d.d > nd,
+            today: nd > d.d && nd - d.d < 1000 * 60 * 60 * 24,
           },
         };
       }
+    },
+  },
+  watch: {
+    datestr() {
+      this.setDaysTableForDate();
     },
   },
   mounted() {
@@ -116,16 +207,24 @@ export default {
   justify-content: center;
   font-size: 68%;
 }
+.week {
+  width: 70px;
+  border-radius: 10px;
+  padding: 0px 5px;
+}
 
 .future {
-  border: 1px dashed rgb(200, 200, 200);
+  /* border: 1px dashed rgb(200, 200, 200); */
   color: grey;
 }
 .done {
-  background-color: green;
+  background-color: rgb(82, 212, 82);
 }
 .day.skip {
   background-color: rgb(200, 200, 200);
+}
+.today {
+  border: 3px solid blue;
 }
 
 th {
@@ -150,5 +249,35 @@ tr:last-child > td {
 }
 tr:last-child > td:last-child {
   border-bottom-width: 0px;
+}
+
+.cal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  padding-top: 5px;
+}
+.arrow {
+  height: 40px;
+  filter: hue-rotate(180deg);
+}
+.arrow:hover {
+  filter: hue-rotate(45deg);
+}
+.left-arrow {
+  transform: rotateZ(90deg);
+}
+.right-arrow {
+  transform: rotateZ(270deg);
+}
+
+.today-button {
+  font-size: 0.7em;
+  color: rgb(60, 60, 211);
+  padding: 7px 17px;
+  /* border: 1px solid black; */
+  /* border-radius: 10px; */
+  font-weight: bold;
 }
 </style>

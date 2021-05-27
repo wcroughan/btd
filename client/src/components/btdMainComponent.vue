@@ -25,6 +25,7 @@ import btdList from "./btdList.vue";
 import api_util from "../utility/api_util.js";
 import btdNoListsFiller from "./btdNoListsFiller.vue";
 import btdEditDefaultModal from "./btdEditDefaultModal.vue";
+import { provide, ref } from "vue";
 
 export default {
   name: "btdMainComponent",
@@ -39,10 +40,27 @@ export default {
     return {
       selectedDate: date_util.getToday(),
       lists: null,
+      //   streakUpdateFlag: 0,
     };
   },
   inject: ["authToken"],
   emits: ["logout"],
+  setup() {
+    const streakUpdateFlag = ref(0);
+    const streakUpdateReceived = () => streakUpdateFlag.value--;
+    provide("streakUpdateFlag", streakUpdateFlag);
+    provide("streakUpdateReceived", streakUpdateReceived);
+
+    return {
+      streakUpdateFlag,
+    };
+  },
+  //   provide() {
+  //     return {
+  //       streakUpdateFlag: computed(() => this.streakUpdateFlag),
+  //       streakUpdateReceived: () => this.streakUpdateFlag--,
+  //     };
+  //   },
   methods: {
     refreshList() {
       this.getListsFromServer(this.selectedDate);
@@ -120,6 +138,7 @@ export default {
           this.lists[listidx] = res.data;
         });
         api_util.deleteListFromServer(this.authToken.value, id);
+        setTimeout(() => this.streakUpdateFlag++, 50);
         return;
       } else if (type === "itemMovedToList") {
         const idx = this.lists[listidx].items.findIndex(
@@ -140,6 +159,7 @@ export default {
         return;
       }
       this.pushListToServer(this.lists[listidx]);
+      setTimeout(() => this.streakUpdateFlag++, 50);
     },
   },
   watch: {
