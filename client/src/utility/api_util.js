@@ -1,7 +1,7 @@
 const axios = require('axios');
 const api_root = "/api/v1/";
 const date_util = require('./date_util');
-// const bson = require('bson')
+const bson = require('bson')
 
 
 module.exports = {
