@@ -155,7 +155,7 @@ module.exports = function (db) {
             const options = {
                 upsert: true,
             }
-            await db.collection("lists").findOneAndUpdate(req.params, entry, options)
+            await db.collection("lists").findOneAndUpdate(detail, entry, options)
 
             res.status(200).json({ success: true });
         },
