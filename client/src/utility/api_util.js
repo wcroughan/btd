@@ -65,14 +65,14 @@ module.exports = {
         axios.get(req).then(callback);
     },
     async getHash(str) {
-        // const sdat = new TextEncoder().encode(str);
-        // const hs = await crypto.subtle.digest("SHA-256", sdat);
-        // // console.log(hs)
-        // return bson.Binary(hs)
+        const sdat = new TextEncoder().encode(str);
+        const hs = await crypto.subtle.digest("SHA-256", sdat);
+        // console.log(hs)
+        return bson.Binary(hs)
         //Above code commented because I need a paid heroku to get https which is the only way crypto subtle will work.
         //And in general sounds like there's more concerns here so in long run would be better just to use an outside library like 0auth
 
-        return str;
+        // return str;
     },
     async checkAuthToken(tkn, callback) {
         const reqParamObj = { tkn };
