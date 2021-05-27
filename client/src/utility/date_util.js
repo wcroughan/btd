@@ -7,10 +7,10 @@ module.exports = {
         d.setHours(0, 0, 0, 0);
         return d;
     },
-    dayOfWeekShortAbbr(date) {
-        const vals = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        return vals[date.getDay()];
-    },
+    // dayOfWeekShortAbbr(date) {
+    //     const vals = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    //     return vals[date.getDay()];
+    // },
     tomorrow(date) {
         const ret = new Date(date);
         ret.setDate(ret.getDate() + 1);

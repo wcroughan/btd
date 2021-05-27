@@ -64,7 +64,6 @@ export default {
   emits: ["dayChosen"],
   data() {
     return {
-      //   date: new Date(this.initialDate),
       datestr: "" + new Date(this.initialDate),
       daystable: [[], []],
       dayinfo: {},
@@ -77,9 +76,9 @@ export default {
         year: "numeric",
       };
       //   return new Intl.DateTimeFormat("en-US", formatOptions).format(this.date);
-      return new Intl.DateTimeFormat("en-US", formatOptions).format(
-        new Date(this.datestr)
-      );
+      const d = new Date(this.datestr);
+      d.setHours(0, 0, 0, 0);
+      return new Intl.DateTimeFormat("en-US", formatOptions).format(d);
     },
   },
   methods: {
@@ -92,7 +91,7 @@ export default {
       }
     },
     todayClicked() {
-      this.datestr = "" + new Date();
+      this.datestr = "" + date_util.getToday();
       this.$emit("dayChosen", new Date());
     },
     dayClicked(day) {
@@ -113,6 +112,9 @@ export default {
     setDaysTableForDate() {
       const d = new Date(this.datestr);
       d.setDate(1);
+      if (d.getHours() !== 0) {
+        console.log("Calendar has a problem witha date!");
+      }
       d.setHours(0, 0, 0, 0);
       const d1 = new Date(d);
       d1.setDate(d1.getDate() - d1.getDay() + 1);

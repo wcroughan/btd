@@ -72,6 +72,7 @@ import BtdListHeader from "./btdListHeader.vue";
 import BtdListItem from "./btdListItem.vue";
 import btdItemTitleEdit from "./btdItemTitleEdit.vue";
 import { nextTick } from "vue";
+import date_util from "../utility/date_util";
 // import date_util from "../utility/date_util";
 // const _ = require("underscore");
 
@@ -112,7 +113,7 @@ export default {
           day: "numeric",
         };
         return new Intl.DateTimeFormat("en-US", formatOptions).format(
-          new Date(this.list.start)
+          date_util.getDateFromIdStr(id)
         );
       } else if (id.substring(0, 5) === "week_") {
         // console.log(this.list.start);
@@ -122,9 +123,13 @@ export default {
         };
         const dtf = new Intl.DateTimeFormat("en-US", formatOptions);
         return (
-          dtf.format(new Date(this.list.start)) +
+          dtf.format(date_util.getDateFromIdStr(id)) +
           " - " +
-          dtf.format(new Date(this.list.end) - 1)
+          dtf.format(
+            date_util.plusOneWeek(
+              date_util.yesterday(date_util.getDateFromIdStr(id))
+            )
+          )
         );
       } else return id;
     },

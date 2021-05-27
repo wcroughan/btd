@@ -25,6 +25,7 @@ import btdDropdown from "./btdDropdown.vue";
 import btdCalendar from "./btdCalendar.vue";
 import { inject } from "vue";
 import api_util from "./../utility/api_util.js";
+import date_util from "../utility/date_util";
 
 export default {
   name: "btdStreakInfo",
@@ -36,8 +37,10 @@ export default {
     return {
       streakLength: 0,
       todayGood: false,
-      date: new Date(),
     };
+  },
+  props: {
+    date: Date,
   },
   inject: ["authToken"],
   setup() {
@@ -51,10 +54,14 @@ export default {
   emits: ["updateDone", "dayChosen"],
   methods: {
     getStreakLengthFromServer() {
-      api_util.getStreakLength(this.authToken.value, this.date, (l) => {
-        this.streakLength = l.data.len;
-        this.todayGood = l.data.todayGood;
-      });
+      api_util.getStreakLength(
+        this.authToken.value,
+        date_util.getToday(),
+        (l) => {
+          this.streakLength = l.data.len;
+          this.todayGood = l.data.todayGood;
+        }
+      );
     },
   },
   watch: {
