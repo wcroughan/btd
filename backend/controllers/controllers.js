@@ -237,10 +237,10 @@ module.exports = function (db) {
             res.status(200).json(resArray)
         },
         async getStreakLength(req, res, next) {
-            // console.log(__line, req.query);
+            console.log(__line, req.query);
             const batch_size = 30;
 
-            const d = new Date(req.query.date);
+            const d = date_util.getDateFromIdStr(req.query.date)
             d.setHours(0, 0, 0, 0);
             const projection = {
                 isDone: 1,
@@ -282,6 +282,7 @@ module.exports = function (db) {
             }
 
             let cd = new Date(d1);
+            cd.setUTCHours(0, 0, 0, 0)
             let rai = undefined;
             let detail = {
                 userid: req.uid,
@@ -290,13 +291,13 @@ module.exports = function (db) {
                     $gt: d2
                 },
             }
-            // console.log(__line, "detail", detail)
+            console.log(__line, "detail", detail)
             let dbres = await db.collection("lists").find(detail).project(projection).sort({ start: -1 });
             resArray = await dbres.toArray();
-            // console.log(__line, "resarray", resArray)
+            console.log(__line, "resarray", resArray)
             let raidx = 0;
             while (true) {
-                // console.log(__line, "cd", cd)
+                console.log(__line, "cd", cd)
                 if (cd.getTime() <= d2.getTime()) {
                     d2.setDate(d2.getDate() - batch_size)
                     d1.setDate(d1.getDate() - batch_size)
@@ -307,31 +308,31 @@ module.exports = function (db) {
                             $gt: d2
                         },
                     }
-                    // console.log(__line, detail)
+                    console.log(__line, detail)
                     dbres = await db.collection("lists").find(detail).project(projection).sort({ start: -1 });
                     resArray = await dbres.toArray();
-                    // console.log(__line, "resArray", resArray)
+                    console.log(__line, "resArray", resArray)
                     raidx = 0;
                 }
                 rai = resArray[raidx];
                 if (rai !== undefined && rai.end.getTime() === cd.getTime()) {
                     raidx++;
                     if (rai.isSkipped) {
-                        // console.log(__line, "Found and skipped")
+                        console.log(__line, "Found and skipped")
                     } else if (rai.isDone) {
-                        // console.log(__line, "Found and done")
+                        console.log(__line, "Found and done")
                         len++;
                     } else {
-                        // console.log(__line, "found and streak done")
+                        console.log(__line, "found and streak done")
                         break;
                     }
                 } else {
                     const cd_start = new Date(cd);
                     cd_start.setDate(cd.getDate() - 1);
                     if (isSkippedByDefault(cd_start)) {
-                        // console.log(__line, "not found, skipped")
+                        console.log(__line, "not found, skipped")
                     } else {
-                        // console.log(__line, "not found, not skipped")
+                        console.log(__line, "not found, not skipped")
                         break;
                     }
                 }
