@@ -25,6 +25,23 @@
           @itemEdited="itemEdited(item.id, $event)"
         />
       </transition-group>
+      <!-- <transition name="donelist"> -->
+      <div class="completed-container" v-if="showCompleted">
+        <transition-group name="list">
+          <btd-list-item
+            v-for="item in itemsDone"
+            :key="list.id + '_' + item.id + '_d'"
+            :text="item.text"
+            :isDone="item.isDone"
+            @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
+            @itemDeleted="itemDeleted(item.id)"
+            @itemMoved="itemMoved(item.id, $event)"
+            @itemEdited="itemEdited(item.id, $event)"
+            class="done-item"
+          />
+        </transition-group>
+      </div>
+      <!-- </transition> -->
       <div class="list-footer">
         <component
           class="add-item-button"
@@ -48,21 +65,6 @@
           }}
         </button>
       </div>
-      <transition name="donelist">
-        <div class="completed-container" v-if="showCompleted">
-          <btd-list-item
-            v-for="item in itemsDone"
-            :key="list.id + '_' + item.id + '_nd'"
-            :text="item.text"
-            :isDone="item.isDone"
-            @itemDoneUpdate="itemDoneUpdate(item.id, $event)"
-            @itemDeleted="itemDeleted(item.id)"
-            @itemMoved="itemMoved(item.id, $event)"
-            @itemEdited="itemEdited(item.id, $event)"
-            class="done-item"
-          />
-        </div>
-      </transition>
     </div>
   </div>
 </template>
@@ -87,7 +89,7 @@ export default {
     return {
       isAddingItem: false,
       testitems: [1, 2, 3, 4, 5],
-      showCompleted: false,
+      showCompleted: true,
     };
   },
   props: {
@@ -228,21 +230,26 @@ export default {
   position: relative;
 }
 .list-item {
-  font-size: 2rem;
+  font-size: 1rem;
   width: 100%;
-  padding: 10px 0px;
+  padding: 5px 0px;
   user-select: none;
 }
 @media only screen and (min-width: 600px) {
   .list-item {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
 }
 
 .done-item {
-  font-size: 1.3rem;
+  font-size: 0.8rem;
   user-select: none;
+  text-decoration: line-through;
 }
+.done-item:first-child {
+  padding-top: 2em;
+}
+
 .list-footer {
   display: flex;
   justify-content: space-between;

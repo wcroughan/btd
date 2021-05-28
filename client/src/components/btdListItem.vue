@@ -4,7 +4,7 @@
     @mouseenter="mouseIn = true"
     @mouseleave="mouseIn = false"
   >
-    <!-- <input type="checkbox" @change="handleCheckbox($event)" :checked="isDone" /> -->
+    <input type="checkbox" @change="handleCheckbox($event)" :checked="isDone" />
     <component
       class="todo-item-title"
       ref="itemText"

@@ -1,5 +1,5 @@
 <template>
-  <btd-dropdown menuAlign="right" :closeOnAnyClick="false">
+  <btd-dropdown menuAlign="right" ref="dropcal" :closeOnAnyClick="false">
     <template v-slot:button>
       <div class="btd-streak-info">
         <img
@@ -12,10 +12,7 @@
       </div>
     </template>
     <template v-slot:content>
-      <btd-calendar
-        :initialDate="date"
-        @dayChosen="$emit('dayChosen', $event)"
-      />
+      <btd-calendar :initialDate="date" @dayChosen="calendarDayChosen" />
     </template>
   </btd-dropdown>
 </template>
@@ -53,6 +50,10 @@ export default {
   },
   emits: ["updateDone", "dayChosen"],
   methods: {
+    calendarDayChosen(event) {
+      this.$refs.dropcal.hideMenu();
+      this.$emit("dayChosen", event);
+    },
     getStreakLengthFromServer() {
       api_util.getStreakLength(
         this.authToken.value,

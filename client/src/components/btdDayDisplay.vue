@@ -6,15 +6,12 @@
       alt="Yesterday"
       class="left-arrow arrow"
     />
-    <btd-dropdown menuAlign="center" :closeOnAnyClick="false">
+    <btd-dropdown menuAlign="center" ref="dropcal" :closeOnAnyClick="false">
       <template v-slot:button>
         <span class="date-text">{{ dateText }}</span>
       </template>
       <template v-slot:content>
-        <btd-calendar
-          :initialDate="date"
-          @dayChosen="$emit('dayChosen', $event)"
-        />
+        <btd-calendar :initialDate="date" @dayChosen="calendarDayChosen" />
       </template>
     </btd-dropdown>
     <img
@@ -55,6 +52,10 @@ export default {
     },
   },
   methods: {
+    calendarDayChosen(event) {
+      this.$refs.dropcal.hideMenu();
+      this.$emit("dayChosen", event);
+    },
     yesterdayClicked() {
       const newday = date_util.yesterday(this.date);
       //   console.log("yesterday clicked, new date: ", newday);
