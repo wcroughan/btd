@@ -4,17 +4,29 @@
     @mouseenter="mouseIn = true"
     @mouseleave="mouseIn = false"
   >
-    <input type="checkbox" @change="handleCheckbox($event)" :checked="isDone" />
-    <component
-      class="todo-item-title"
-      ref="itemText"
-      :is="itemTitleComponentType"
-      @click="textClicked"
-      :text="text"
-      :isDone="isDone"
-      @doneEditing="doneEditing"
-      @canceledEditing="canceledEditing"
-    />
+    <label :for="key">
+      <input
+        class="ogcheck"
+        :id="key"
+        type="checkbox"
+        @change="handleCheckbox($event)"
+        :checked="isDone"
+      />
+      <div class="ogreplace">
+        <div class="checkmark" />
+      </div>
+
+      <component
+        class="todo-item-title"
+        ref="itemText"
+        :is="itemTitleComponentType"
+        @click="textClicked"
+        :text="text"
+        :isDone="isDone"
+        @doneEditing="doneEditing"
+        @canceledEditing="canceledEditing"
+      />
+    </label>
     <btd-dropdown
       menuAlign="right"
       class="menu-button"
@@ -89,6 +101,7 @@ export default {
     text: String,
     isDone: Boolean,
     type: String,
+    key: String,
   },
   emits: ["itemDoneUpdate", "itemDeleted", "itemMoved", "itemEdited"],
   computed: {
@@ -101,9 +114,9 @@ export default {
     handleCheckbox(event) {
       this.$emit("itemDoneUpdate", event.target.checked);
     },
-    textClicked() {
-      if (!this.isEditing) this.$emit("itemDoneUpdate", !this.isDone);
-    },
+    // textClicked() {
+    //   if (!this.isEditing) this.$emit("itemDoneUpdate", !this.isDone);
+    // },
     deleteButtonClicked() {
       //   this.$refs.itemOptionsMenu.hideMenu(false);
       nextTick(() => {
@@ -169,5 +182,43 @@ export default {
 
 .menu-icon {
   max-height: 20px;
+}
+
+label {
+  display: flex;
+}
+
+.ogcheck {
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+.ogreplace {
+  width: 1em;
+  height: 1em;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 3px;
+}
+
+label:hover .ogreplace {
+  background-color: #6fd4d3;
+}
+
+input:checked ~ .ogreplace {
+  width: 0.8em;
+  height: 0.8em;
+  background-color: #53d3d1;
+}
+input:checked ~ .ogreplace .checkmark {
+  position: absolute;
+  border: 0.2em solid white;
+  border-top-width: 0px;
+  border-right-width: 0px;
+  height: 2px;
+  width: 6px;
+  transform: rotate(-45deg) translate(0px, 2px);
 }
 </style>

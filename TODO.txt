@@ -3,7 +3,6 @@ Next shipped update:
     - Allow repeating items on custom schedule like google calendar
     - Items aggregated with smallish headings like "Due Today:" or "Due next week:"
     - instead of all these moves, just have a snooze option with a modal
-- try adding checkbox? Or maybe an icon on one side that's a button but not the box itself?
 
 
 Should implement at some point:
