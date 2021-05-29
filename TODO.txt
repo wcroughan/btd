@@ -3,6 +3,7 @@ Next shipped update:
     - Allow repeating items on custom schedule like google calendar
     - Items aggregated with smallish headings like "Due Today:" or "Due next week:"
     - instead of all these moves, just have a snooze option with a modal
+- refresh button. Also auto refreshes every (idk, 5 mins?)
 
 
 Should implement at some point:
@@ -30,3 +31,4 @@ Nice to have, not need to have:
 - done items can jiggle when hovered and not hovered (recreate with 4 not done and 1 done)
 - there's probably some bugs when people switch between time zones
 - more efficient streak calculation
+- confetti when completed a day
