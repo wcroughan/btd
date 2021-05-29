@@ -24,15 +24,16 @@ export default {
   data() {
     const today = date_util.getToday();
     const tomorrow = date_util.getTomorrow();
-    const timeDividers = [today, tomorrow];
+    const twodays = date_util.tomorrow(tomorrow);
+    const timeDividers = [today, tomorrow, twodays];
     const titles = ["Today", "Tomorrow"];
     if (today.getDay() < 6) {
-      const sunday = date_util.plusOneWeek(date_util.getMonday());
+      const sunday = date_util.plusOneWeek(date_util.getMonday(today));
       timeDividers.push(sunday);
       titles.push("This Week");
     }
     const nextWeek = date_util.plusOneWeek(
-      date_util.plusOneWeek(date_util.getMonday())
+      date_util.plusOneWeek(date_util.getMonday(today))
     );
     timeDividers.push(nextWeek);
     titles.push("Next Week");
@@ -45,6 +46,8 @@ export default {
       titles
     );
 
+    // console.log(timeDividers, titles, allPossibleGroups);
+
     return {
       //   timeDividers,
       allPossibleGroups,
@@ -53,8 +56,8 @@ export default {
   computed: {
     ...mapState({
       timeGroups(state) {
-        return this.allPossibleGroups.filter((interval) =>
-          state.todoItems.some(
+        return this.allPossibleGroups.filter((interval) => {
+          return state.todoItems.some(
             (i) =>
               (i.isDone &&
                 i.doneDate.getTime() <= interval[1].getTime() &&
@@ -62,17 +65,13 @@ export default {
               (!i.isDone &&
                 i.dueDate.getTime() <= interval[1].getTime() &&
                 i.dueDate.getTime() > interval[0].getTime())
-          )
-        );
-      },
-      todayTodo: (state) => state.todayTodo,
-      todayDone: (state) => state.todayCompleted,
-      futureGroups(state) {
-        if (state.asdf === undefined) console.log("lul");
-        const g = [];
-        return g;
+          );
+        });
       },
     }),
+  },
+  created() {
+    // console.log(this.debugInfo);
   },
 };
 </script>

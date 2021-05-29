@@ -3,12 +3,25 @@ Next shipped update:
     - Allow repeating items on custom schedule like google calendar
     - Items aggregated with smallish headings like "Due Today:" or "Due next week:"
     - instead of all these moves, just have a snooze option with a modal
+    - Remaining todo:
+        -front end:
+            -header: add item button in center, calendar doens't need emit, other menu options for viewing older items, and maybe a browser of repeating items?
+            - all the auth token stuff should use store instead
+            -implement options dialogs for adding/editing item
+            - alot of the calendar local data should probably be stored in the store object so persists when calendar is closed
+            - have teh store object communicate iwht api_util to keep server updated
+            - trigger loading the items from the server on load, and at 5min interval after
+            - add a refresh button somewhere
+
+        -backend
+            -new db for items
+            -api_util calls
+            -aggregation logic
 - refresh button. Also auto refreshes every (idk, 5 mins?)
+- bring back animations on move
 
 
 Should implement at some point:
-- On desktop, can have a column on the right that's done items?
-- Check again at 1am if dates are out of sync
 - figure out this reactivity stuff so can just use date object directly in btdCalendar as opposed to converting to and from a string
 - swipe input on header/day display for yesterday/tomorrow navigation
 - getListsForId needs to be reworked iwth the following:

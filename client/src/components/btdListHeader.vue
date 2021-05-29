@@ -16,12 +16,6 @@
           <img v-else src="../assets/check.png" class="checkimg" />
         </transition>
       </div>
-      <img
-        class="skipped-icon"
-        v-if="isSkipped"
-        alt="Skipped"
-        src="../assets/curved-arrow.png"
-      />
       <div class="header-info-spacer-vert" />
     </div>
     <div class="header-spacer" />
@@ -29,7 +23,7 @@
       menuAlign="right"
       class="menu-button"
       ref="menuDropdown"
-      :closeOnAnyClick="false"
+      :closeOnAnyClick="true"
       v-show="persistentOptions || mouseIn"
     >
       <template v-slot:button>
@@ -41,17 +35,6 @@
             {{ markAllText }}
           </button>
         </section>
-        <section class="dropdown-option">
-          <button @click="skipButtonClicked">
-            {{ isSkipped ? "Don't Skip" : "Skip" }}
-          </button>
-        </section>
-        <section class="dropdown-option">
-          <button @click="loadDefaultClicked">Load Default List</button>
-        </section>
-        <section class="dropdown-option">
-          <button @click="editDefaultClicked">Edit Default List</button>
-        </section>
       </template>
     </btd-dropdown>
   </div>
@@ -59,14 +42,10 @@
 
 <script>
 import BtdDropdown from "./btdDropdown.vue";
-// import date_util from "./../utility/date_util.js";
-
-// import btdOptionsButton from "./btdOptionsButton.vue";
 
 export default {
   name: "btdListHeader",
   components: {
-    //    btdOptionsButton,
     BtdDropdown,
   },
   data() {
@@ -78,10 +57,8 @@ export default {
   props: {
     numItems: Number,
     numComplete: Number,
-    isSkipped: Boolean,
     title: String,
   },
-  emits: ["updateSkipped", "setAllDone", "loadDefaultList", "editDefaultList"],
   computed: {
     isComplete() {
       return this.numItems === this.numComplete;
@@ -92,24 +69,13 @@ export default {
     },
   },
   methods: {
-    skipButtonClicked() {
-      this.$emit("updateSkipped", !this.isSkipped);
-    },
     markAllClicked() {
-      this.$emit("setAllDone", !this.isComplete);
-    },
-    loadDefaultClicked() {
-      this.$refs.menuDropdown.hideMenu();
-      this.$emit("loadDefaultList");
-    },
-    editDefaultClicked() {
-      this.$refs.menuDropdown.hideMenu();
-      this.$emit("editDefaultList");
+      console.log("TODO");
     },
   },
   mounted() {
-    // this.persistentOptions = !window.matchMedia("(pointer: fine)").matches;
-    this.persistentOptions = true;
+    this.persistentOptions = !window.matchMedia("(pointer: fine)").matches;
+    // this.persistentOptions = true;
   },
 };
 </script>
@@ -140,9 +106,6 @@ export default {
   /* background-color: magenta; */
   transform: translate(0%, 40%);
 }
-.skipped-icon {
-  width: 20px;
-}
 .checkimg {
   width: 30px;
 }
@@ -165,11 +128,7 @@ export default {
 .completion-status-enter-active {
   transition: all 0.4s ease;
 }
-/* .completion-status-leave-active {
-  transition: all 0.4s ease;
-} */
-.completion-status-enter-from,
-.completion-status-leave-to {
+.completion-status-enter-from {
   transform: rotateZ(-360deg) scale(0);
 }
 </style>

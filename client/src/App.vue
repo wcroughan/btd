@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <btd-main-component v-if="authInfo.loggedIn" @logout="logout" />
+    <div v-else-if="authInfo.pending" />
     <btd-login v-else @setAuthToken="setAuthToken" />
   </div>
 </template>
@@ -24,6 +25,7 @@ export default {
       authInfo: {
         loggedIn: false,
         atkn: "",
+        pending: true,
       },
     };
   },
@@ -37,6 +39,7 @@ export default {
       this.authInfo.atkn = "";
       document.cookie = `atkn= ; expires=${new Date()}`;
       this.authInfo.loggedIn = false;
+      this.authInfo.pending = false;
     },
     setAuthToken(tknInfo) {
       if (tknInfo.loggedIn) {
@@ -53,6 +56,7 @@ export default {
         // console.log("cookie: ", document.cookie);
       }
       this.authInfo.loggedIn = tknInfo.loggedIn;
+      this.authInfo.pending = false;
     },
   },
   created() {
@@ -68,11 +72,15 @@ export default {
           if (res.data.success && res.data.authenticated)
             this.authInfo.loggedIn = true;
           else this.authInfo.loggedIn = false;
+          this.authInfo.pending = false;
         });
         // console.log("found a token. authinfo", this.authInfo);
       } else {
         this.authInfo.loggedIn = false;
+        this.authInfo.pending = false;
       }
+    } else {
+      this.authInfo.pending = false;
     }
   },
   mounted() {

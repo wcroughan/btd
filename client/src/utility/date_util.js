@@ -29,9 +29,11 @@ module.exports = {
         const day = ret.getDay();
         const diff = ret.getDate() - day + (day == 0 ? -6 : 1);
         ret.setDate(diff);
+        // console.log("gm:", ret, day, diff)
         return ret;
     },
     plusOneWeek(date) {
+        // console.log("pow:", date)
         const ret = new Date(date);
         ret.setDate(ret.getDate() + 7);
         return ret;

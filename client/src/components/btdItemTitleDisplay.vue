@@ -1,10 +1,6 @@
 <template>
   <div class="item-title-display">
-    <span
-      class="title-display-text"
-      :class="{ strike: isDone }"
-      @mousedown="mousedown"
-    >
+    <span class="title-display-text" :class="{ strike: isDone }">
       &nbsp;&nbsp;{{ text }}&nbsp;&nbsp;
     </span>
   </div>
@@ -20,16 +16,6 @@ export default {
     text: String,
     isDone: Boolean,
   },
-  computed: {
-    itemTitleComponentType() {
-      return this.isDone ? "s" : "b";
-    },
-  },
-  methods: {
-    mousedown(e) {
-      e.preventDefault();
-    },
-  },
 };
 </script>
 
@@ -41,6 +27,7 @@ export default {
   max-width: 95%;
   padding-left: 1em;
   text-indent: -1em;
+  user-select: none;
 }
 /* .strike {
   text-decoration: line-through;

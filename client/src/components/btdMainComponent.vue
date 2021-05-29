@@ -7,13 +7,14 @@
     />
     <btd-loading-body v-if="lists === null" />
     <btd-no-lists-filler v-if="lists !== null && lists.length == 0" />
-    <btd-list
+    <btd-aggregated-list />
+    <!-- <btd-list
       v-for="(list, idx) in lists"
       :key="list.id"
       :list="list"
       @listUpdate="listUpdate(idx, $event)"
-    />
-    <btd-edit-default-modal ref="editDefaultModal" @editMade="refreshList" />
+    /> -->
+    <!-- <btd-edit-default-modal ref="editDefaultModal" @editMade="refreshList" /> -->
   </div>
 </template>
 
@@ -21,11 +22,12 @@
 import date_util from "../utility/date_util.js";
 import btdHeader from "./btdHeader.vue";
 import btdLoadingBody from "./btdLoadingBody.vue";
-import btdList from "./btdList.vue";
+// import btdList from "./btdList.vue";
 import api_util from "../utility/api_util.js";
 import btdNoListsFiller from "./btdNoListsFiller.vue";
-import btdEditDefaultModal from "./btdEditDefaultModal.vue";
+// import btdEditDefaultModal from "./btdEditDefaultModal.vue";
 import { provide, ref } from "vue";
+import btdAggregatedList from "./btdAggregatedList.vue";
 
 export default {
   name: "btdMainComponent",
@@ -33,8 +35,9 @@ export default {
     btdHeader,
     btdLoadingBody,
     btdNoListsFiller,
-    btdList,
-    btdEditDefaultModal,
+    // btdList,
+    // btdEditDefaultModal,
+    btdAggregatedList,
   },
   data() {
     return {

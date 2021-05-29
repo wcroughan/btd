@@ -39,7 +39,6 @@
               dayinfo[day.idstr].classes,
               day.type === 'week' ? 'week' : 'day',
             ]"
-            @click="dayClicked(day)"
           >
             {{ dayText(day) }}
           </div>
@@ -61,7 +60,6 @@ export default {
     initialDate: null,
   },
   inject: ["authToken"],
-  emits: ["dayChosen"],
   data() {
     return {
       datestr: "" + new Date(this.initialDate),
@@ -75,7 +73,6 @@ export default {
         month: "long",
         year: "numeric",
       };
-      //   return new Intl.DateTimeFormat("en-US", formatOptions).format(this.date);
       const d = new Date(this.datestr);
       d.setHours(0, 0, 0, 0);
       return new Intl.DateTimeFormat("en-US", formatOptions).format(d);
@@ -92,22 +89,16 @@ export default {
     },
     todayClicked() {
       this.datestr = "" + date_util.getToday();
-      this.$emit("dayChosen", new Date());
-    },
-    dayClicked(day) {
-      this.$emit("dayChosen", new Date(day.d));
     },
     lastMonthClicked() {
       const d = new Date(this.datestr);
       d.setMonth(d.getMonth() - 1);
       this.datestr = "" + d;
-      //   this.setDaysTableForDate();
     },
     nextMonthClicked() {
       const d = new Date(this.datestr);
       d.setMonth(d.getMonth() + 1);
       this.datestr = "" + d;
-      //   this.setDaysTableForDate();
     },
     setDaysTableForDate() {
       const d = new Date(this.datestr);
@@ -160,9 +151,6 @@ export default {
         });
       });
       //   console.log(this.dayinfo);
-    },
-    dstr(d) {
-      return "" + d;
     },
     dayTableObject(d, type) {
       return {

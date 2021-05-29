@@ -4,35 +4,26 @@
     @mouseenter="mouseIn = true"
     @mouseleave="mouseIn = false"
   >
-    <label :for="key">
+    <label :for="item.id">
       <input
         class="ogcheck"
-        :id="key"
+        :id="item.id"
         type="checkbox"
         @change="handleCheckbox($event)"
-        :checked="isDone"
+        :checked="item.isDone"
       />
       <div class="ogreplace">
         <div class="checkmark" />
       </div>
 
-      <component
-        class="todo-item-title"
-        ref="itemText"
-        :is="itemTitleComponentType"
-        @click="textClicked"
-        :text="text"
-        :isDone="isDone"
-        @doneEditing="doneEditing"
-        @canceledEditing="canceledEditing"
-      />
+      <btd-item-title-display :text="item.text" :isDone="item.isDone" />
     </label>
     <btd-dropdown
       menuAlign="right"
       class="menu-button"
       ref="itemOptionsMenu"
       :closeOnAnyClick="true"
-      v-show="(persistentOptions || mouseIn) && !isEditing"
+      v-show="persistentOptions || mouseIn"
     >
       <template v-slot:button>
         <img src="../assets/ellipsis.png" class="menu-icon" />
@@ -45,28 +36,7 @@
           <button @click="deleteButtonClicked">delete</button>
         </section>
         <section class="dropdown-option">
-          <button @click="moveToTomorrowClicked">
-            move to
-            {{
-              type === "day"
-                ? "tomorrow"
-                : type === "week"
-                ? "next week"
-                : "next list"
-            }}
-          </button>
-        </section>
-        <section class="dropdown-option">
-          <button @click="moveToYesterdayClicked">
-            move to
-            {{
-              type === "day"
-                ? "yesterday"
-                : type === "week"
-                ? "last week"
-                : "previous list"
-            }}
-          </button>
+          <button @click="snoozeButtonClicked">Snooze</button>
         </section>
       </template>
     </btd-dropdown>
@@ -74,81 +44,51 @@
 </template>
 
 <script>
-import btdOptionsButton from "./btdOptionsButton.vue";
 // import date_util from "./../utility/date_util.js";
-// import { nextTick } from "vue";
 import btdItemTitleDisplay from "./btdItemTitleDisplay.vue";
-import btdItemTitleEdit from "./btdItemTitleEdit.vue";
 import { nextTick } from "@vue/runtime-core";
 import BtdDropdown from "./btdDropdown.vue";
+import { mapMutations } from "vuex";
 
 export default {
   name: "btdListItem",
   components: {
-    btdOptionsButton,
     btdItemTitleDisplay,
-    btdItemTitleEdit,
     BtdDropdown,
   },
   data() {
     return {
       mouseIn: false,
-      isEditing: false,
       persistentOptions: false,
     };
   },
   props: {
-    text: String,
-    isDone: Boolean,
     type: String,
-    key: String,
-  },
-  emits: ["itemDoneUpdate", "itemDeleted", "itemMoved", "itemEdited"],
-  computed: {
-    itemTitleComponentType() {
-      if (this.isEditing) return "btd-item-title-edit";
-      else return "btd-item-title-display";
-    },
+    item: Object,
   },
   methods: {
+    ...mapMutations(["updateItem", "deleteItem", "addItem"]),
     handleCheckbox(event) {
-      this.$emit("itemDoneUpdate", event.target.checked);
+      const i = { ...this.item };
+      i.isDone = event.target.checked;
+      if (i.isDone) {
+        i.doneDate = new Date();
+      } else {
+        delete i.doneDate;
+      }
+      this.updateItem(i);
     },
-    // textClicked() {
-    //   if (!this.isEditing) this.$emit("itemDoneUpdate", !this.isDone);
-    // },
     deleteButtonClicked() {
       //   this.$refs.itemOptionsMenu.hideMenu(false);
       nextTick(() => {
-        this.$emit("itemDeleted");
+        this.deleteItem(this.item.id);
       });
     },
-    moveToYesterdayClicked() {
-      //   this.$refs.itemOptionsMenu.hideMenu(false);
-      nextTick(() => {
-        this.$emit("itemMoved", -1);
-      });
-    },
-    moveToTomorrowClicked() {
-      //   this.$refs.itemOptionsMenu.hideMenu(false);
-      nextTick(() => {
-        this.$emit("itemMoved", 1);
-      });
+    snoozeButtonClicked() {
+      console.log("TODO");
     },
     editButtonClicked() {
-      this.isEditing = true;
-      //   console.log(this.$refs.itemText);
-      //   this.$refs.itemOptionsMenu.hideMenu();
-      // nextTick(() => {
-      //   this.$refs.itemText.focusInput();
-      // });
-    },
-    doneEditing(newname) {
-      this.isEditing = false;
-      this.$emit("itemEdited", newname);
-    },
-    canceledEditing() {
-      this.isEditing = false;
+      console.log("TODO");
     },
   },
   mounted() {

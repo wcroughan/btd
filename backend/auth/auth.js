@@ -8,7 +8,7 @@ module.exports = function (db) {
         console.log("creating new user")
         newUserDetail = { email, hpw };
         const user = await db.collection("users").insertOne(newUserDetail);
-        console.log(user);
+        // console.log(user);
 
         const dayentry = {
             id: "day_default",
