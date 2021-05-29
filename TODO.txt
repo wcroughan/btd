@@ -4,6 +4,7 @@ Next shipped update:
     - Items aggregated with smallish headings like "Due Today:" or "Due next week:"
     - instead of all these moves, just have a snooze option with a modal
     - Remaining todo:
+        - move all the store stuff into the two modules. Move cookie checking logic into a method in there also, can just call that from App
         -front end:
             -header: add item button in center, calendar doens't need emit, other menu options for viewing older items, and maybe a browser of repeating items?
             - all the auth token stuff should use store instead

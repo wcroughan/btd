@@ -60,6 +60,17 @@ export default createStore({
         },
         setPastItems(state, items) {
             state.pastItems = items;
+        },
+        setAuthInfo(state, info) {
+            state.authInfo = info;
+        },
+        logout(state, info) {
+            state.authInfo = info;
+            //   this.authInfo.authTkn = "";
+            //   document.cookie = `authTkn= ; expires=${new Date()}`;
+            //   this.authInfo.loggedIn = false;
+            //   this.authInfo.pending = false;
+
         }
     },
     actions: {
@@ -73,6 +84,15 @@ export default createStore({
                 commit('setPastItems', items)
             })
         },
+        checkAuthToken({ commit }) {
+            api_util.checkAuthToken().then((r) =>
+                commit('setAuthInfo', r)
+
+                // document.cookie = `authTkn=${
+                //   this.authInfo.authTkn
+                // } ; expires=${tknInfo.expireDate.toUTCString()}`;
+            )
+        }
     },
     strict: debug,
     plugins: debug ? [createLogger()] : []

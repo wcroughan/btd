@@ -12,6 +12,7 @@ import axios from "axios";
 import BtdLogin from "./components/btdLogin.vue";
 import { computed } from "vue";
 import api_util from "./utility/api_util";
+import { mapActions, mapMutations, mapState } from "vuex";
 
 export default {
   name: "App",
@@ -20,73 +21,46 @@ export default {
     BtdLogin,
   },
   data() {
-    return {
-      msg: "Loading",
-      authInfo: {
-        loggedIn: false,
-        atkn: "",
-        pending: true,
-      },
-    };
+    return {};
+  },
+  computed: {
+    ...mapState(["authInfo"]),
   },
   provide() {
     return {
-      authToken: computed(() => this.authInfo.atkn),
+      authToken: computed(() => this.authInfo.authTkn),
     };
   },
   methods: {
-    logout() {
-      this.authInfo.atkn = "";
-      document.cookie = `atkn= ; expires=${new Date()}`;
-      this.authInfo.loggedIn = false;
-      this.authInfo.pending = false;
-    },
-    setAuthToken(tknInfo) {
-      if (tknInfo.loggedIn) {
-        this.authInfo.atkn = tknInfo.auth_token;
-        // console.log("setting authtoken", this.authInfo.atkn);
-        // console.log(tknInfo.expireDate);
-        document.cookie = `atkn=${
-          this.authInfo.atkn
-        } ; expires=${tknInfo.expireDate.toUTCString()}`;
-        // console.log("cookie: ", document.cookie);
-      } else {
-        this.authInfo.atkn = "";
-        document.cookie = `atkn= ; expires=`;
-        // console.log("cookie: ", document.cookie);
-      }
-      this.authInfo.loggedIn = tknInfo.loggedIn;
-      this.authInfo.pending = false;
-    },
+    ...mapActions(["checkAuthToken"]),
+    ...mapMutations(["setAuthInfo"]),
   },
   created() {
-    // console.log("cookie: ", document.cookie);
-    if (document.cookie.split(";").some((c) => c.trim().startsWith("atkn="))) {
-      this.authInfo.atkn = document.cookie
+    if (
+      document.cookie.split(";").some((c) => c.trim().startsWith("authTkn="))
+    ) {
+      const authTkn = document.cookie
         .split(";")
-        .find((row) => row.trim().startsWith("atkn="))
+        .find((row) => row.trim().startsWith("authTkn="))
         .split("=")[1];
-      if (this.authInfo.atkn.length > 0) {
-        // console.log(this.authInfo.atkn.length, this.authInfo.atkn);
-        api_util.checkAuthToken(this.authInfo.atkn, (res) => {
-          if (res.data.success && res.data.authenticated)
-            this.authInfo.loggedIn = true;
-          else this.authInfo.loggedIn = false;
-          this.authInfo.pending = false;
-        });
-        // console.log("found a token. authinfo", this.authInfo);
+      if (authTkn.length > 0) {
+        this.checkAuthToken(authTkn);
       } else {
-        this.authInfo.loggedIn = false;
-        this.authInfo.pending = false;
+        const info = {
+          loggedIn: false,
+          authTkn: "",
+          pending: false,
+        };
+        this.setAuthInfo(info);
       }
     } else {
-      this.authInfo.pending = false;
+      const info = {
+        loggedIn: false,
+        authTkn: "",
+        pending: false,
+      };
+      this.setAuthInfo(info);
     }
-  },
-  mounted() {
-    axios.get("/api/v1/test").then((res) => {
-      this.msg = res.data.body;
-    });
   },
 };
 </script>

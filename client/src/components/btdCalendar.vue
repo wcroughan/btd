@@ -51,6 +51,7 @@
 <script>
 import api_util from "../utility/api_util";
 import date_util from "../utility/date_util";
+import { mapState } from "vuex";
 const _ = require("underscore");
 
 export default {
@@ -59,7 +60,6 @@ export default {
   props: {
     initialDate: null,
   },
-  inject: ["authToken"],
   data() {
     return {
       datestr: "" + new Date(this.initialDate),
@@ -68,6 +68,9 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      authToken: (state) => state.authInfo.authTkn,
+    }),
     title() {
       const formatOptions = {
         month: "long",
@@ -133,7 +136,7 @@ export default {
         return days;
       });
       this.daystable.flat().forEach((v) => this.fillDateInfo(v));
-      api_util.getDaysInfo(this.authToken.value, d1, d2, (info) => {
+      api_util.getDaysInfo(this.authToken, d1, d2, (info) => {
         info.data.forEach((v) => {
           //   console.log(
           //     "changing dayinfo id",
