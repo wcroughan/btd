@@ -69,8 +69,8 @@
 </template>
 
 <script>
-import { mapActions, mapMutations, mapState } from 'vuex';
-import misc_util from '../utility/misc_util';
+import { mapActions, mapMutations, mapState } from "vuex";
+import misc_util from "../utility/misc_util";
 
 export default {
   name: "btdLogin",
@@ -84,53 +84,53 @@ export default {
     };
   },
   computed: {
-    ...mapState(["showWarning", "warning"])
+    ...mapState("auth", ["showWarning", "warning"]),
   },
   methods: {
-      ...mapMutations(["setWarning"]),
-      ...mapActions(["createUser", "login"]),
+    ...mapMutations("auth", ["setWarning"]),
+    ...mapActions("auth", ["createUser", "login"]),
     goButton() {
       this.addingAccount ? this.localCreateAccount() : this.localLogin();
     },
     async localCreateAccount() {
       if (this.username.length === 0) {
-          this.setWarning({
-            warning = "missing username",
-            showWarning = true,
-          })
+        this.setWarning({
+          warning: "missing username",
+          showWarning: true,
+        });
         return;
       }
       if (this.cpwd !== this.pwd) {
-          this.setWarning({
-            warning = "passwords don't match",
-            showWarning = true,
-          })
+        this.setWarning({
+          warning: "passwords don't match",
+          showWarning: true,
+        });
         return;
       }
       const hpw = await misc_util.getHash(this.pwd);
       //   console.log("creating account with ", this.username, hpw);
       const payload = {
-          username: this.username.toLowerCase(),
-          hpw,
-        stayin: this.stayin
-      }
-    this.createUser(payload);
+        username: this.username.toLowerCase(),
+        hpw,
+        stayin: this.stayin,
+      };
+      this.createUser(payload);
     },
     async localLogin() {
       if (this.username.length === 0) {
-          this.setWarning({
-            warning = "missing username",
-            showWarning = true,
-          })
+        this.setWarning({
+          warning: "missing username",
+          showWarning: true,
+        });
         return;
       }
       const hpw = await misc_util.getHash(this.pwd);
       const payload = {
-          username: this.username.toLowerCase(),
-          hpw,
-        stayin: this.stayin
-      }
-    this.login(payload);
+        username: this.username.toLowerCase(),
+        hpw,
+        stayin: this.stayin,
+      };
+      this.login(payload);
     },
   },
   mounted() {

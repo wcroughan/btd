@@ -1,11 +1,10 @@
-import { createStore, createLogger } from 'vuex'
-import date_util from "../utility/date_util.js"
-import misc_util from "../utility/misc_util.js"
+// import { createStore, createLogger } from 'vuex'
 import api_util from "../utility/api_util.js"
+// const api_util = require("../utility/api_util")
 
-const debug = process.env.NODE_ENV !== 'production'
+// const debug = process.env.NODE_ENV !== 'production'
 
-export default createStore({
+export default {
     state() {
         return {
             authInfo: {
@@ -25,7 +24,7 @@ export default createStore({
         setAuthInfo(state, info) {
             state.authInfo = info;
         },
-        logout(state, info) {
+        logout(state) {
             state.authInfo = {
                 loggedIn: false,
                 authTkn: "",
@@ -40,6 +39,7 @@ export default createStore({
     },
     actions: {
         tryCookieLogin({ commit }) {
+            console.log("checking cookie:", document.cookie)
             if (
                 document.cookie.split(";").some((c) => c.trim().startsWith("authTkn="))
             ) {
@@ -58,13 +58,16 @@ export default createStore({
                             }
                             commit('setAuthInfo', info);
                         } else {
+                            console.log("checked but server said no")
                             commit('logout');
                         }
                     });
                 } else {
+                    console.log("blank auth token")
                     commit('logout')
                 }
             } else {
+                console.log("no saved auth info")
                 commit('logout')
             }
         },
@@ -92,9 +95,11 @@ export default createStore({
             })
         },
         login({ commit }, payload) {
+            console.log("action login with payload", payload)
+            // console.log(api_util, api_util.login)
             api_util.login(payload.username, payload.hpw, (res) => {
+                console.log(res.data);
                 if (res.data.success) {
-                    // console.log(res.data);
                     let expireDate = new Date();
                     if (payload.stayin) expireDate = new Date(res.data.expireDate);
                     const info = {
@@ -114,6 +119,7 @@ export default createStore({
             })
         }
     },
-    strict: debug,
-    plugins: debug ? [createLogger()] : []
-})
+    // strict: debug,
+    // plugins: debug ? [createLogger()] : []
+    namespaced: true
+}

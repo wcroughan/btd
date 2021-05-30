@@ -1,9 +1,9 @@
-import { createStore, createLogger } from 'vuex'
-import date_util from "../utility/date_util.js"
+// import { createStore, createLogger } from 'vuex'
 import misc_util from "../utility/misc_util.js"
 import api_util from "../utility/api_util.js"
+import date_util from "../utility/date_util.js"
 
-const debug = process.env.NODE_ENV !== 'production'
+// const debug = process.env.NODE_ENV !== 'production'
 
 const exampleTodoItems = [{
     id: 0,
@@ -19,7 +19,7 @@ const exampleTodoItems = [{
 const examplePastItems = undefined;
 
 
-export default createStore({
+export default {
     state() {
         return {
             loadingItems: true,
@@ -37,6 +37,13 @@ export default createStore({
         },
         defaultItem(state) {
             //TODO should return an item with id already set to non-conflicting value
+            const item = {
+                text: "",
+                isDone: false,
+                dueDate: date_util.getTomorrow()
+            }
+            item.id = misc_util.getUniqueItemId(state.todoItems.concat(state.pastItems))
+            return item
         }
     },
     mutations: {
@@ -72,6 +79,7 @@ export default createStore({
             })
         },
     },
-    strict: debug,
-    plugins: debug ? [createLogger()] : []
-})
+    // strict: debug,
+    // plugins: debug ? [createLogger()] : []
+    namespaced: true
+}

@@ -13,7 +13,6 @@ Object.defineProperty(global, '__stack', {
         return stack;
     }
 });
-
 Object.defineProperty(global, '__line', {
     get: function () {
         return __stack[1].getLineNumber();

@@ -4,6 +4,7 @@ Next shipped update:
     - Items aggregated with smallish headings like "Due Today:" or "Due next week:"
     - instead of all these moves, just have a snooze option with a modal
     - Remaining todo:
+        -FIRST authmodule can't import api_util because circular dependency because apiutil accesses authtoken. I guess have to pass in auth token again each time?
         -front end:
             -header: Add menu items on left to view previous items and view repeating items
             -header: Implement quick add and show full add modal
@@ -15,6 +16,7 @@ Next shipped update:
         -backend
             -new db for items
             -api_util calls
+                -make sure to add a check for overdue field so can search later
             -aggregation logic
 - refresh button. Also auto refreshes every (idk, 5 mins?)
 - bring back animations on move

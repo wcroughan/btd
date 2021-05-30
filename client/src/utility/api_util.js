@@ -98,10 +98,12 @@ module.exports = {
         const req = api_root + "createUser" + `?${params}`;
         axios.get(req).then(callback);
     },
-    login(email, hpw, callback) {
+    loginRequestToServer(email, hpw, callback) {
+        console.log("api util loggin in with ", email, hpw, callback)
         const reqParamObj = { email, hpw };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "login" + `?${params}`;
+        console.log("axios sending ", req)
         axios.get(req).then(callback);
     },
     async checkAuthToken(tkn, callback) {

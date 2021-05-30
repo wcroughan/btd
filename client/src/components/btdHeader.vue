@@ -40,7 +40,6 @@
 </template>
 
 <script>
-import BtdDayDisplay from "./btdDayDisplay.vue";
 import BtdDropdown from "./btdDropdown.vue";
 import BtdStreakInfo from "./btdStreakInfo.vue";
 import { mapGetters, mapMutations } from "vuex";
@@ -66,7 +65,6 @@ export default {
     },
   },
   components: {
-    BtdDayDisplay,
     BtdStreakInfo,
     BtdDropdown,
   },
@@ -119,5 +117,23 @@ export default {
 }
 .menu-icon {
   height: 40px;
+}
+
+.add-item-icon-container {
+  position: relative;
+}
+.add-item-vert {
+  position: absolute;
+  left: calc(50% - 2px);
+  width: 4px;
+  top: 2px;
+  height: calc(100% - 4px);
+}
+.add-item-horiz {
+  position: absolute;
+  top: calc(50% - 2px);
+  height: 4px;
+  left: 2px;
+  width: calc(100% - 4px);
 }
 </style>
