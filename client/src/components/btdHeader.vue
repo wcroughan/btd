@@ -7,48 +7,68 @@
         </template>
         <template v-slot:content>
           <section class="dropdown-option">
-            <button @click="$emit('logout')">Sign out</button>
+            <button @click="logout">Sign out</button>
           </section>
         </template>
       </btd-dropdown>
     </div>
-    <btd-day-display :date="date" @dayChosen="dayChosen($event)" />
-    <btd-streak-info :date="date" @dayChosen="dayChosen($event)" />
+    <!-- <btd-day-display /> -->
+    <btd-streak-info />
+    <div class="add-item">
+      <btd-dropdown menuAlign="right" class="add-item-button">
+        <template v-slot:button>
+          <div class="add-item-icon-container">
+            <div class="add-item-horiz" />
+            <div class="add-item-vert" />
+          </div>
+          <!-- <img src="../assets/menu.png" class="add-item-icon" /> -->
+        </template>
+        <template v-slot:content>
+          <section class="dropdown-option">
+            <div class="quickadd-container">
+              <input type="text" v-model="quickAddText" />
+              <div class="quickadd-button-container">
+                <button @click="quickAddMoreOptions">More Options</button>
+                <button @click="quickAddDone">Add</button>
+              </div>
+            </div>
+          </section>
+        </template>
+      </btd-dropdown>
+    </div>
   </div>
 </template>
 
 <script>
-import date_util from "../utility/date_util";
 import BtdDayDisplay from "./btdDayDisplay.vue";
 import BtdDropdown from "./btdDropdown.vue";
 import BtdStreakInfo from "./btdStreakInfo.vue";
-// import date_util from "./../utility/date_util.js";
+import { mapGetters, mapMutations } from "vuex";
 
 export default {
   name: "btdHeader",
   data() {
     return {
-      showMenu: false,
+      quickAddText: "",
     };
+  },
+  computed: {
+    ...mapGetters(["defaultItem"]),
+  },
+  methods: {
+    ...mapMutations(["logout"]),
+    quickAddMoreOptions() {
+      //TODO show modal here
+    },
+    quickAddDone() {
+      const item = this.defaultItem;
+      console.log(item);
+    },
   },
   components: {
     BtdDayDisplay,
     BtdStreakInfo,
     BtdDropdown,
-  },
-  props: {
-    scrollInfo: null,
-    date: Date,
-  },
-  emits: ["dayChosen", "logout"],
-  methods: {
-    dayChosen(date) {
-      //   console.log("header got date", date);
-      this.$emit("dayChosen", date);
-    },
-    todayClicked() {
-      this.dayChosen(date_util.getToday());
-    },
   },
 };
 </script>

@@ -1,10 +1,8 @@
 <template>
-  <div class="btd-no-lists-filler">No lists</div>
+  <div class="btd-no-lists-filler">No items</div>
 </template>
 
 <script>
-// import date_util from "./../utility/date_util.js";
-
 export default {
   name: "btdNoListsFiller",
   data() {

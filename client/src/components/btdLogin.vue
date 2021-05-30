@@ -69,85 +69,68 @@
 </template>
 
 <script>
-import api_util from "../utility/api_util";
+import { mapActions, mapMutations, mapState } from 'vuex';
+import misc_util from '../utility/misc_util';
 
 export default {
   name: "btdLogin",
-  components: {},
-  emits: ["setAuthToken"],
   data() {
     return {
       username: "",
       pwd: "",
       cpwd: "",
       addingAccount: false,
-      warning: "",
-      showWarning: false,
       stayin: false,
     };
   },
+  computed: {
+    ...mapState(["showWarning", "warning"])
+  },
   methods: {
+      ...mapMutations(["setWarning"]),
+      ...mapActions(["createUser", "login"]),
     goButton() {
-      this.addingAccount ? this.createAccount() : this.login();
+      this.addingAccount ? this.localCreateAccount() : this.localLogin();
     },
-    async createAccount() {
+    async localCreateAccount() {
       if (this.username.length === 0) {
-        this.warning = "missing username";
-        this.showWarning = true;
+          this.setWarning({
+            warning = "missing username",
+            showWarning = true,
+          })
         return;
       }
       if (this.cpwd !== this.pwd) {
-        this.warning = "passwords don't match";
-        this.showWarning = true;
+          this.setWarning({
+            warning = "passwords don't match",
+            showWarning = true,
+          })
         return;
       }
-      const hpw = await api_util.getHash(this.pwd);
+      const hpw = await misc_util.getHash(this.pwd);
       //   console.log("creating account with ", this.username, hpw);
-      api_util.createAccount(
-        this.username.toLowerCase(),
-        hpw,
-        this.createAccountCallback
-      );
-    },
-    createAccountCallback(res) {
-      //   console.log(res.data);
-      if (res.data.success) {
-        // console.log("success, logggin in");
-        this.login();
-      } else if (res.data.error !== undefined) {
-        console.log(res.data);
-        this.warning = res.data.error;
-        this.showWarning = true;
-      } else {
-        this.warning = "Unknown error, failed to create account";
-        this.showWarning = true;
+      const payload = {
+          username: this.username.toLowerCase(),
+          hpw,
+        stayin: this.stayin
       }
+    this.createUser(payload);
     },
-    async login() {
+    async localLogin() {
       if (this.username.length === 0) {
-        this.warning = "missing username";
-        this.showWarning = true;
+          this.setWarning({
+            warning = "missing username",
+            showWarning = true,
+          })
         return;
       }
-      const hpw = await api_util.getHash(this.pwd);
-      //   console.log("logging in with ", this.username, hpw);
-      api_util.login(this.username.toLowerCase(), hpw, this.loginCallback);
-    },
-    loginCallback(res) {
-      //   console.log(res);
-      if (res.data.success) {
-        // console.log(res.data);
-        let expireDate = new Date();
-        if (this.stayin) expireDate = new Date(res.data.expireDate);
-        this.$emit("setAuthToken", {
-          loggedIn: true,
-          auth_token: res.data.auth_token,
-          expireDate,
-        });
-      } else {
-        this.warning = "username or password incorrect";
-        this.showWarning = true;
+      const hpw = await misc_util.getHash(this.pwd);
+      const payload = {
+          username: this.username.toLowerCase(),
+          hpw,
+        stayin: this.stayin
       }
+    this.login(payload);
     },
   },
   mounted() {

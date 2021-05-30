@@ -1,11 +1,47 @@
 const axios = require('axios');
 const api_root = "/api/v1/";
 const date_util = require('./date_util');
-const bson = require('bson')
+const store = require('../store/index.js')
 
 
 module.exports = {
-    getListsForDate(auth_token, date, callback) {
+    getItems(callback) {
+        const auth_token = store.default.getters.token;
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "items" + `?${params}`;
+        // console.log(req);
+        axios.get(req).then((res) => {
+            callback(res);
+        });
+    },
+    getPastItems(callback) {
+        const auth_token = store.default.getters.token;
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "pastitems" + `?${params}`;
+        // console.log(req);
+        axios.get(req).then((res) => {
+            callback(res);
+        });
+    },
+    pushItemToServer(item) {
+        const auth_token = store.default.getters.token;
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "item/" + item.id + `?${params}`;
+        // console.log(req);
+        axios.put(req, item);
+    },
+    deleteItem(id) {
+        const auth_token = store.default.getters.token;
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "item/" + id + `?${params}`;
+        axios.delete(req);
+    },
+    getListsForDate(date, callback) {
+        const auth_token = store.default.getters.token;
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "list/" + date_util.apiDateStr(date) + `?${params}`;
@@ -14,14 +50,16 @@ module.exports = {
             callback(res);
         });
     },
-    pushListToServer(auth_token, list) {
+    pushListToServer(list) {
+        const auth_token = store.default.getters.token;
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "list/" + list.id + `?${params}`;
         // console.log(req);
         axios.put(req, list);
     },
-    getDefaultList(auth_token, id, callback) {
+    getDefaultList(id, callback) {
+        const auth_token = store.default.getters.token;
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "list/default/" + id + `?${params}`;
@@ -29,7 +67,8 @@ module.exports = {
             callback(res);
         });
     },
-    deleteListFromServer(auth_token, id) {
+    deleteListFromServer(id) {
+        const auth_token = store.default.getters.token;
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "list/" + id + `?${params}`;
@@ -45,7 +84,8 @@ module.exports = {
         // console.log(id, moveAmt, retDate);
         return type + "_" + date_util.apiDateStr(retDate);
     },
-    addItemToList(auth_token, item, id) {
+    addItemToList(item, id) {
+        const auth_token = store.default.getters.token;
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "list/append_item/" + id + `?${params}`;
@@ -64,16 +104,6 @@ module.exports = {
         const req = api_root + "login" + `?${params}`;
         axios.get(req).then(callback);
     },
-    async getHash(str) {
-        const sdat = new TextEncoder().encode(str);
-        const hs = await crypto.subtle.digest("SHA-256", sdat);
-        // console.log(hs)
-        return bson.Binary(hs)
-        //Above code commented because I need a paid heroku to get https which is the only way crypto subtle will work.
-        //And in general sounds like there's more concerns here so in long run would be better just to use an outside library like 0auth
-
-        // return str;
-    },
     async checkAuthToken(tkn, callback) {
         const reqParamObj = { tkn };
         const params = new URLSearchParams(reqParamObj);
@@ -86,7 +116,8 @@ module.exports = {
             return ret;
         }
     },
-    async getDaysInfo(auth_token, d1, d2, callback) {
+    async getDaysInfo(d1, d2, callback) {
+        const auth_token = store.default.getters.token;
         const reqParamObj = { auth_token, d1: date_util.apiDateStr(d1), d2: date_util.apiDateStr(d2) };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "daysinfo/" + `?${params}`;
@@ -100,7 +131,8 @@ module.exports = {
             return ret;
         }
     },
-    async getStreakLength(auth_token, date, callback) {
+    async getStreakLength(date, callback) {
+        const auth_token = store.default.getters.token;
         const reqParamObj = { auth_token, date: date_util.apiDateStr(date) };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "streaklength/" + `?${params}`;
