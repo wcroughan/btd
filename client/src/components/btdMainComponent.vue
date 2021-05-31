@@ -24,8 +24,8 @@ export default {
     btdAggregatedList,
   },
   computed: {
-    ...mapState(["loadingItems"]),
-    ...mapGetters(["numTodoItems"]),
+    ...mapState("todolist", ["loadingItems"]),
+    ...mapGetters("todolist", ["numTodoItems"]),
   },
   setup() {
     const streakUpdateFlag = ref(0);
@@ -38,7 +38,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["refreshItems"]),
+    ...mapActions("todolist", ["refreshItems"]),
   },
   mounted() {
     this.refreshItems();

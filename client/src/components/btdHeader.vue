@@ -12,8 +12,7 @@
         </template>
       </btd-dropdown>
     </div>
-    <!-- <btd-day-display /> -->
-    <btd-streak-info />
+    <!-- <btd-streak-info /> -->
     <div class="add-item">
       <btd-dropdown menuAlign="right" class="add-item-button">
         <template v-slot:button>
@@ -41,7 +40,7 @@
 
 <script>
 import BtdDropdown from "./btdDropdown.vue";
-import BtdStreakInfo from "./btdStreakInfo.vue";
+// import BtdStreakInfo from "./btdStreakInfo.vue";
 import { mapGetters, mapMutations } from "vuex";
 
 export default {
@@ -65,7 +64,7 @@ export default {
     },
   },
   components: {
-    BtdStreakInfo,
+    // BtdStreakInfo,
     BtdDropdown,
   },
 };

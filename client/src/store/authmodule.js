@@ -1,8 +1,4 @@
-// import { createStore, createLogger } from 'vuex'
 import api_util from "../utility/api_util.js"
-// const api_util = require("../utility/api_util")
-
-// const debug = process.env.NODE_ENV !== 'production'
 
 export default {
     state() {
@@ -39,7 +35,7 @@ export default {
     },
     actions: {
         tryCookieLogin({ commit }) {
-            console.log("checking cookie:", document.cookie)
+            // console.log("checking cookie:", document.cookie)
             if (
                 document.cookie.split(";").some((c) => c.trim().startsWith("authTkn="))
             ) {
@@ -58,16 +54,16 @@ export default {
                             }
                             commit('setAuthInfo', info);
                         } else {
-                            console.log("checked but server said no")
+                            // console.log("checked but server said no")
                             commit('logout');
                         }
                     });
                 } else {
-                    console.log("blank auth token")
+                    // console.log("blank auth token")
                     commit('logout')
                 }
             } else {
-                console.log("no saved auth info")
+                // console.log("no saved auth info")
                 commit('logout')
             }
         },
@@ -95,7 +91,7 @@ export default {
             })
         },
         login({ commit }, payload) {
-            console.log("action login with payload", payload)
+            // console.log("action login with payload", payload)
             // console.log(api_util, api_util.login)
             api_util.login(payload.username, payload.hpw, (res) => {
                 console.log(res.data);
@@ -104,7 +100,7 @@ export default {
                     if (payload.stayin) expireDate = new Date(res.data.expireDate);
                     const info = {
                         loggedIn: true,
-                        auth_token: res.data.auth_token,
+                        authTkn: res.data.auth_token,
                         pending: false,
                         expireDate,
                     }
@@ -119,7 +115,5 @@ export default {
             })
         }
     },
-    // strict: debug,
-    // plugins: debug ? [createLogger()] : []
     namespaced: true
 }

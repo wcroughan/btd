@@ -49,16 +49,16 @@ export default {
     mutations: {
         updateItem(state, item) {
             state.todoItems[state.todoItems.findIndex(i => i.id === item.id)] = { ...item };
-            api_util.pushItemToServer(item);
+            api_util.pushItemToServer(state.token, item);
         },
         deleteItem(state, id) {
             state.todoItems.splice(state.todoItems.findIndex(i => i.id === id), 1);
-            api_util.deleteItem(id);
+            api_util.deleteItem(state.token, id);
         },
         addItem(state, item) {
             item.id = misc_util.getUniqueItemId(state.todoItems)
             state.todoItems.push(item)
-            api_util.pushItemToServer(item);
+            api_util.pushItemToServer(state.token, item);
         },
         setItems(state, items) {
             state.todoItems = items;
@@ -68,18 +68,18 @@ export default {
         },
     },
     actions: {
-        refreshItems({ commit }) {
-            api_util.getItems().then((items) => {
+        refreshItems({ rootState, commit }) {
+            console.log(rootState, rootState.auth)
+            api_util.getItems(rootState.auth.authInfo.authTkn).then((items) => {
+                console.log("got items", items)
                 commit('setItems', items)
             })
         },
-        refreshPastItems({ commit }) {
-            api_util.getPastItems().then((items) => {
+        refreshPastItems({ rootState, commit }) {
+            api_util.getPastItems(rootState.auth.authInfo.authTkn).then((items) => {
                 commit('setPastItems', items)
             })
         },
     },
-    // strict: debug,
-    // plugins: debug ? [createLogger()] : []
     namespaced: true
 }

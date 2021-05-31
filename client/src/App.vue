@@ -10,7 +10,7 @@
 import btdMainComponent from "./components/btdMainComponent.vue";
 import BtdLogin from "./components/btdLogin.vue";
 import { computed } from "vue";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapMutations, mapState } from "vuex";
 
 export default {
   name: "App",
@@ -30,6 +30,7 @@ export default {
     };
   },
   methods: {
+    ...mapMutations("auth", ["logout"]),
     ...mapActions("auth", ["tryCookieLogin"]),
   },
   created() {
