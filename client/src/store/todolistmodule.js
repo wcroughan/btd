@@ -55,13 +55,11 @@ export default {
         }
     },
     mutations: {
-        updateItem(state, item) {
-            state.todoItems[state.todoItems.findIndex(i => i.id === item.id)] = { ...item };
-            api_util.pushItemToServer(state.token, item);
+        updateItemLocal(state, item) {
+            state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
         },
-        deleteItem(state, id) {
-            state.todoItems.splice(state.todoItems.findIndex(i => i.id === id), 1);
-            api_util.deleteItem(state.token, id);
+        deleteItemLocal(state, id) {
+            state.todoItems.splice(state.todoItems.findIndex(i => i._id === id), 1);
         },
         addItemLocal(state, item) {
             state.todoItems.push(item)
@@ -78,7 +76,6 @@ export default {
     },
     actions: {
         refreshItems({ rootState, commit }) {
-            console.log(rootState, rootState.auth)
             api_util.getItems(rootState.auth.authInfo.authTkn).then((items) => {
                 console.log("got items", items.data)
                 console.log(typeof items.data.dueDate)
@@ -100,6 +97,18 @@ export default {
             }
             );
         },
+        updateItem({ commit, rootState }, item) {
+            api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then(() => {
+                commit('updateItemLocal', item)
+            });
+        },
+        deleteItem({ commit, rootState }, id) {
+            api_util.deleteItem(rootState.auth.authInfo.authTkn, id).then(() => {
+                commit('deleteItemLocal', id)
+            });
+
+
+        }
     },
     namespaced: true
 }

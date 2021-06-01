@@ -54,6 +54,7 @@ module.exports = function (db) {
         }
 
         if (req.method === "GET" && req.url.includes(api_root + "checktkn")) {
+            console.log("getting objectid for tkn", req.query.tkn)
             const authDetail = { _id: ObjectID(req.query.tkn) };
             const authres = await db.collection("auth").findOne(authDetail);
             if (authres === null || new Date() > authres.expireDate) {
@@ -125,7 +126,13 @@ module.exports = function (db) {
             res.send({ 'error': "Needs auth, but no auth_token present" });
             return;
         }
+        if (req.query.auth_token === "undefined") {
+            console.log("Received invalid auth_token")
+            res.send({ 'error': "Invalid auth token" });
+            return;
+        }
 
+        console.log("getting objectid for auth_token", req.query.auth_token)
         const authDetail = { _id: ObjectID(req.query.auth_token) };
         const authres = await db.collection("auth").findOne(authDetail);
         if (authres !== null) {

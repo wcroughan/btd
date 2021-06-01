@@ -3,10 +3,10 @@
     <btd-list-header
       :numItems="items.length + doneItems.length"
       :numComplete="doneItems.length"
-      :title="title"
+      :title="listInfo.title"
     />
     <div class="sectionbody">
-      <btd-list-item v-for="(item, idx) in items" :item="item" :key="idx" />
+      <btd-list-item v-for="item in items" :item="item" :key="item._id" />
     </div>
     <div class="sectionfooter" v-if="doneItems.length > 0">
       <transition name="doneitems-trans">
@@ -15,7 +15,7 @@
             class="done-item"
             v-for="item in doneItems"
             :item="item"
-            :key="item.id"
+            :key="item._id"
           />
         </div>
       </transition>
@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import btdListHeader from "./btdListHeader.vue";
 import btdListItem from "./btdListItem.vue";
 
@@ -42,9 +41,7 @@ export default {
     btdListItem,
   },
   props: {
-    start: Date,
-    end: Date,
-    title: String,
+    listInfo: Object,
   },
   data() {
     return {
@@ -52,30 +49,17 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      items(state) {
-        return state.todolist.todoItems.filter(
-          (i) =>
-            !i.isDone &&
-            i.dueDate.getTime() <= this.end.getTime() &&
-            i.dueDate.getTime() > this.start.getTime()
-        );
-        // return state.todoItems;
-      },
-      doneItems(state) {
-        return state.todolist.todoItems.filter(
-          (i) =>
-            i.isDone &&
-            i.doneDate.getTime() <= this.end.getTime() &&
-            i.doneDate.getTime() > this.start.getTime()
-        );
-      },
-    }),
+    items() {
+      return this.listInfo.getItems();
+    },
+    doneItems() {
+      const ret = this.listInfo.getDoneItems();
+      console.log("doneItems: ", ret);
+      return ret;
+    },
   },
   created() {
-    // setInterval(() => {
-    //   console.log(this.items);
-    // }, 1000);
+    // console.log("creating section with info: ", this.listInfo);
   },
 };
 </script>

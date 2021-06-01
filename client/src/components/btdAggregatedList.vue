@@ -1,11 +1,9 @@
 <template>
   <div class="agglist">
     <btd-aggregated-list-section
-      v-for="(tg, idx) in timeGroups"
-      :key="'tg_' + idx"
-      :start="tg[0]"
-      :end="tg[1]"
-      :title="tg[2]"
+      v-for="(li, idx) in filteredListInfos"
+      :listInfo="li"
+      :key="'li_' + idx"
     />
   </div>
 </template>
@@ -55,22 +53,53 @@ export default {
   },
   computed: {
     ...mapState({
-      timeGroups(state) {
-        return this.allPossibleGroups.filter((interval) => {
-          return state.todolist.todoItems.some((i) => {
-            if (i.isDone)
-              return (
-                i.doneDate.getTime() <= interval[1].getTime() &&
-                i.doneDate.getTime() > interval[0].getTime()
-              );
-            return (
-              i.dueDate.getTime() <= interval[1].getTime() &&
-              i.dueDate.getTime() > interval[0].getTime()
-            );
-          });
+      listInfos(state) {
+        const ret = this.allPossibleGroups.map((interval) => {
+          return {
+            getItems: () => {
+              return state.todolist.todoItems.filter((i) => {
+                return (
+                  !i.isDone &&
+                  i.dueDate.getTime() <= interval[1].getTime() &&
+                  i.dueDate.getTime() > interval[0].getTime()
+                );
+              });
+            },
+            getDoneItems: () => {
+              return state.todolist.todoItems.filter((i) => {
+                return (
+                  i.isDone &&
+                  i.dueDate.getTime() <= interval[1].getTime() &&
+                  i.dueDate.getTime() > interval[0].getTime()
+                );
+              });
+            },
+            title: interval[2],
+          };
         });
+        ret.push({
+          title: "Overdue",
+          getItems: () => {
+            const ret = state.todolist.todoItems.filter((i) => {
+              return !i.isDone && i.dueDate.getTime() <= new Date();
+            });
+            // console.log("overdue items returning: ", ret);
+            return ret;
+          },
+          getDoneItems: () => [],
+        });
+
+        // console.log("timegroups: ", ret);
+        return ret;
       },
     }),
+    filteredListInfos() {
+      const ret = this.listInfos.filter((li) => {
+        return li.getItems().length > 0 || li.getDoneItems().length > 0;
+      });
+      //   console.log("filtered lsit infos", ret);
+      return ret;
+    },
   },
   created() {
     // console.log(this.debugInfo);

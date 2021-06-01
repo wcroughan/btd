@@ -1,6 +1,7 @@
 const date_util = require('./../../client/src/utility/date_util.js');
 const _ = require('underscore')
 const misc_util = require('./../../client/src/utility/misc_util.js')
+var ObjectID = require('mongodb').ObjectID;
 
 Object.defineProperty(global, '__stack', {
     get: function () {
@@ -111,11 +112,12 @@ module.exports = function (db) {
             res.status(200).json(results)
         },
         async pushItemToServer(req, res, next) {
+            // console.log(__line, req.body)
             if (req.body._id !== undefined) {
                 //updating an existing item, just delete it first
                 const deldetail = {
                     userid: req.uid,
-                    _id: req.body._id
+                    _id: ObjectID(req.body._id)
                 }
                 const delresult = await db.collection("items").deleteOne(deldetail);
                 console.log(delresult)
@@ -124,14 +126,9 @@ module.exports = function (db) {
             entryVar.userid = req.uid;
             if (entryVar.displayDate !== undefined) entryVar.displayDate = new Date(entryVar.displayDate)
             if (entryVar.dueDate !== undefined) entryVar.dueDate = new Date(entryVar.dueDate)
-            console.log("TODO also add other item properties?")
-            const entry = {
-                $set: {
-                    ...entryVar
-                }
-            }
-            console.log("adding ", entry)
-            console.log(typeof entry.$set.displayDate)
+            // console.log("TODO also add other item properties?")
+            if (entryVar._id !== undefined) entryVar._id = ObjectID(entryVar._id)
+            console.log("adding ", entryVar._id, typeof entryVar._id)
             const result = await db.collection("items").insertOne(entryVar);
             console.log(result.insertedId);
             const retid = result.insertedId || "tmpval";

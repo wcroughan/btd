@@ -20,6 +20,8 @@ Next shipped update:
             -aggregation logic
 - refresh button. Also auto refreshes every (idk, 5 mins?)
 - bring back animations on move
+- slight ui change for item whose menu is up
+-calendar doesn't fit on mobile
 
 
 Should implement at some point:

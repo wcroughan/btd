@@ -15,7 +15,11 @@
       <div class="ogreplace">
         <div class="checkmark" />
       </div> -->
-      <btd-checkbox :id="item.id" :checked="item.isDone" />
+      <btd-checkbox
+        @change="handleCheckbox($event)"
+        :id="item.id"
+        :checked="item.isDone"
+      />
 
       <btd-item-title-display :text="item.text" :isDone="item.isDone" />
     </label>
@@ -49,7 +53,7 @@
 import btdItemTitleDisplay from "./btdItemTitleDisplay.vue";
 import { nextTick } from "@vue/runtime-core";
 import BtdDropdown from "./btdDropdown.vue";
-import { mapMutations } from "vuex";
+import { mapActions } from "vuex";
 import BtdCheckbox from "./btdCheckbox.vue";
 
 export default {
@@ -70,7 +74,7 @@ export default {
     item: Object,
   },
   methods: {
-    ...mapMutations(["updateItem", "deleteItem", "addItem"]),
+    ...mapActions("todolist", ["updateItem", "deleteItem"]),
     handleCheckbox(event) {
       const i = { ...this.item };
       i.isDone = event.target.checked;
