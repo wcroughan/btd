@@ -104,34 +104,37 @@ module.exports = function (db) {
                     }
                 ]
             }
+            console.log(__line, detail.$or[1].displayDate.$lte.getTime())
             const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
             const results = await cursor.toArray();
             console.log(__line, results);
             res.status(200).json(results)
         },
         async pushItemToServer(req, res, next) {
-            console.log("unimplemented ... do the two versions, adding vs updating")
-            const detail = {
-                userid: req.uid,
-            }
             if (req.body._id !== undefined) {
-                //adding new item
-                detail._id = req.body._id;
+                //updating an existing item, just delete it first
+                const deldetail = {
+                    userid: req.uid,
+                    _id: req.body._id
+                }
+                const delresult = await db.collection("items").deleteOne(deldetail);
+                console.log(delresult)
             }
             const entryVar = req.body;
             entryVar.userid = req.uid;
+            if (entryVar.displayDate !== undefined) entryVar.displayDate = new Date(entryVar.displayDate)
+            if (entryVar.dueDate !== undefined) entryVar.dueDate = new Date(entryVar.dueDate)
             console.log("TODO also add other item properties?")
             const entry = {
                 $set: {
                     ...entryVar
                 }
             }
-            const options = {
-                upsert: true,
-            }
-            const result = await db.collection("items").findOneAndUpdate(detail, entry, options)
-            console.log(result.upsertedId, result.modifiedId, result.insertedId);
-            const retid = result.upsertedId || result.modifiedId || result.insertedId;
+            console.log("adding ", entry)
+            console.log(typeof entry.$set.displayDate)
+            const result = await db.collection("items").insertOne(entryVar);
+            console.log(result.insertedId);
+            const retid = result.insertedId || "tmpval";
 
             res.status(200).json({ id: retid });
         },

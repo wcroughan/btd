@@ -54,7 +54,7 @@ export default {
   computed: {
     ...mapState({
       items(state) {
-        return state.todoItems.filter(
+        return state.todolist.todoItems.filter(
           (i) =>
             !i.isDone &&
             i.dueDate.getTime() <= this.end.getTime() &&
@@ -63,7 +63,7 @@ export default {
         // return state.todoItems;
       },
       doneItems(state) {
-        return state.todoItems.filter(
+        return state.todolist.todoItems.filter(
           (i) =>
             i.isDone &&
             i.doneDate.getTime() <= this.end.getTime() &&

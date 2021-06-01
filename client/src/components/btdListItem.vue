@@ -50,12 +50,14 @@ import btdItemTitleDisplay from "./btdItemTitleDisplay.vue";
 import { nextTick } from "@vue/runtime-core";
 import BtdDropdown from "./btdDropdown.vue";
 import { mapMutations } from "vuex";
+import BtdCheckbox from "./btdCheckbox.vue";
 
 export default {
   name: "btdListItem",
   components: {
     btdItemTitleDisplay,
     BtdDropdown,
+    BtdCheckbox,
   },
   data() {
     return {

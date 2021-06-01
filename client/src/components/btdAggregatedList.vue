@@ -57,15 +57,17 @@ export default {
     ...mapState({
       timeGroups(state) {
         return this.allPossibleGroups.filter((interval) => {
-          return state.todoItems.some(
-            (i) =>
-              (i.isDone &&
+          return state.todolist.todoItems.some((i) => {
+            if (i.isDone)
+              return (
                 i.doneDate.getTime() <= interval[1].getTime() &&
-                i.doneDate.getTime() > interval[0].getTime()) ||
-              (!i.isDone &&
-                i.dueDate.getTime() <= interval[1].getTime() &&
-                i.dueDate.getTime() > interval[0].getTime())
-          );
+                i.doneDate.getTime() > interval[0].getTime()
+              );
+            return (
+              i.dueDate.getTime() <= interval[1].getTime() &&
+              i.dueDate.getTime() > interval[0].getTime()
+            );
+          });
         });
       },
     }),

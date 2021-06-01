@@ -14,7 +14,11 @@
     </div>
     <!-- <btd-streak-info /> -->
     <div class="add-item">
-      <btd-dropdown menuAlign="right" class="add-item-button">
+      <btd-dropdown
+        menuAlign="right"
+        class="add-item-button"
+        :closeOnAnyClick="false"
+      >
         <template v-slot:button>
           <!-- <img src="../assets/menu.png" class="add-item-icon" /> -->
           <div class="add-item-icon-container">
@@ -41,7 +45,7 @@
 <script>
 import BtdDropdown from "./btdDropdown.vue";
 // import BtdStreakInfo from "./btdStreakInfo.vue";
-import { mapGetters, mapMutations } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   name: "btdHeader",
@@ -51,17 +55,18 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("todolist", ["defaultItem"]),
+    ...mapGetters("todolist", ["generateDefaultItem"]),
   },
   methods: {
-    ...mapMutations("todolist", ["logout", "addItem"]),
+    ...mapMutations("todolist", ["logout"]),
+    ...mapActions("todolist", ["addItem"]),
     quickAddMoreOptions() {
       //TODO show modal here
     },
     quickAddDone() {
-      const item = this.defaultItem;
+      const item = this.generateDefaultItem();
       item.text = this.quickAddText;
-      console.log(item);
+      console.log("header, adding item ", item);
       this.addItem(item);
     },
   },
@@ -89,6 +94,8 @@ export default {
   z-index: 1;
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
+  padding-bottom: 10px;
+  padding-top: 10px;
 }
 .btd-streak-info {
   flex-basis: 0;

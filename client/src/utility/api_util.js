@@ -11,10 +11,18 @@ module.exports = {
         console.log(req);
         if (callback !== undefined) {
             axios.get(req).then((res) => {
+                res.data.forEach(v => {
+                    if (v.displayDate !== undefined) v.displayDate = new Date(v.displayDate)
+                    if (v.dueDate !== undefined) v.dueDate = new Date(v.dueDate)
+                })
                 callback(res);
             });
         } else {
             const ret = await axios.get(req);
+            ret.data.forEach(v => {
+                if (v.displayDate !== undefined) v.displayDate = new Date(v.displayDate)
+                if (v.dueDate !== undefined) v.dueDate = new Date(v.dueDate)
+            })
             return ret;
         }
     },

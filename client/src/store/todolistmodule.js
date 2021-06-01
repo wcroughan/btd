@@ -1,5 +1,5 @@
 // import { createStore, createLogger } from 'vuex'
-import misc_util from "../utility/misc_util.js"
+// import misc_util from "../utility/misc_util.js"
 import api_util from "../utility/api_util.js"
 import date_util from "../utility/date_util.js"
 
@@ -35,12 +35,14 @@ export default {
         numTodoItems(state) {
             return state.todoItems.length
         },
-        defaultItem() {
+        generateDefaultItem: () => () => {
             const item = {
                 text: "",
                 isDone: false,
-                dueDate: date_util.getTomorrow()
+                dueDate: date_util.getTomorrow(),
+                displayDate: date_util.getToday()
             }
+            console.log("returning default item ", item)
             return item
         }
     },
@@ -54,7 +56,7 @@ export default {
             api_util.deleteItem(state.token, id);
         },
         addItemLocal(state, item) {
-
+            state.todoItems.push(item)
         },
         setItems(state, items) {
             state.todoItems = items;
@@ -71,6 +73,7 @@ export default {
             console.log(rootState, rootState.auth)
             api_util.getItems(rootState.auth.authInfo.authTkn).then((items) => {
                 console.log("got items", items.data)
+                console.log(typeof items.data.dueDate)
                 commit('setItems', items.data)
                 commit('setLoadingStatus', false)
             })
@@ -80,10 +83,10 @@ export default {
                 commit('setPastItems', items.data)
             })
         },
-        addItem(state, item) {
+        addItem({ commit, rootState }, item) {
             // item.id = misc_util.getUniqueItemId(state.todoItems)
             // state.todoItems.push(item)
-            api_util.pushItemToServer(state.token, item).then((res) => {
+            api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then((res) => {
                 item._id = res.data.id;
                 commit('addItemLocal', item)
             }
