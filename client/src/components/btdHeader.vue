@@ -16,11 +16,11 @@
     <div class="add-item">
       <btd-dropdown menuAlign="right" class="add-item-button">
         <template v-slot:button>
+          <!-- <img src="../assets/menu.png" class="add-item-icon" /> -->
           <div class="add-item-icon-container">
             <div class="add-item-horiz" />
             <div class="add-item-vert" />
           </div>
-          <!-- <img src="../assets/menu.png" class="add-item-icon" /> -->
         </template>
         <template v-slot:content>
           <section class="dropdown-option">
@@ -51,16 +51,18 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["defaultItem"]),
+    ...mapGetters("todolist", ["defaultItem"]),
   },
   methods: {
-    ...mapMutations(["logout"]),
+    ...mapMutations("todolist", ["logout", "addItem"]),
     quickAddMoreOptions() {
       //TODO show modal here
     },
     quickAddDone() {
       const item = this.defaultItem;
+      item.text = this.quickAddText;
       console.log(item);
+      this.addItem(item);
     },
   },
   components: {
@@ -80,7 +82,7 @@ export default {
   right: 0;
   left: 0;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   background-color: #53d3d1;
   font-size: 2em;
@@ -88,51 +90,46 @@ export default {
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
 }
-.btd-day-display {
-  flex-basis: 0;
-  flex-grow: 0.6;
-  height: 64px;
-}
 .btd-streak-info {
   flex-basis: 0;
   flex-grow: 0;
-}
-.today-button {
-  flex-basis: 0;
-  flex-grow: 0;
-  border-width: 0px;
-  /* color: blue; */
-  font-weight: bold;
-  font-size: 0.7em;
-  background-color: inherit;
-}
-.today-button:hover {
-  color: lightblue;
 }
 
 .menu-button {
   /* transform: translateY(10%); */
   align-self: center;
+  margin-left: 30px;
 }
 .menu-icon {
+  height: 40px;
+}
+.add-item-icon {
   height: 40px;
 }
 
 .add-item-icon-container {
   position: relative;
+  /* background-color: brown; */
+  width: 40px;
+  height: 40px;
+  margin-right: 30px;
 }
 .add-item-vert {
   position: absolute;
   left: calc(50% - 2px);
   width: 4px;
-  top: 2px;
-  height: calc(100% - 4px);
+  top: 3px;
+  height: calc(100% - 6px);
+  background-color: black;
+  border-radius: 3px;
 }
 .add-item-horiz {
   position: absolute;
   top: calc(50% - 2px);
   height: 4px;
-  left: 2px;
-  width: calc(100% - 4px);
+  left: 3px;
+  width: calc(100% - 6px);
+  background-color: black;
+  border-radius: 3px;
 }
 </style>

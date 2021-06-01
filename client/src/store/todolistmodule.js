@@ -35,14 +35,12 @@ export default {
         numTodoItems(state) {
             return state.todoItems.length
         },
-        defaultItem(state) {
-            //TODO should return an item with id already set to non-conflicting value
+        defaultItem() {
             const item = {
                 text: "",
                 isDone: false,
                 dueDate: date_util.getTomorrow()
             }
-            item.id = misc_util.getUniqueItemId(state.todoItems.concat(state.pastItems))
             return item
         }
     },
@@ -55,10 +53,8 @@ export default {
             state.todoItems.splice(state.todoItems.findIndex(i => i.id === id), 1);
             api_util.deleteItem(state.token, id);
         },
-        addItem(state, item) {
-            item.id = misc_util.getUniqueItemId(state.todoItems)
-            state.todoItems.push(item)
-            api_util.pushItemToServer(state.token, item);
+        addItemLocal(state, item) {
+
         },
         setItems(state, items) {
             state.todoItems = items;
@@ -66,19 +62,32 @@ export default {
         setPastItems(state, items) {
             state.pastItems = items;
         },
+        setLoadingStatus(state, isloading) {
+            state.loadingItems = isloading
+        }
     },
     actions: {
         refreshItems({ rootState, commit }) {
             console.log(rootState, rootState.auth)
             api_util.getItems(rootState.auth.authInfo.authTkn).then((items) => {
-                console.log("got items", items)
-                commit('setItems', items)
+                console.log("got items", items.data)
+                commit('setItems', items.data)
+                commit('setLoadingStatus', false)
             })
         },
         refreshPastItems({ rootState, commit }) {
             api_util.getPastItems(rootState.auth.authInfo.authTkn).then((items) => {
-                commit('setPastItems', items)
+                commit('setPastItems', items.data)
             })
+        },
+        addItem(state, item) {
+            // item.id = misc_util.getUniqueItemId(state.todoItems)
+            // state.todoItems.push(item)
+            api_util.pushItemToServer(state.token, item).then((res) => {
+                item._id = res.data.id;
+                commit('addItemLocal', item)
+            }
+            );
         },
     },
     namespaced: true

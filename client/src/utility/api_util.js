@@ -27,12 +27,17 @@ module.exports = {
             callback(res);
         });
     },
-    pushItemToServer(auth_token, item) {
+    async pushItemToServer(auth_token, item, callback) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "item/" + item.id + `?${params}`;
+        const req = api_root + "item/" + `?${params}`;
         // console.log(req);
-        axios.put(req, item);
+        if (callback !== undefined) {
+            axios.put(req, item).then(callback);
+        } else {
+            const ret = await axios.put(req, item);
+            return ret;
+        }
     },
     deleteItem(auth_token, id) {
         const reqParamObj = { auth_token };

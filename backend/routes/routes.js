@@ -12,5 +12,8 @@ module.exports = function (db) {
     router.put('/list/append_item/:id', controllers.appendItem);
     router.delete('/list/:id', controllers.deleteListFromServer);
 
+    router.get('/items', controllers.getItems);
+    router.put('/item', controllers.pushItemToServer);
+
     return router;
 }

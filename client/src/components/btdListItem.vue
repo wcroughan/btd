@@ -5,7 +5,7 @@
     @mouseleave="mouseIn = false"
   >
     <label :for="item.id">
-      <input
+      <!-- <input
         class="ogcheck"
         :id="item.id"
         type="checkbox"
@@ -14,7 +14,8 @@
       />
       <div class="ogreplace">
         <div class="checkmark" />
-      </div>
+      </div> -->
+      <btd-checkbox :id="item.id" :checked="item.isDone" />
 
       <btd-item-title-display :text="item.text" :isDone="item.isDone" />
     </label>
@@ -126,39 +127,5 @@ export default {
 
 label {
   display: flex;
-}
-
-.ogcheck {
-  position: absolute;
-  opacity: 0;
-  height: 0;
-  width: 0;
-}
-
-.ogreplace {
-  width: 1em;
-  height: 1em;
-  background-color: white;
-  border: 2px solid black;
-  border-radius: 3px;
-}
-
-label:hover .ogreplace {
-  background-color: #6fd4d3;
-}
-
-input:checked ~ .ogreplace {
-  width: 0.8em;
-  height: 0.8em;
-  background-color: #53d3d1;
-}
-input:checked ~ .ogreplace .checkmark {
-  position: absolute;
-  border: 0.2em solid white;
-  border-top-width: 0px;
-  border-right-width: 0px;
-  height: 2px;
-  width: 6px;
-  transform: rotate(-45deg) translate(0px, 2px);
 }
 </style>
