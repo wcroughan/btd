@@ -18,6 +18,7 @@
         menuAlign="right"
         class="add-item-button"
         :closeOnAnyClick="false"
+        ref="quickaddmenu"
       >
         <template v-slot:button>
           <!-- <img src="../assets/menu.png" class="add-item-icon" /> -->
@@ -29,7 +30,11 @@
         <template v-slot:content>
           <section class="dropdown-option">
             <div class="quickadd-container">
-              <input type="text" v-model="quickAddText" />
+              <input
+                type="text"
+                v-model="quickAddText"
+                @keydown="quickaddkeypressed"
+              />
               <div class="quickadd-button-container">
                 <button @click="quickAddMoreOptions">More Options</button>
                 <button @click="quickAddDone">Add</button>
@@ -39,6 +44,7 @@
         </template>
       </btd-dropdown>
     </div>
+    <btd-item-edit-modal v-if="showAddItemModal" :initialItem="modalItem" />
   </div>
 </template>
 
@@ -46,12 +52,15 @@
 import BtdDropdown from "./btdDropdown.vue";
 // import BtdStreakInfo from "./btdStreakInfo.vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import BtdItemEditModal from "./btdItemEditModal.vue";
 
 export default {
   name: "btdHeader",
   data() {
     return {
       quickAddText: "",
+      modalItem: null,
+      showAddItemModal: false,
     };
   },
   computed: {
@@ -61,23 +70,36 @@ export default {
     ...mapMutations("todolist", ["logout"]),
     ...mapActions("todolist", ["addItem"]),
     quickAddMoreOptions() {
-      //TODO show modal here
+      this.$refs.quickaddmenu.hideMenu();
+      this.showAddItemModal = this.generateDefaultItem();
+      this.showAddItemModal.text = this.quickAddText;
+      this.showAddItemModal = true;
     },
     quickAddDone() {
+      this.$refs.quickaddmenu.hideMenu();
       const item = this.generateDefaultItem();
       item.text = this.quickAddText;
       console.log("header, adding item ", item);
       this.addItem(item);
     },
+    quickaddkeypressed(e) {
+      if (e.key === "Escape") {
+        this.$refs.quickaddmenu.hideMenu();
+      } else if (e.key === "Enter") {
+        this.quickAddDone();
+      }
+    },
   },
   components: {
     // BtdStreakInfo,
     BtdDropdown,
+    BtdItemEditModal,
   },
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+<!-- Add "
+    BtdItemEditModalscoped" attribute to limit CSS to this component only -->
 <style scoped>
 .btd-header {
   max-width: inherit;

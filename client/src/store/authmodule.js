@@ -98,12 +98,15 @@ export default {
                 if (res.data.success) {
                     let expireDate = new Date();
                     if (payload.stayin) expireDate = new Date(res.data.expireDate);
+                    console.log("expireDate", expireDate)
                     const info = {
                         loggedIn: true,
                         authTkn: res.data.auth_token,
                         pending: false,
                         expireDate,
                     }
+
+                    document.cookie = `authTkn=${res.data.auth_token} ; expires=${expireDate}`;
                     commit('setAuthInfo', info)
                 } else {
                     commit('setWarning', {
