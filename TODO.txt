@@ -22,8 +22,10 @@ Next shipped update:
 - bring back animations on move
 - slight ui change for item whose menu is up
 -calendar doesn't fit on mobile
-Autofocus quick add text input on mounted
-Add button in each category
+- Autofocus quick add text input on mounted
+- Add button in each category
+- Long press to rearrange items. Can just implement always as rearrangable with handle, have v-if/else b/w handle and checkbox (and maybe on right side between ellipses menu and select checkmark for things like deleting many)
+
 
 
 Should implement at some point:
