@@ -22,6 +22,8 @@ Next shipped update:
 - bring back animations on move
 - slight ui change for item whose menu is up
 -calendar doesn't fit on mobile
+Autofocus quick add text input on mounted
+Add button in each category
 
 
 Should implement at some point:
