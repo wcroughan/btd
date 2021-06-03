@@ -6,17 +6,21 @@
       :title="listInfo.title"
     />
     <div class="sectionbody">
-      <btd-list-item v-for="item in items" :item="item" :key="item._id" />
+      <transition-group name="listitems">
+        <btd-list-item v-for="item in items" :item="item" :key="item._id" />
+      </transition-group>
     </div>
     <div class="sectionfooter" v-if="doneItems.length > 0">
       <transition name="doneitems-trans">
         <div class="doneitems" v-if="showDoneItems">
-          <btd-list-item
-            class="done-item"
-            v-for="item in doneItems"
-            :item="item"
-            :key="item._id"
-          />
+          <transition-group name="donelisttrans">
+            <btd-list-item
+              class="done-item"
+              v-for="item in doneItems"
+              :item="item"
+              :key="item._id"
+            />
+          </transition-group>
         </div>
       </transition>
       <button @click="showDoneItems = !showDoneItems">
@@ -85,11 +89,50 @@ export default {
 }
 
 .sectionfooter > button {
+  position: relative;
   color: rgb(60, 60, 211);
   border-width: 0;
   font-weight: bold;
   font-size: 1em;
   background-color: inherit;
   padding-top: 10px;
+}
+
+.doneitems-trans-enter-from,
+.doneitems-trans-leave-to {
+  transform: translateY(-50%) scaleY(0);
+}
+.doneitems-trans-enter-active,
+.doneitems-trans-leave-active {
+  transition: all 0.15s;
+}
+
+.donelisttrans-enter-active {
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+.donelisttrans-leave-active {
+  position: absolute;
+  /* top: 0px; */
+  /* transition: transform 0.3s ease, opacity 0.2s ease; */
+}
+.donelisttrans-enter-from {
+  transform: translateX(-100px);
+  opacity: 0;
+}
+.donelisttrans-move {
+  transition: transform 0.25s ease;
+}
+
+.listitems-leave-active {
+  position: absolute;
+  /* top: 0px; */
+  transition: transform 0.3s ease, opacity 0.2s ease;
+}
+.listitems-leave-to {
+  transform: translateX(-100px);
+  opacity: 0;
+}
+.listitems-move {
+  transition: transform 0.25s ease;
 }
 </style>

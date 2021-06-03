@@ -23,10 +23,13 @@ export default {
     state() {
         return {
             loadingItems: true,
+            loadingPastItems: false,
+            loadingUpcomingItems: false,
             // todoItems: exampleTodoItems || [], //Includes items to be completed and items that were completed today
             // pastItems: examplePastItems || [], // Includes items that were completed yesterday or earlier
             todoItems: [], //Includes items to be completed and items that were completed today
             pastItems: [], // Includes items that were completed yesterday or earlier
+            upcomingItems: [], // Includes items that were completed yesterday or earlier
             streakInfo: {
                 todayGood: false,
                 len: 0
@@ -41,7 +44,6 @@ export default {
             const item = {
                 text: "",
                 isDone: false,
-                overdue: false,
                 dueDate: date_util.getTomorrow(),
                 displayDate: date_util.getToday(),
                 doneDate: null,
@@ -71,22 +73,37 @@ export default {
         setPastItems(state, items) {
             state.pastItems = items;
         },
-        setLoadingStatus(state, isloading) {
-            state.loadingItems = isloading
+        setUpcomingItems(state, items) {
+            state.upcomingItems = items;
+        },
+        setLoadingStatus(state, payload) {
+            if (payload.loadingItems !== undefined)
+                state.loadingItems = payload.loadingItems;
+            if (payload.loadingPastItems !== undefined)
+                state.loadingPastItems = payload.loadingPastItems;
+            if (payload.loadingUpcomingItems !== undefined)
+                state.loadingUpcomingItems = payload.loadingUpcomingItems;
         }
     },
     actions: {
         refreshItems({ rootState, commit }) {
             api_util.getItems(rootState.auth.authInfo.authTkn).then((items) => {
                 console.log("got items", items.data)
-                console.log(typeof items.data.dueDate)
+                // console.log(typeof items.data.dueDate)
                 commit('setItems', items.data)
-                commit('setLoadingStatus', false)
+                commit('setLoadingStatus', { loadingItems: false })
             })
         },
         refreshPastItems({ rootState, commit }) {
             api_util.getPastItems(rootState.auth.authInfo.authTkn).then((items) => {
                 commit('setPastItems', items.data)
+                commit('setLoadingStatus', { loadingPastItems: false })
+            })
+        },
+        refreshUpcomingItems({ rootState, commit }) {
+            api_util.getUpcomingItems(rootState.auth.authInfo.authTkn).then((items) => {
+                commit('setUpcomingItems', items.data)
+                commit('setLoadingStatus', { loadingUpcomingItems: false })
             })
         },
         addItem({ commit, rootState }, item) {

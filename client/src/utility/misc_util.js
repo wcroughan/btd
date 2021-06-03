@@ -14,4 +14,19 @@ module.exports = {
         // console.log(hs)
         return bson.Binary(hs)
     },
+    convertTimesToDates(item) {
+        if (item.displayDate !== undefined) item.displayDate = new Date(item.displayDate)
+        if (item.dueDate !== undefined) item.dueDate = new Date(item.dueDate)
+        if (item.createdDate !== undefined) item.createdDate = new Date(item.createdDate)
+        if (item.doneDate !== undefined) item.doneDate = new Date(item.doneDate)
+        if (item.snoozedOnDate !== undefined) item.snoozedOnDate = new Date(item.snoozedOnDate)
+    },
+    convertDatesToTimes(item) {
+        if (item.displayDate !== undefined) item.displayDate = item.displayDate.getTime();
+        if (item.dueDate !== undefined) item.dueDate = item.dueDate.getTime();
+        if (item.createdDate !== undefined) item.createdDate = item.createdDate.getTime();
+        if (item.doneDate !== undefined) item.doneDate = item.doneDate.getTime();
+        if (item.snoozedOnDate !== undefined) item.snoozedOnDate = item.snoozedOnDate.getTime();
+    }
+
 }

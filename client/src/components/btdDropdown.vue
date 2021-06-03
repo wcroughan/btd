@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { nextTick } from "@vue/runtime-core";
 export default {
   name: "btdDropdown",
   data() {
@@ -37,6 +38,10 @@ export default {
       default: true,
     },
     onContentMounted: {
+      type: Function,
+      default: () => {},
+    },
+    onContentUnmounted: {
       type: Function,
       default: () => {},
     },
@@ -61,7 +66,14 @@ export default {
   },
   watch: {
     showMenu(newval) {
-      if (newval) this.onContentMounted();
+      nextTick(() => {
+        if (newval) {
+          this.onContentMounted();
+        } else {
+          this.onContentUnmounted();
+        }
+        console.log("showmenu", newval);
+      });
     },
   },
 };

@@ -1,7 +1,7 @@
 const axios = require('axios');
 const api_root = "/api/v1/";
 const date_util = require('./date_util');
-
+const { convertTimesToDates } = require('./misc_util')
 
 module.exports = {
     async getItems(auth_token, callback) {
@@ -11,29 +11,46 @@ module.exports = {
         console.log(req);
         if (callback !== undefined) {
             axios.get(req).then((res) => {
-                res.data.forEach(v => {
-                    if (v.displayDate !== undefined) v.displayDate = new Date(v.displayDate)
-                    if (v.dueDate !== undefined) v.dueDate = new Date(v.dueDate)
-                })
+                res.data.forEach(convertTimesToDates)
                 callback(res);
             });
         } else {
             const ret = await axios.get(req);
-            ret.data.forEach(v => {
-                if (v.displayDate !== undefined) v.displayDate = new Date(v.displayDate)
-                if (v.dueDate !== undefined) v.dueDate = new Date(v.dueDate)
-            })
+            ret.data.forEach(convertTimesToDates)
             return ret;
         }
     },
-    getPastItems(auth_token, callback) {
+    async getPastItems(auth_token, callback) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "pastitems" + `?${params}`;
         // console.log(req);
-        axios.get(req).then((res) => {
-            callback(res);
-        });
+        if (callback !== undefined) {
+            axios.get(req).then((res) => {
+                res.data.forEach(convertTimesToDates)
+                callback(res);
+            });
+        } else {
+            const ret = await axios.get(req);
+            ret.data.forEach(convertTimesToDates)
+            return ret;
+        }
+    },
+    async getUpcomingItems(auth_token, callback) {
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "upcomingitems" + `?${params}`;
+        // console.log(req);
+        if (callback !== undefined) {
+            axios.get(req).then((res) => {
+                res.data.forEach(convertTimesToDates)
+                callback(res);
+            });
+        } else {
+            const ret = await axios.get(req);
+            ret.data.forEach(convertTimesToDates)
+            return ret;
+        }
     },
     async pushItemToServer(auth_token, item, callback) {
         const reqParamObj = { auth_token };

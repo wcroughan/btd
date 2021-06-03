@@ -24,7 +24,9 @@
       class="menu-button"
       ref="menuDropdown"
       :closeOnAnyClick="true"
-      v-show="persistentOptions || mouseIn"
+      v-show="persistentOptions || mouseIn || menuShowing"
+      :onContentMounted="menuMounted"
+      :onContentUnmounted="menuUnmounted"
     >
       <template v-slot:button>
         <img src="../assets/ellipsis.png" class="menu-icon" />
@@ -52,6 +54,7 @@ export default {
     return {
       mouseIn: false,
       persistentOptions: false,
+      menuShowing: false,
     };
   },
   props: {
@@ -69,6 +72,12 @@ export default {
     },
   },
   methods: {
+    menuMounted() {
+      this.menuShowing = true;
+    },
+    menuUnmounted() {
+      this.menuShowing = false;
+    },
     markAllClicked() {
       console.log("TODO");
     },

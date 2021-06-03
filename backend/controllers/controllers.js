@@ -1,6 +1,6 @@
 const date_util = require('./../../client/src/utility/date_util.js');
 const _ = require('underscore')
-const misc_util = require('./../../client/src/utility/misc_util.js')
+const { convertDatesToTimes, convertTimesToDates } = require('./../../client/src/utility/misc_util.js')
 var ObjectID = require('mongodb').ObjectID;
 
 Object.defineProperty(global, '__stack', {
@@ -21,75 +21,7 @@ Object.defineProperty(global, '__line', {
 });
 
 
-
 module.exports = function (db) {
-    isSkippedByDefault = function (date) {
-        return date.getDay() === 6 || date.getDay() === 0;
-    };
-
-    getDefaultListInternal = async function (userid, listid, callback) {
-        // console.log(__line, "looking for default list for userid", userid, ", listid", listid, "and callback", callback);
-        const datestr = listid.split("_")[1];
-        const type = listid.split("_")[0];
-
-        const detail = {
-            id: type + "_default",
-            userid
-        };
-        let start;
-        let end;
-        if (type === "day") {
-            start = date_util.getDateFromIdStr(datestr);
-            end = date_util.tomorrow(start);
-        } else if (type === "week") {
-            start = date_util.getMonday(date_util.getDateFromIdStr(datestr));
-            end = date_util.plusOneWeek(start);
-        } else {
-            console.log(__line, "unknown type", type);
-            return;
-        }
-
-        if (callback === undefined) {
-            let item = await db.collection("lists").findOne(detail);
-            if (item === null) {
-                item = {
-                    items: [],
-                }
-            }
-            delete item._id;
-            item.id = listid;
-            item.start = start;
-            item.end = end;
-            item.userid = userid;
-            item.isDone = item.items.length === 0;
-            item.isSkipped = isSkippedByDefault(start);
-            // console.log(__line, "returning default item:", item)
-            return item;
-        } else {
-            db.collection("lists").findOne(detail, (err, item) => {
-                if (err) {
-                    console.log(__line, err);
-                    callback(err, { 'error': "error occured" });
-                } else {
-                    if (item === null) {
-                        item = {
-                            items: [],
-                        }
-                    }
-                    delete item._id;
-                    item.id = listid;
-                    item.start = start;
-                    item.end = end;
-                    item.userid = userid;
-                    item.isDone = item.items.length === 0;
-                    item.isSkipped = isSkippedByDefault(start);
-                    // console.log(__line, "running callback with default item:", item)
-                    callback(false, item);
-                }
-            });
-        }
-    };
-
     return {
         async getItems(req, res, next) {
             const detail = {
@@ -97,7 +29,7 @@ module.exports = function (db) {
                 $or: [
                     {
                         isDone: true,
-                        doneDate: { $gt: date_util.getToday() }
+                        doneDate: { $gte: date_util.getToday() }
                     },
                     {
                         isDone: false,
@@ -105,7 +37,32 @@ module.exports = function (db) {
                     }
                 ]
             }
-            console.log(__line, detail.$or[1].displayDate.$lte.getTime())
+            // console.log(__line, detail.$or[1].displayDate.$lte)
+            const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
+            const results = await cursor.toArray();
+            console.log(__line, results);
+            // console.log(__line, results[0].displayDate, typeof results[0].displayDate)
+            res.status(200).json(results)
+        },
+        async getPastItems(req, res, next) {
+            const detail = {
+                userid: req.uid,
+                isDone: true,
+                doneDate: { $lt: date_util.getToday() }
+            }
+            // console.log(__line, detail.$or[1].displayDate.$lte.getTime())
+            const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
+            const results = await cursor.toArray();
+            console.log(__line, results);
+            res.status(200).json(results)
+        },
+        async getUpcomingItems(req, res, next) {
+            const detail = {
+                userid: req.uid,
+                isDone: false,
+                doneDate: { $gt: new Date() }
+            }
+            // console.log(__line, detail.$or[1].displayDate.$lte.getTime())
             const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
             const results = await cursor.toArray();
             console.log(__line, results);
@@ -124,8 +81,10 @@ module.exports = function (db) {
             }
             const entryVar = req.body;
             entryVar.userid = req.uid;
-            if (entryVar.displayDate !== undefined) entryVar.displayDate = new Date(entryVar.displayDate)
-            if (entryVar.dueDate !== undefined) entryVar.dueDate = new Date(entryVar.dueDate)
+            // if (entryVar.displayDate !== undefined) entryVar.displayDate = new Date(entryVar.displayDate)
+            // if (entryVar.dueDate !== undefined) entryVar.dueDate = new Date(entryVar.dueDate)
+            convertTimesToDates(entryVar);
+            console.log(__line, entryVar.displayDate, typeof entryVar.displayDate)
             // console.log("TODO also add other item properties?")
             if (entryVar._id !== undefined) entryVar._id = ObjectID(entryVar._id)
             console.log("adding ", entryVar._id, typeof entryVar._id)
@@ -151,126 +110,6 @@ module.exports = function (db) {
             res.status(200).json({
                 body: "Becca is great!!!"
             })
-        },
-        async getListsForId(req, res, next) {
-            // console.log(__line, req.params);
-            const id1 = "day_" + req.params.id;
-            const id2 = "week_" + date_util.apiDateStr(date_util.getMonday(date_util.getDateFromIdStr(req.params.id)));
-            // console.log(__line, "searching for ", id1, id2)
-
-            const filterDetail = {
-                id: {
-                    $in: [id1, id2]
-                },
-                userid: req.uid
-            };
-
-            const cursor = await db.collection("lists").find(filterDetail).sort({ id: 1 });
-            const results = await cursor.toArray();
-            // console.log(__line, results);
-
-            if (results.length === 2) {
-                // console.log(__line, "got both lists, returning the following:", results);
-                res.status(200).json(results);
-                return;
-            }
-            const needIds = [];
-            // console.log(__line, "initial results:", results);
-            if (!results.some((r) => r.id.includes("week_"))) {
-                const weekList = await getDefaultListInternal(req.uid, id2);
-                results.push(weekList);
-            }
-            if (!results.some((r) => r.id.includes("day_"))) {
-                const dayList = await getDefaultListInternal(req.uid, id1);
-                results.push(dayList);
-            }
-
-            const resArray = results.sort((a, b) => (a.id > b.id) ? 1 : -1);
-            // console.log(__line, "got default lists, returning the following:", resArray);
-            res.status(200).json(resArray);
-        },
-        async pushListToServer(req, res, next) {
-            // console.log(__line, req.params, req.body);
-
-            const detail = {
-                id: req.params.id,
-                userid: req.uid,
-            }
-            const entryVar = req.body;
-            delete entryVar._id;
-            entryVar.userid = req.uid;
-            if (entryVar.start !== undefined) {
-                entryVar.start = new Date(entryVar.start)
-                entryVar.end = new Date(entryVar.end)
-            }
-            const entry = {
-                $set: {
-                    ...entryVar
-                }
-            }
-            const options = {
-                upsert: true,
-            }
-            await db.collection("lists").findOneAndUpdate(detail, entry, options)
-
-            res.status(200).json({ success: true });
-        },
-        async appendItem(req, res, next) {
-            // console.log(__line, "append item", req.params, req.body);
-            const id = req.params.id;
-            const userid = req.uid;
-
-            let updatedlist = await db.collection("lists").findOne({ id, userid });
-            if (updatedlist === null) {
-                //Inserting into new list, initialize with default
-                updatedlist = await this.getDefaultListInternal(req.uid, id);
-            }
-
-            const newitem = req.body;
-            newitem.id = misc_util.getUniqueItemId(updatedlist.items);
-            updatedlist.items.push(newitem);
-            delete updatedlist._id;
-            updatedlist.start = new Date(updatedlist.start)
-            updatedlist.end = new Date(updatedlist.end)
-            const entry = {
-                $set: {
-                    ...updatedlist
-                }
-            }
-            const config = {
-                upsert: true
-            }
-
-            // console.log(__line, "entry", entry, "id:", id);
-            const r = await db.collection("lists").updateOne({ id, userid }, entry, config);
-            // console.log(__line, r);
-            res.status(200).json({ success: true });
-        },
-        getDefaultList(req, res, next) {
-            // console.log(__line, req.params);
-            this.getDefaultListInternal(req.uid, req.params.id, (err, item) => {
-                if (err) {
-                    console.log(__line, err);
-                    res.send({ 'error': "db error occured" });
-                } else {
-                    res.status(200).json(item)
-                }
-            });
-        },
-        deleteListFromServer(req, res, next) {
-            // console.log(__line, req.params);
-            if (req.params.id.includes("default")) {
-                console.log(__line, "Won't delete default list even when asked");
-                res.send({ 'error': "db error occured" });
-                return;
-            }
-            const detail = {
-                id: req.params.id,
-                userid: req.uid
-            }
-
-            db.collection("lists").deleteOne(detail);
-
         },
         async getDaysInfo(req, res, next) {
             // console.log(__line, req.query);

@@ -1,6 +1,7 @@
 <template>
   <div
     class="btd-list-item"
+    :class="{ 'menu-showing': menuShowing }"
     @mouseenter="mouseIn = true"
     @mouseleave="mouseIn = false"
   >
@@ -28,7 +29,9 @@
       class="menu-button"
       ref="itemOptionsMenu"
       :closeOnAnyClick="true"
-      v-show="persistentOptions || mouseIn"
+      v-show="persistentOptions || mouseIn || menuShowing"
+      :onContentMounted="menuMounted"
+      :onContentUnmounted="menuUnmounted"
     >
       <template v-slot:button>
         <img src="../assets/ellipsis.png" class="menu-icon" />
@@ -67,6 +70,7 @@ export default {
     return {
       mouseIn: false,
       persistentOptions: false,
+      menuShowing: false,
     };
   },
   props: {
@@ -74,6 +78,14 @@ export default {
     item: Object,
   },
   methods: {
+    menuMounted() {
+      console.log("menuMounted");
+      this.menuShowing = true;
+    },
+    menuUnmounted() {
+      console.log("menuUnmounted");
+      this.menuShowing = false;
+    },
     ...mapActions("todolist", ["updateItem", "deleteItem"]),
     handleCheckbox(event) {
       const i = { ...this.item };
@@ -133,5 +145,9 @@ export default {
 
 label {
   display: flex;
+}
+
+.menu-showing {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 </style>

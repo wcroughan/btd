@@ -19,7 +19,7 @@
         class="add-item-button"
         :closeOnAnyClick="false"
         ref="quickaddmenu"
-        :onContentMounted="ocm"
+        :onContentMounted="dropdownContentMounted"
       >
         <template v-slot:button>
           <!-- <img src="../assets/menu.png" class="add-item-icon" /> -->
@@ -55,7 +55,7 @@ import BtdDropdown from "./btdDropdown.vue";
 // import BtdStreakInfo from "./btdStreakInfo.vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import BtdItemEditModal from "./btdItemEditModal.vue";
-import { nextTick } from "@vue/runtime-core";
+// import { nextTick } from "@vue/runtime-core";
 
 export default {
   name: "btdHeader",
@@ -70,10 +70,8 @@ export default {
     ...mapGetters("todolist", ["generateDefaultItem"]),
   },
   methods: {
-    ocm() {
-      nextTick(() => {
-        this.$refs.quickAddInput.focus();
-      });
+    dropdownContentMounted() {
+      this.$refs.quickAddInput.focus();
     },
     ...mapMutations("todolist", ["logout"]),
     ...mapActions("todolist", ["addItem"]),

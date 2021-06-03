@@ -1,10 +1,13 @@
 <template>
   <div class="agglist">
-    <btd-aggregated-list-section
-      v-for="(li, idx) in filteredListInfos"
-      :listInfo="li"
-      :key="'li_' + idx"
-    />
+    <transition-group name="lists">
+      <btd-aggregated-list-section
+        class="aggsection"
+        v-for="li in filteredListInfos"
+        :listInfo="li"
+        :key="li.title"
+      />
+    </transition-group>
   </div>
 </template>
 
@@ -69,15 +72,15 @@ export default {
               return state.todolist.todoItems.filter((i) => {
                 return (
                   i.isDone &&
-                  i.dueDate.getTime() <= interval[1].getTime() &&
-                  i.dueDate.getTime() > interval[0].getTime()
+                  i.doneDate.getTime() <= interval[1].getTime() &&
+                  i.doneDate.getTime() > interval[0].getTime()
                 );
               });
             },
             title: interval[2],
           };
         });
-        ret.push({
+        ret.unshift({
           title: "Overdue",
           getItems: () => {
             const ret = state.todolist.todoItems.filter((i) => {
@@ -108,4 +111,35 @@ export default {
 </script>
 
 <style scoped>
+.agglist {
+  position: relative;
+}
+.lists-move {
+  transition: transform 0.5s ease;
+}
+
+.lists-enter-active {
+  animation: rollbounce 0.5s;
+}
+.lists-leave-active {
+  position: absolute;
+  animation: rollbounce 0.3s reverse;
+}
+.lists-leave-to {
+  opacity: 0;
+}
+@keyframes rollbounce {
+  0% {
+    transform: translateY(-50%) scaleY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+    /* transform: translateY(10%) scaleY(1.2); */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
 </style>

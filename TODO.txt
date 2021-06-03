@@ -1,23 +1,14 @@
 Next shipped update:
-- Rework items, etc. Have one big list aggregated by distance to deadline
-    - Allow repeating items on custom schedule like google calendar
-    - Items aggregated with smallish headings like "Due Today:" or "Due next week:"
-    - instead of all these moves, just have a snooze option with a modal
-    - Remaining todo:
-        -front end:
-            -header: Add menu items on left to view previous items and view repeating items
-            -header: Implement quick add and show full add modal
-            -create a modal for adding/editing items
-            -streak info
-            - trigger loading the items from the server on load, and at 5min interval after
-            - add a refresh button somewhere
-
-        -backend
-            -api_util calls
-            -aggregation logic
+- streak info
+- Allow repeating items on custom schedule like google calendar
+- instead of all these moves, just have a snooze option with a modal
+- header: Add menu items on left to view previous items, upcoming items, and repeating items
+- create a modal for adding/editing items
+- streak info
+- trigger loading the items from the server at 5min interval after loading
+- add a refresh button somewhere
+- ability to mark an item as not overdue
 - refresh button. Also auto refreshes every (idk, 5 mins?)
-- bring back animations on move
-- slight ui change for item whose menu is up
 - calendar doesn't fit on mobile
 - Add button in each category
 - Long press to rearrange items. Can just implement always as rearrangable with handle, have v-if/else b/w handle and checkbox (and maybe on right side between ellipses menu and select checkmark for things like deleting many)
@@ -27,18 +18,10 @@ Next shipped update:
 
 Should implement at some point:
 - figure out this reactivity stuff so can just use date object directly in btdCalendar as opposed to converting to and from a string
-- swipe input on header/day display for yesterday/tomorrow navigation
-- getListsForId needs to be reworked iwth the following:
-    - getListsForDatestr instead
-    - Searches by gt/lt start/end
-    - Each list should have a separate "category" field (do I need datestr too?). Then can search by date, then have a list of required list categories that a default is generated for as well
-- general font exploration and color scheme and maybe prettier borders in actual list
-- Use composition API to make an API handler with provides for data and update methods and an API child that gets those using inject so don't have to have emit chains. Note more info might have to be passed down, can have list provide listid etc (not necessarily thorugh composition api)
 - allow swipe left to mark (un)done
 - backend needs to handle weird input without crashing (like weird auth tokens that ObjectID won't accept)
 - keyboard shortcuts!
 - center aligned dropdowns get all screwy with animations
-- ability to reorder list (not just default list)
 - image backgrounds white against blue like the alert symbol on login page
 
 Nice to have, not need to have:
