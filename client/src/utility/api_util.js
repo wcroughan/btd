@@ -47,11 +47,16 @@ module.exports = {
             return ret;
         }
     },
-    deleteItem(auth_token, id) {
+    async deleteItem(auth_token, id, callback) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "item/" + id + `?${params}`;
-        axios.delete(req);
+        if (callback !== undefined) {
+            axios.delete(req).then(callback);
+        } else {
+            const ret = await axios.delete(req);
+            return ret;
+        }
     },
     createAccount(email, hpw, callback) {
         const reqParamObj = { email, hpw };

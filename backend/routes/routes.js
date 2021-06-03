@@ -14,6 +14,7 @@ module.exports = function (db) {
 
     router.get('/items', controllers.getItems);
     router.put('/item', controllers.pushItemToServer);
+    router.delete('/item/:id', controllers.deleteItemFromServer);
 
     return router;
 }

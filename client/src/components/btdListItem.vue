@@ -88,7 +88,7 @@ export default {
     deleteButtonClicked() {
       //   this.$refs.itemOptionsMenu.hideMenu(false);
       nextTick(() => {
-        this.deleteItem(this.item.id);
+        this.deleteItem(this.item._id);
       });
     },
     snoozeButtonClicked() {

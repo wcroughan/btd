@@ -135,6 +135,18 @@ module.exports = function (db) {
 
             res.status(200).json({ id: retid });
         },
+        async deleteItemFromServer(req, res, next) {
+            const detail = {
+                _id: ObjectID(req.params.id),
+                userid: ObjectID(req.uid)
+            }
+
+            const result = await db.collection("items").deleteOne(detail);
+            console.log(__line, result)
+            console.log(detail)
+
+            res.status(200).json({ success: true });
+        },
         getTest(req, res, next) {
             res.status(200).json({
                 body: "Becca is great!!!"

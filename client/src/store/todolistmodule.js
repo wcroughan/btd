@@ -59,6 +59,7 @@ export default {
             state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
         },
         deleteItemLocal(state, id) {
+            console.log(state.todoItems)
             state.todoItems.splice(state.todoItems.findIndex(i => i._id === id), 1);
         },
         addItemLocal(state, item) {

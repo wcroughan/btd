@@ -13,16 +13,12 @@ Next shipped update:
             - add a refresh button somewhere
 
         -backend
-            -new db for items
             -api_util calls
-                -make sure to add a check for overdue field so can search later
-                -also include info when snoozing about original due date, date snoozed, etc
             -aggregation logic
 - refresh button. Also auto refreshes every (idk, 5 mins?)
 - bring back animations on move
 - slight ui change for item whose menu is up
--calendar doesn't fit on mobile
-- Autofocus quick add text input on mounted
+- calendar doesn't fit on mobile
 - Add button in each category
 - Long press to rearrange items. Can just implement always as rearrangable with handle, have v-if/else b/w handle and checkbox (and maybe on right side between ellipses menu and select checkmark for things like deleting many)
 

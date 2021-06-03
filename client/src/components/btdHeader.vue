@@ -19,6 +19,7 @@
         class="add-item-button"
         :closeOnAnyClick="false"
         ref="quickaddmenu"
+        :onContentMounted="ocm"
       >
         <template v-slot:button>
           <!-- <img src="../assets/menu.png" class="add-item-icon" /> -->
@@ -34,6 +35,7 @@
                 type="text"
                 v-model="quickAddText"
                 @keydown="quickaddkeypressed"
+                ref="quickAddInput"
               />
               <div class="quickadd-button-container">
                 <button @click="quickAddMoreOptions">More Options</button>
@@ -53,6 +55,7 @@ import BtdDropdown from "./btdDropdown.vue";
 // import BtdStreakInfo from "./btdStreakInfo.vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import BtdItemEditModal from "./btdItemEditModal.vue";
+import { nextTick } from "@vue/runtime-core";
 
 export default {
   name: "btdHeader",
@@ -67,12 +70,18 @@ export default {
     ...mapGetters("todolist", ["generateDefaultItem"]),
   },
   methods: {
+    ocm() {
+      nextTick(() => {
+        this.$refs.quickAddInput.focus();
+      });
+    },
     ...mapMutations("todolist", ["logout"]),
     ...mapActions("todolist", ["addItem"]),
     quickAddMoreOptions() {
       this.$refs.quickaddmenu.hideMenu();
-      this.showAddItemModal = this.generateDefaultItem();
-      this.showAddItemModal.text = this.quickAddText;
+      this.modalItem = this.generateDefaultItem();
+      this.modalItem.text = this.quickAddText;
+      this.quickAddText = "";
       this.showAddItemModal = true;
     },
     quickAddDone() {
@@ -80,10 +89,12 @@ export default {
       const item = this.generateDefaultItem();
       item.text = this.quickAddText;
       console.log("header, adding item ", item);
+      this.quickAddText = "";
       this.addItem(item);
     },
     quickaddkeypressed(e) {
       if (e.key === "Escape") {
+        this.quickAddText = "";
         this.$refs.quickaddmenu.hideMenu();
       } else if (e.key === "Enter") {
         this.quickAddDone();

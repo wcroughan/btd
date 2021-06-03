@@ -36,6 +36,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    onContentMounted: {
+      type: Function,
+      default: () => {},
+    },
   },
   methods: {
     menuClickHandler() {
@@ -53,6 +57,11 @@ export default {
     },
     hideMenu() {
       this.showMenu = false;
+    },
+  },
+  watch: {
+    showMenu(newval) {
+      if (newval) this.onContentMounted();
     },
   },
 };
