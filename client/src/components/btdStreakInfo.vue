@@ -12,7 +12,7 @@
       </div>
     </template>
     <template v-slot:content>
-      <btd-calendar :initialDate="date" @dayChosen="calendarDayChosen" />
+      <btd-calendar :initialDate="date" />
     </template>
   </btd-dropdown>
 </template>
@@ -20,9 +20,8 @@
 <script>
 import btdDropdown from "./btdDropdown.vue";
 import btdCalendar from "./btdCalendar.vue";
-import { inject } from "vue";
-import api_util from "./../utility/api_util.js";
 import date_util from "../utility/date_util";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "btdStreakInfo",
@@ -32,50 +31,24 @@ export default {
   },
   data() {
     return {
-      streakLength: 0,
-      todayGood: false,
+      date: date_util.getToday(),
     };
   },
-  props: {
-    date: Date,
+  computed: {
+    ...mapState("todolist", {
+      streakLength(state) {
+        return state.streakInfo.len;
+      },
+      todayGood(state) {
+        return state.streakInfo.todayGood;
+      },
+    }),
   },
-  inject: ["authToken"],
-  setup() {
-    const updateFlag = inject("streakUpdateFlag");
-    const updateReceived = inject("streakUpdateReceived");
-    return {
-      updateFlag,
-      updateReceived,
-    };
-  },
-  emits: ["updateDone", "dayChosen"],
   methods: {
-    calendarDayChosen(event) {
-      this.$refs.dropcal.hideMenu();
-      this.$emit("dayChosen", event);
-    },
-    getStreakLengthFromServer() {
-      api_util.getStreakLength(
-        this.authToken.value,
-        date_util.getToday(),
-        (l) => {
-          this.streakLength = l.data.len;
-          this.todayGood = l.data.todayGood;
-        }
-      );
-    },
-  },
-  watch: {
-    updateFlag(newval) {
-      if (newval > 0) {
-        // console.log("time to update the streak! val", this.updateFlag);
-        this.getStreakLengthFromServer();
-        this.updateReceived();
-      }
-    },
+    ...mapActions("todolist", ["refreshStreakInfo"]),
   },
   mounted() {
-    this.getStreakLengthFromServer();
+    this.refreshStreakInfo();
   },
 };
 </script>

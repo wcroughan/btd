@@ -9,6 +9,7 @@ module.exports = function (db) {
 
     router.get('/items', controllers.getItems);
     router.get('/pastitems', controllers.getPastItems);
+    router.get('/streak', controllers.getStreakInfo);
     router.put('/item', controllers.pushItemToServer);
     router.delete('/item/:id', controllers.deleteItemFromServer);
 

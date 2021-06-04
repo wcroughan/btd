@@ -83,6 +83,9 @@ export default {
                 state.loadingPastItems = payload.loadingPastItems;
             if (payload.loadingUpcomingItems !== undefined)
                 state.loadingUpcomingItems = payload.loadingUpcomingItems;
+        },
+        setStreakInfo(state, payload) {
+            state.streakInfo = { ...payload };
         }
     },
     actions: {
@@ -106,23 +109,31 @@ export default {
                 commit('setLoadingStatus', { loadingUpcomingItems: false })
             })
         },
-        addItem({ commit, rootState }, item) {
+        refreshStreakInfo({ rootState, commit }) {
+            api_util.getStreakInfo(rootState.auth.authInfo.authTkn).then((info) => {
+                commit('setStreakInfo', info.data)
+            })
+        },
+        addItem({ commit, rootState, dispatch }, item) {
             // item.id = misc_util.getUniqueItemId(state.todoItems)
             // state.todoItems.push(item)
             api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then((res) => {
                 item._id = res.data.id;
                 commit('addItemLocal', item)
+                dispatch('refreshStreakInfo')
             }
             );
         },
-        updateItem({ commit, rootState }, item) {
+        updateItem({ commit, rootState, dispatch }, item) {
             api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then(() => {
                 commit('updateItemLocal', item)
+                dispatch('refreshStreakInfo')
             });
         },
-        deleteItem({ commit, rootState }, id) {
+        deleteItem({ commit, rootState, dispatch }, id) {
             api_util.deleteItem(rootState.auth.authInfo.authTkn, id).then(() => {
                 commit('deleteItemLocal', id)
+                dispatch('refreshStreakInfo')
             });
 
 

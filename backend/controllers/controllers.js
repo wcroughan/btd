@@ -110,31 +110,69 @@ module.exports = function (db) {
             const overdueDetail = {
                 userid: ObjectID(req.uid),
                 isDone: false,
-                doneDate: {
+                dueDate: {
                     $lt: new Date()
                 }
             }
-            const overdueCount = await db.collection("items").count(overdueDetail);
+            const overdueCount = await db.collection("items").countDocuments(overdueDetail);
             console.log(__line, overdueCount);
             if (overdueCount > 0) {
-                return {
+                res.status(200).json({
                     todayGood: false,
                     len: 0
-                }
+                });
+                return;
             }
 
-            const detail = {
-                userid: ObjectID(req.uid),
-
-            }
             const pipeline = [
                 {
+                    $match: {
+                        userid: ObjectID(req.uid),
+                    }
+                }, {
                     $project:
                     {
-                        doneD
+                        doneDate: 1,
+                        wasOverdue: {
+                            $cmp: [
+                                "$doneDate",
+                                "$dueDate"
+                            ]
+                        }
                     }
+                }, {
+                    $match: {
+                        wasOverdue: 1
+                    }
+                }, {
+                    $sort: {
+                        'dueDate': -1
+                    }
+                }, {
+                    $limit: 1
                 }
             ]
+            const result = await db.collection("items").aggregate(pipeline)
+            // const resarray = await result.toArray();
+            // console.log(__line, resarray)
+            const mostRecent = await result.next();
+            // console.log(__line, first)
+            let t1;
+            if (mostRecent === null) {
+                //Never any overdue events, just take delay between first item ever and today
+                // aggregate with sort by duedate, limit 1
+                //Needs edge case possibly if no items exist
+            } else {
+                //t1 related to mostRecent.doneDate and today
+                t1 = null;
+            }
+            console.log("UNIMPLEMENTED", __line)
+
+            const streakInfo = {
+                todayGood: true,
+                len: 2
+            }
+            res.status(200).json(streakInfo)
         },
         getTest(req, res, next) {
             res.status(200).json({

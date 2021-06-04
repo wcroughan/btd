@@ -75,6 +75,18 @@ module.exports = {
             return ret;
         }
     },
+    async getStreakInfo(auth_token, id, callback) {
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "streak" + `?${params}`;
+        if (callback !== undefined) {
+            axios.get(req).then(callback);
+        } else {
+            const ret = await axios.get(req);
+            return ret;
+        }
+
+    },
     createAccount(email, hpw, callback) {
         const reqParamObj = { email, hpw };
         const params = new URLSearchParams(reqParamObj);

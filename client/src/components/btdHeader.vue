@@ -12,7 +12,7 @@
         </template>
       </btd-dropdown>
     </div>
-    <!-- <btd-streak-info /> -->
+    <btd-streak-info />
     <div class="add-item">
       <btd-dropdown
         menuAlign="right"
@@ -52,7 +52,7 @@
 
 <script>
 import BtdDropdown from "./btdDropdown.vue";
-// import BtdStreakInfo from "./btdStreakInfo.vue";
+import BtdStreakInfo from "./btdStreakInfo.vue";
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import BtdItemEditModal from "./btdItemEditModal.vue";
 // import { nextTick } from "@vue/runtime-core";
@@ -100,7 +100,7 @@ export default {
     },
   },
   components: {
-    // BtdStreakInfo,
+    BtdStreakInfo,
     BtdDropdown,
     BtdItemEditModal,
   },

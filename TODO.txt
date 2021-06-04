@@ -1,8 +1,8 @@
 Next shipped update:
+- streak info
 - instead of all these moves, just have a snooze option with a modal
 - header: Add menu items on left to view previous items, upcoming items, and repeating items
 - create a modal for adding/editing items
-- streak info
 - trigger loading the items from the server at 5min interval after loading
 - add a refresh button somewhere
 - ability to mark an item as not overdue
