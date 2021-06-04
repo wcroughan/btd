@@ -106,6 +106,36 @@ module.exports = function (db) {
 
             res.status(200).json({ success: true });
         },
+        async getStreakInfo(req, res, next) {
+            const overdueDetail = {
+                userid: ObjectID(req.uid),
+                isDone: false,
+                doneDate: {
+                    $lt: new Date()
+                }
+            }
+            const overdueCount = await db.collection("items").count(overdueDetail);
+            console.log(__line, overdueCount);
+            if (overdueCount > 0) {
+                return {
+                    todayGood: false,
+                    len: 0
+                }
+            }
+
+            const detail = {
+                userid: ObjectID(req.uid),
+
+            }
+            const pipeline = [
+                {
+                    $project:
+                    {
+                        doneD
+                    }
+                }
+            ]
+        },
         getTest(req, res, next) {
             res.status(200).json({
                 body: "Becca is great!!!"

@@ -1,6 +1,4 @@
 Next shipped update:
-- streak info
-- Allow repeating items on custom schedule like google calendar
 - instead of all these moves, just have a snooze option with a modal
 - header: Add menu items on left to view previous items, upcoming items, and repeating items
 - create a modal for adding/editing items
