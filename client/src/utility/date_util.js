@@ -51,5 +51,13 @@ module.exports = {
         // console.log("converted", str, "into", ret);
         return ret;
     },
-
+    daysBetween(d1, d2) {
+        const denom = 1000 * 60 * 60 * 24;
+        return Math.round((d2.getTime() - d1.getTime()) / denom)
+    },
+    startOfDay(d) {
+        const ret = new Date(d);
+        ret.setHours(0, 0, 0, 0)
+        return ret;
+    }
 }

@@ -159,11 +159,28 @@ module.exports = function (db) {
             // console.log(__line, first)
             let t1;
             if (mostRecent === null) {
+                const firstItemPipeline = [
+                    {
+                        $match: {
+                            userid: ObjectID(req.uid),
+                        }
+                    }, {
+                        $sort: {
+                            doneDate: 1
+                        }
+                    }, {
+                        $limit: 1
+                    }
+                ]
+                const result = await db.collection("items").aggregate(firstItemPipeline)
+                const firstItem = await result.next();
+
+                const len = date_util.daysBetween(date_util.startOfDay(firstItem.doneDate), date_util.getToday());
                 //Never any overdue events, just take delay between first item ever and today
                 // aggregate with sort by duedate, limit 1
                 //Needs edge case possibly if no items exist
             } else {
-                //t1 related to mostRecent.doneDate and today
+                //len related to mostRecent.doneDate and today
                 t1 = null;
             }
             console.log("UNIMPLEMENTED", __line)
