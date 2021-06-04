@@ -35,6 +35,26 @@
             />
             <span>Repeats</span>
           </label>
+          <div class="repeatcontent" v-if="showRepeatSection">
+            <label for="repeveryx">
+              <input
+                type="radio"
+                id="repeveryx"
+                value="rep1"
+                v-model="repModeSelection"
+              />
+              <div class="repeveryx repselsection">Hi</div>
+            </label>
+            <label for="repondate">
+              <input
+                type="radio"
+                id="repondate"
+                value="rep2"
+                v-model="repModeSelection"
+              />
+              <div class="repondate repselsection">Hi</div>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -58,6 +78,7 @@ export default {
       savedDueTime: null,
       item: clone(this.initialItem),
       showRepeatSection: false,
+      repModeSelection: {},
     };
   },
   computed: {
