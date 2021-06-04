@@ -43,6 +43,25 @@ module.exports = {
             ("0" + (date.getMonth() + 1)).slice(-2) +
             ("0" + date.getDate()).slice(-2)
     },
+    calendarInputDateStr(date) {
+        return date.getFullYear() + '-' +
+            ("0" + (date.getMonth() + 1)).slice(-2) + '-' +
+            ("0" + date.getDate()).slice(-2)
+    },
+    updateDateFromCalendarInputStr(date, str) {
+        const s = str.split('-');
+        date.setYear(s[0]);
+        date.setMonth(s[1] - 1);
+        date.setDate(s[2]);
+    },
+    timeInputValueStr(date) {
+        return ('0' + date.getHours()).slice(-2) + ':' +
+            ('0' + date.getMinutes()).slice(-2)
+    },
+    updateDateFromTimeInputStr(date, str) {
+        const s = str.split(':');
+        date.setHours(s[0], s[1]);
+    },
     getDateFromIdStr(str) {
         const yr = parseInt(str.substring(0, 4));
         const mo = parseInt(str.substring(4, 6)) - 1;

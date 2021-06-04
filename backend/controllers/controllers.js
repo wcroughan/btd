@@ -124,6 +124,11 @@ module.exports = function (db) {
                 return;
             }
 
+            const streakInfo = {
+                todayGood: true,
+                len: 2
+            }
+
             const pipeline = [
                 {
                     $match: {
@@ -156,9 +161,10 @@ module.exports = function (db) {
             // const resarray = await result.toArray();
             // console.log(__line, resarray)
             const mostRecent = await result.next();
-            // console.log(__line, first)
+            console.log(__line, mostRecent)
             let t1;
             if (mostRecent === null) {
+                //never anything overdue
                 const firstItemPipeline = [
                     {
                         $match: {
@@ -174,21 +180,36 @@ module.exports = function (db) {
                 ]
                 const result = await db.collection("items").aggregate(firstItemPipeline)
                 const firstItem = await result.next();
+                if (firstItem === null) {
+                    //edge case of no items
+                    streakInfo.len = 0;
+                    streakInfo.todayGood = 0;
+                    res.status(200).json(streakInfo);
+                    return;
+                }
 
-                const len = date_util.daysBetween(date_util.startOfDay(firstItem.doneDate), date_util.getToday());
-                //Never any overdue events, just take delay between first item ever and today
-                // aggregate with sort by duedate, limit 1
-                //Needs edge case possibly if no items exist
+                streakInfo.len = date_util.daysBetween(date_util.startOfDay(firstItem.doneDate), date_util.getToday());
             } else {
-                //len related to mostRecent.doneDate and today
-                t1 = null;
+                streakInfo.len = date_util.daysBetween(date_util.startOfDay(mostRecent.doneDate), date_util.getToday());
             }
-            console.log("UNIMPLEMENTED", __line)
 
-            const streakInfo = {
-                todayGood: true,
-                len: 2
+            //finally, see if there's anything left to do today
+            const todayDetail = {
+                userid: ObjectID(req.uid),
+                isDone: false,
+                dueDate: {
+                    $lte: date_util.getTomorrow()
+                }
             }
+            const todayCount = await db.collection("items").countDocuments(todayDetail);
+            console.log(__line, todayCount);
+            if (todayCount > 0) {
+                streakInfo.todayGood = false;
+            } else {
+                streakInfo.todayGood = true;
+                streakInfo.len++;
+            }
+
             res.status(200).json(streakInfo)
         },
         getTest(req, res, next) {

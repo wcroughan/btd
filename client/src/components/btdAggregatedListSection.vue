@@ -13,6 +13,7 @@
     <div class="sectionfooter" v-if="doneItems.length > 0">
       <transition name="doneitems-trans">
         <div class="doneitems" v-if="showDoneItems">
+          <div class="sectionfooterspacer" />
           <transition-group name="donelisttrans">
             <btd-list-item
               class="done-item"
@@ -84,8 +85,11 @@ export default {
   user-select: none;
   text-decoration: line-through;
 }
-.done-item:first-child {
+/* .done-item:first-child {
   padding-top: 2em;
+} */
+.sectionfooterspacer {
+  height: 1em;
 }
 
 .sectionfooter > button {

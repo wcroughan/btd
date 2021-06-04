@@ -95,6 +95,7 @@ export default {
   display: flex;
   justify-content: space-between;
   /* background-color: teal; */
+  /* padding-bottom: 1em; */
 }
 
 .header-title {
