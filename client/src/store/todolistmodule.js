@@ -49,7 +49,12 @@ export default {
                 doneDate: null,
                 createdDate: new Date(),
                 repeats: false,
-                repeatInfo: {},
+                repeatInfo: {
+                    everyx: {
+                        frequency: 1,
+                        unit: "days"
+                    }
+                },
                 snoozedOnDate: null,
             }
             console.log("returning default item ", item)

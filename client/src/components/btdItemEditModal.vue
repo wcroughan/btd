@@ -43,7 +43,15 @@
                 value="rep1"
                 v-model="repModeSelection"
               />
-              <div class="repeveryx repselsection">Hi</div>
+              <div class="repeveryx repselsection">
+                Every
+                <input
+                  type="number"
+                  v-model="item.repeatInfo.everyx.frequency"
+                  min="1"
+                />
+                Days
+              </div>
             </label>
             <label for="repondate">
               <input
@@ -180,6 +188,10 @@ export default {
 }
 
 .rc1 {
+  display: flex;
+}
+
+.repeatcontent > label {
   display: flex;
 }
 </style>
