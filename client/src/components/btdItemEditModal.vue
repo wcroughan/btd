@@ -40,28 +40,143 @@
               <input
                 type="radio"
                 id="repeveryx"
-                value="rep1"
-                v-model="repModeSelection"
+                value="repeveryx"
+                v-model="item.repeatInfo.repeatMode"
               />
               <div class="repeveryx repselsection">
                 Every
                 <input
+                  class="numberinput"
                   type="number"
-                  v-model="item.repeatInfo.everyx.frequency"
+                  v-model.number="item.repeatInfo.everyx.frequency"
                   min="1"
                 />
-                Days
+                <select v-model="item.repeatInfo.everyx.unit">
+                  <option value="days">days</option>
+                  <option value="weeks">weeks</option>
+                  <option value="months">months</option>
+                  <option value="years">years</option>
+                </select>
               </div>
             </label>
-            <label for="repondate">
+            <label for="reponxweekday">
               <input
                 type="radio"
-                id="repondate"
-                value="rep2"
-                v-model="repModeSelection"
+                id="reponxweekday"
+                value="reponxweekday"
+                v-model="item.repeatInfo.repeatMode"
               />
-              <div class="repondate repselsection">Hi</div>
+              <div class="reponxweekday repselsection">
+                On the
+                <select v-model="item.repeatInfo.xweekday.x">
+                  <option value="1st">1st</option>
+                  <option value="last">last</option>
+                  <option value="2nd">2nd</option>
+                  <option value="3rd">3rd</option>
+                  <option value="4th">4th</option>
+                  <option value="5th">5th</option>
+                </select>
+                <select v-model="item.repeatInfo.xweekday.weekday">
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+              </div>
             </label>
+            <div class="repeatsubsection">
+              <h4>Ends:</h4>
+              <label for="endafterx">
+                <input
+                  type="radio"
+                  id="endafterx"
+                  value="endafterx"
+                  v-model="item.repeatInfo.end.endMode"
+                />
+                After
+                <input
+                  type="number"
+                  class="numberinput"
+                  min="1"
+                  v-model.number="item.repeatInfo.end.endafterx"
+                />
+                Occurences
+              </label>
+              <label for="endon">
+                <input
+                  type="radio"
+                  id="endon"
+                  value="endon"
+                  v-model="item.repeatInfo.end.endMode"
+                />
+                On
+                <input type="date" v-model="endOnCalendarVal" />
+              </label>
+              <label for="endnever">
+                <input
+                  type="radio"
+                  id="endnever"
+                  value="endnever"
+                  v-model="item.repeatInfo.end.endMode"
+                />
+                Never
+              </label>
+            </div>
+            <div class="repeatsubsection">
+              <h4>Show:</h4>
+              <label for="shownow">
+                <input
+                  type="radio"
+                  id="shownow"
+                  value="shownow"
+                  v-model="item.repeatInfo.show.showMode"
+                />
+                now
+              </label>
+              <label for="xunits">
+                <input
+                  type="radio"
+                  id="xunits"
+                  value="xunits"
+                  v-model="item.repeatInfo.show.showMode"
+                />
+                <input
+                  class="numberinput"
+                  type="number"
+                  v-model.number="item.repeatInfo.show.xunits.x"
+                  min="1"
+                />
+                <select v-model="item.repeatInfo.show.xunits.unit">
+                  <option value="days">days</option>
+                  <option value="weeks">weeks</option>
+                  <option value="months">months</option>
+                  <option value="years">years</option>
+                </select>
+                before due date
+              </label>
+              <label for="showweekday">
+                <input
+                  type="radio"
+                  id="showweekday"
+                  value="showweekday"
+                  v-model="item.repeatInfo.show.showMode"
+                />
+                on the
+                <select v-model="item.repeatInfo.show.weekday">
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+                before due date
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -86,7 +201,6 @@ export default {
       savedDueTime: null,
       item: clone(this.initialItem),
       showRepeatSection: false,
-      repModeSelection: {},
     };
   },
   computed: {
@@ -119,6 +233,26 @@ export default {
         // console.log(this.item.dueDate);
         this.savedDueTime = val;
         this.item.dueDate = new Date(this.item.dueDate);
+      },
+    },
+    endOnCalendarVal: {
+      get() {
+        const ret = date_util.calendarInputDateStr(
+          this.item.repeatInfo.end.endon
+        );
+        console.log(ret);
+        return ret;
+      },
+      set(val) {
+        console.log("end on calendar setting: ", val);
+        date_util.updateDateFromCalendarInputStr(
+          this.item.repeatInfo.end.endon,
+          val
+        );
+        console.log(this.item.repeatInfo.end.endon);
+        this.item.repeatInfo.end.endon = new Date(
+          this.item.repeatInfo.end.endon
+        );
       },
     },
   },
@@ -177,10 +311,13 @@ export default {
 
 .modal-content {
   position: absolute;
-  top: 25%;
-  left: 25%;
-  width: 50%;
-  height: 50%;
+  /* margin: auto; */
+  top: calc(50% - 150px);
+  left: calc(50% - 150px);
+  /* width: 50%; */
+  /* height: 50%; */
+  min-width: 300px;
+  min-height: 300px;
   z-index: 2;
   background-color: white;
   display: flex;
@@ -193,5 +330,20 @@ export default {
 
 .repeatcontent > label {
   display: flex;
+}
+
+.numberinput {
+  max-width: 35px;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.repeatsubsection {
+  display: flex;
+  flex-direction: column;
+}
+.repeatsubsection > h4 {
+  margin: 0px;
+  margin-top: 7px;
 }
 </style>

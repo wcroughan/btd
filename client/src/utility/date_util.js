@@ -38,6 +38,11 @@ module.exports = {
         ret.setDate(ret.getDate() + 7);
         return ret;
     },
+    plusOneMonth(date) {
+        const ret = new Date(date);
+        ret.setMonth(ret.getMonth() + 1);
+        return ret;
+    },
     apiDateStr(date) {
         return date.getFullYear() +
             ("0" + (date.getMonth() + 1)).slice(-2) +

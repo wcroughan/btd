@@ -50,9 +50,27 @@ export default {
                 createdDate: new Date(),
                 repeats: false,
                 repeatInfo: {
+                    repMode: "everyx",
                     everyx: {
                         frequency: 1,
                         unit: "days"
+                    },
+                    xweekday: {
+                        x: "1st",
+                        weekday: "Monday"
+                    },
+                    end: {
+                        endMode: "endafterx",
+                        endafterx: 10,
+                        endon: date_util.plusOneMonth(date_util.getToday())
+                    },
+                    show: {
+                        showMode: "shownow",
+                        xunits: {
+                            x: 1,
+                            unit: "days"
+                        },
+                        weekday: "Monday"
                     }
                 },
                 snoozedOnDate: null,

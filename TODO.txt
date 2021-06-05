@@ -9,6 +9,8 @@ Next shipped update:
 - calendar doesn't fit on mobile
 - Add button in each category
 - Long press to rearrange items. Can just implement always as rearrangable with handle, have v-if/else b/w handle and checkbox (and maybe on right side between ellipses menu and select checkmark for things like deleting many)
+- change dueby section to do radio button instead of add time button
+- click on modal backmask closes modal
 
 
 
@@ -19,6 +21,7 @@ Should implement at some point:
 - keyboard shortcuts!
 - center aligned dropdowns get all screwy with animations
 - image backgrounds white against blue like the alert symbol on login page
+- in repeat section, automatically set parameters to match the relevant date
 
 Nice to have, not need to have:
 - make a smaller curved arrow image so less to download
