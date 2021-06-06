@@ -20,6 +20,7 @@ module.exports = {
         if (item.createdDate !== undefined) item.createdDate = new Date(item.createdDate)
         if (item.doneDate !== undefined) item.doneDate = new Date(item.doneDate)
         if (item.snoozedOnDate !== undefined) item.snoozedOnDate = new Date(item.snoozedOnDate)
+        if (item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = new Date(item.repeatInfo.end.endon)
     },
     convertDatesToTimes(item) {
         if (item.displayDate !== undefined) item.displayDate = item.displayDate.getTime();
@@ -27,6 +28,7 @@ module.exports = {
         if (item.createdDate !== undefined) item.createdDate = item.createdDate.getTime();
         if (item.doneDate !== undefined) item.doneDate = item.doneDate.getTime();
         if (item.snoozedOnDate !== undefined) item.snoozedOnDate = item.snoozedOnDate.getTime();
+        if (item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = item.repeatInfo.end.endon.getTime();
     }
 
 }

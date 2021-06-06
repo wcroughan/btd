@@ -1,5 +1,14 @@
 <template>
-  <btd-dropdown menuAlign="right" ref="dropcal" :closeOnAnyClick="false">
+  <div class="btd-streak-info">
+    <img
+      class="fire-img"
+      :class="{ greyed: !todayGood }"
+      src="../assets/fire.png"
+      alt="streak"
+    />
+    {{ streakLength }}
+  </div>
+  <!-- <btd-dropdown menuAlign="right" ref="dropcal" :closeOnAnyClick="false">
     <template v-slot:button>
       <div class="btd-streak-info">
         <img
@@ -14,20 +23,20 @@
     <template v-slot:content>
       <btd-calendar :initialDate="date" />
     </template>
-  </btd-dropdown>
+  </btd-dropdown> -->
 </template>
 
 <script>
-import btdDropdown from "./btdDropdown.vue";
-import btdCalendar from "./btdCalendar.vue";
+// import btdDropdown from "./btdDropdown.vue";
+// import btdCalendar from "./btdCalendar.vue";
 import date_util from "../utility/date_util";
 import { mapActions, mapState } from "vuex";
 
 export default {
   name: "btdStreakInfo",
   components: {
-    btdDropdown,
-    btdCalendar,
+    // btdDropdown,
+    // btdCalendar,
   },
   data() {
     return {

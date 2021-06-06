@@ -42,6 +42,10 @@ export default {
   },
   mounted() {
     this.refreshItems();
+    setInterval(() => {
+      console.log("refreshing items");
+      this.refreshItems();
+    }, 1000 * 60 * 5);
   },
 };
 </script>

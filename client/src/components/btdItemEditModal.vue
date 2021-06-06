@@ -39,19 +39,15 @@
         </div>
         <div class="formsection repeatcontainer">
           <label class="rc1" for="repeatsbox">
-            <btd-checkbox
-              @change="showRepeatSection = $event.target.checked"
-              :id="'repeatsbox'"
-              :checked="false"
-            />
+            <btd-checkbox v-model="item.repeats" :id="'repeatsbox'" />
             <span>Repeats</span>
           </label>
-          <div class="repeatcontent" v-if="showRepeatSection">
+          <div class="repeatcontent" v-if="item.repeats">
             <label for="repeveryx">
               <input
                 type="radio"
                 id="repeveryx"
-                value="repeveryx"
+                value="everyx"
                 v-model="item.repeatInfo.repeatMode"
               />
               <div class="repeveryx repselsection">
@@ -185,7 +181,9 @@
           <div class="buttonspacer" />
           <div class="buttonspacer2">
             <button @click="cancel">Cancel</button>
-            <button @click="finishAndAddItem">{{ finishButtonText }}</button>
+            <button @click="finishAndAddItem">
+              {{ editingExistingItem ? "Save" : "Add" }}
+            </button>
           </div>
         </div>
       </div>
@@ -217,16 +215,12 @@ export default {
     return {
       savedDueTime: null,
       item: clone(this.initialItem),
-      showRepeatSection: false,
       duedatestr: date_util.calendarInputDateStr(d),
       duetimestr,
+      editingExistingItem: this.initialItem._id !== undefined,
     };
   },
   computed: {
-    finishButtonText() {
-      if (this.item._id === undefined) return "Add";
-      return "Save";
-    },
     endOnCalendarVal: {
       get() {
         const ret = date_util.calendarInputDateStr(
@@ -257,7 +251,7 @@ export default {
         this.finishAndAddItem();
       }
     },
-    ...mapActions("todolist", ["addItem"]),
+    ...mapActions("todolist", ["addItem", "updateItem"]),
     finishAndAddItem() {
       date_util.updateDateFromCalendarInputStr(
         this.item.dueDate,
@@ -272,12 +266,16 @@ export default {
           this.duetimestr
         );
       }
-      this.addItem(this.item);
+      if (this.editingExistingItem) this.updateItem(this.item);
+      else this.addItem(this.item);
       this.$emit("closeModal", true);
     },
     cancel() {
       this.$emit("closeModal", false);
     },
+  },
+  mounted() {
+    console.log(this.initialItem);
   },
 };
 </script>

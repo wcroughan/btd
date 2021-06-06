@@ -51,7 +51,7 @@ export default {
                 createdDate: new Date(),
                 repeats: false,
                 repeatInfo: {
-                    repMode: "everyx",
+                    repeatMode: "everyx",
                     everyx: {
                         frequency: 1,
                         unit: "days"
