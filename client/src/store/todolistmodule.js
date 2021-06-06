@@ -47,6 +47,7 @@ export default {
                 dueDate: date_util.getTomorrow(),
                 displayDate: date_util.getToday(),
                 doneDate: null,
+                dueDateMode: "endofday",
                 createdDate: new Date(),
                 repeats: false,
                 repeatInfo: {
@@ -65,7 +66,7 @@ export default {
                         endon: date_util.plusOneMonth(date_util.getToday())
                     },
                     show: {
-                        showMode: "shownow",
+                        showMode: "showweekday",
                         xunits: {
                             x: 1,
                             unit: "days"

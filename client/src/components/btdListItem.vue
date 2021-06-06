@@ -48,6 +48,11 @@
         </section>
       </template>
     </btd-dropdown>
+    <btd-item-edit-modal
+      v-if="showAddItemModal"
+      :initialItem="item"
+      @closeModal="showAddItemModal = false"
+    />
   </div>
 </template>
 
@@ -58,10 +63,12 @@ import { nextTick } from "@vue/runtime-core";
 import BtdDropdown from "./btdDropdown.vue";
 import { mapActions } from "vuex";
 import BtdCheckbox from "./btdCheckbox.vue";
+import btdItemEditModal from "./btdItemEditModal.vue";
 
 export default {
   name: "btdListItem",
   components: {
+    btdItemEditModal,
     btdItemTitleDisplay,
     BtdDropdown,
     BtdCheckbox,
@@ -71,6 +78,7 @@ export default {
       mouseIn: false,
       persistentOptions: false,
       menuShowing: false,
+      showAddItemModal: false,
     };
   },
   props: {
@@ -107,7 +115,7 @@ export default {
       console.log("TODO");
     },
     editButtonClicked() {
-      console.log("TODO");
+      this.showAddItemModal = true;
     },
   },
   mounted() {

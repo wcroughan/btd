@@ -2,29 +2,40 @@
   <teleport to="body">
     <div class="item-edit-modal">
       <div class="non-menu-mask" />
-      <div class="modal-content">
+      <div class="modal-content" @keydown="keyhandler">
         <div class="formsection task">
           <label for="taskinput"> Task: </label>
           <input type="text" id="taskinput" v-model="item.text" />
         </div>
         <div class="formsection duedate">
           <label for="dueinput"> Due date: </label>
-          <input type="date" id="dueinput" v-model="duedate" />
+          <input type="date" id="dueinput" v-model="duedatestr" />
         </div>
         <div class="formsection duetime">
-          <label for="duetimeinput"> Due by: </label>
-          <span v-if="!hasDueTime">End of day</span>
-          <input
-            v-else
-            type="time"
-            id="duetimeinput"
-            @change="duetime = $event.target.value"
-            :value="duetime"
-            step="900"
-          />
-          <button @click="toggleDueTimeClicked">
-            {{ hasDueTime ? "End of day" : "Add time" }}
-          </button>
+          <h4>Due by:</h4>
+          <label for="duetimeeod">
+            <input
+              type="radio"
+              id="duetimeeod"
+              value="endofday"
+              v-model="item.dueDateMode"
+            />
+            End of day
+          </label>
+          <label for="duetimetime">
+            <input
+              type="radio"
+              id="duetimetime"
+              value="dueattime"
+              v-model="item.dueDateMode"
+            />
+            <input
+              type="time"
+              id="duetimeinput"
+              v-model="duetimestr"
+              step="900"
+            />
+          </label>
         </div>
         <div class="formsection repeatcontainer">
           <label class="rc1" for="repeatsbox">
@@ -127,15 +138,6 @@
             </div>
             <div class="repeatsubsection">
               <h4>Show:</h4>
-              <label for="shownow">
-                <input
-                  type="radio"
-                  id="shownow"
-                  value="shownow"
-                  v-model="item.repeatInfo.show.showMode"
-                />
-                now
-              </label>
               <label for="xunits">
                 <input
                   type="radio"
@@ -179,6 +181,13 @@
             </div>
           </div>
         </div>
+        <div class="formsection buttoncontainer">
+          <div class="buttonspacer" />
+          <div class="buttonspacer2">
+            <button @click="cancel">Cancel</button>
+            <button @click="finishAndAddItem">{{ finishButtonText }}</button>
+          </div>
+        </div>
       </div>
     </div>
   </teleport>
@@ -188,6 +197,7 @@
 import clone from "just-clone";
 import btdCheckbox from "./btdCheckbox.vue";
 import date_util from "../utility/date_util";
+import { mapActions } from "vuex";
 
 export default {
   name: "BtdItemEditModal",
@@ -195,45 +205,27 @@ export default {
     btdCheckbox,
   },
   props: ["initialItem"],
+  emits: ["closeModal"],
   data() {
+    const d = new Date(this.initialItem.dueDate);
+    d.setSeconds(d.getSeconds() - 1);
+    let duetimestr = "17:00";
+    if (this.initialItem.dueDateMode !== "endofday") {
+      duetimestr = date_util.timeInputValueStr(this.initialItem.dueDate);
+    }
+
     return {
-      hasDueTime: false,
       savedDueTime: null,
       item: clone(this.initialItem),
       showRepeatSection: false,
+      duedatestr: date_util.calendarInputDateStr(d),
+      duetimestr,
     };
   },
   computed: {
-    duedate: {
-      get() {
-        //if it's midnight, should show the day before technically
-        const d = new Date(this.item.dueDate);
-        d.setSeconds(d.getSeconds() - 1);
-        return date_util.calendarInputDateStr(d);
-      },
-      set(val) {
-        // console.log(val);
-        date_util.updateDateFromCalendarInputStr(this.item.dueDate, val);
-        // console.log(this.item.dueDate);
-        if (!this.hasDueTime)
-          this.item.dueDate.setDate(this.item.dueDate.getDate() + 1);
-        this.item.dueDate = new Date(this.item.dueDate);
-      },
-    },
-    duetime: {
-      get() {
-        const ret = date_util.timeInputValueStr(this.item.dueDate);
-        // console.log(ret);
-        return ret;
-        // return this.item.dueDate;
-      },
-      set(val) {
-        console.log("due time setting: ", val);
-        date_util.updateDateFromTimeInputStr(this.item.dueDate, val);
-        // console.log(this.item.dueDate);
-        this.savedDueTime = val;
-        this.item.dueDate = new Date(this.item.dueDate);
-      },
+    finishButtonText() {
+      if (this.item._id === undefined) return "Add";
+      return "Save";
     },
     endOnCalendarVal: {
       get() {
@@ -257,33 +249,34 @@ export default {
     },
   },
   methods: {
-    toggleDueTimeClicked() {
-      this.hasDueTime = !this.hasDueTime;
-      console.log(this.savedDueTime);
-      if (!this.hasDueTime) {
-        console.log("tog1");
-        //no due time, set back to midnight
-        this.item.dueDate.setHours(0, 0, 0, 0);
+    keyhandler(e) {
+      console.log(e);
+      if (e.key === "Escape") {
+        this.cancel();
+      } else if (e.key === "Enter") {
+        this.finishAndAddItem();
+      }
+    },
+    ...mapActions("todolist", ["addItem"]),
+    finishAndAddItem() {
+      date_util.updateDateFromCalendarInputStr(
+        this.item.dueDate,
+        this.duedatestr
+      );
+      if (this.item.dueDateMode === "endofday") {
         this.item.dueDate.setDate(this.item.dueDate.getDate() + 1);
-      } else if (this.savedDueTime === null) {
-        console.log("tog2");
-        //user hasn't input any time specifically, but now wants there to be a date. Set it to a default
-        this.item.dueDate.setDate(this.item.dueDate.getDate() - 1);
-        this.item.dueDate.setHours(17);
+        this.item.dueDate.setHours(0, 0, 0, 0);
       } else {
-        console.log("tog3");
-        //user switching back to due time, and has input previously
-        this.item.dueDate.setDate(this.item.dueDate.getDate() - 1);
         date_util.updateDateFromTimeInputStr(
           this.item.dueDate,
-          this.savedDueTime
+          this.duetimestr
         );
       }
-
-      //more reactivity hax
-      this.item.dueDate = new Date(this.item.dueDate);
-
-      console.log(this.item.dueDate);
+      this.addItem(this.item);
+      this.$emit("closeModal", true);
+    },
+    cancel() {
+      this.$emit("closeModal", false);
     },
   },
 };
@@ -342,8 +335,22 @@ export default {
   display: flex;
   flex-direction: column;
 }
-.repeatsubsection > h4 {
+h4 {
   margin: 0px;
   margin-top: 7px;
+}
+
+.duetime {
+  display: flex;
+  flex-direction: column;
+}
+.buttoncontainer {
+  display: flex;
+}
+.buttonspacer {
+  flex-grow: 1;
+}
+.buttonspacer2 {
+  flex-grow: 0;
 }
 </style>

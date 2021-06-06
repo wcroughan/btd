@@ -46,7 +46,11 @@
         </template>
       </btd-dropdown>
     </div>
-    <btd-item-edit-modal v-if="showAddItemModal" :initialItem="modalItem" />
+    <btd-item-edit-modal
+      v-if="showAddItemModal"
+      :initialItem="modalItem"
+      @closeModal="showAddItemModal = false"
+    />
   </div>
 </template>
 
