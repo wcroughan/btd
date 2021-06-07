@@ -4,8 +4,8 @@
       class="ogcheck"
       :id="id"
       type="checkbox"
-      @change="$emit('change', $event.target.checked)"
-      :checked="checked"
+      @change="$emit('update:modelValue', $event.target.checked)"
+      :checked="modelValue"
     />
     <div class="ogreplace">
       <div class="checkmark" />
@@ -16,8 +16,8 @@
 <script>
 export default {
   name: "BtdCheckbox",
-  props: ["id", "checked"],
-  emits: ["change"],
+  props: ["id", "modelValue"],
+  emits: ["update:modelValue"],
 };
 </script>
 

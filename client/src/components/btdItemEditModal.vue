@@ -2,7 +2,7 @@
   <teleport to="body">
     <div class="item-edit-modal">
       <div class="non-menu-mask" />
-      <div class="modal-content" @keydown="keyhandler">
+      <div class="modal-content">
         <div class="formsection task">
           <label for="taskinput"> Task: </label>
           <input type="text" id="taskinput" v-model="item.text" />
@@ -37,7 +37,10 @@
             />
           </label>
         </div>
-        <div class="formsection repeatcontainer">
+        <div
+          class="formsection repeatcontainer"
+          :class="item.repeats ? 'repeatcontaineractive' : ''"
+        >
           <label class="rc1" for="repeatsbox">
             <btd-checkbox v-model="item.repeats" :id="'repeatsbox'" />
             <span>Repeats</span>
@@ -243,14 +246,6 @@ export default {
     },
   },
   methods: {
-    keyhandler(e) {
-      console.log(e);
-      if (e.key === "Escape") {
-        this.cancel();
-      } else if (e.key === "Enter") {
-        this.finishAndAddItem();
-      }
-    },
     ...mapActions("todolist", ["addItem", "updateItem"]),
     finishAndAddItem() {
       date_util.updateDateFromCalendarInputStr(
@@ -303,20 +298,22 @@ export default {
 .modal-content {
   position: absolute;
   /* margin: auto; */
-  top: calc(50% - 150px);
-  left: calc(50% - 150px);
+  top: calc(25% - 150px);
+  left: calc(50% - 160px);
   /* width: 50%; */
   /* height: 50%; */
   min-width: 300px;
-  min-height: 300px;
+  /* min-height: 300px; */
   z-index: 2;
   background-color: white;
   display: flex;
   flex-direction: column;
+  padding: 15px 20px;
 }
 
 .rc1 {
   display: flex;
+  padding-bottom: 10px;
 }
 
 .repeatcontent > label {
@@ -350,5 +347,19 @@ h4 {
 }
 .buttonspacer2 {
   flex-grow: 0;
+}
+.formsection {
+  margin-top: 15px;
+}
+.repeatcontaineractive {
+  border: 1px solid rgb(150, 150, 150);
+  border-radius: 10px;
+  padding: 10px;
+}
+.repeatcontent > label {
+  padding-top: 5px;
+}
+.repeatsubsection > label {
+  padding-top: 5px;
 }
 </style>

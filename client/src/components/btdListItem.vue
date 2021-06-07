@@ -18,8 +18,8 @@
       </div> -->
       <btd-checkbox
         :id="item.id"
-        @change="handleCheckbox($event)"
-        :checked="item.isDone"
+        @update:modelValue="handleCheckbox($event)"
+        :modelValue="item.isDone"
       />
       <btd-dropdown
         menuAlign="left"
@@ -96,6 +96,7 @@ export default {
     BtdCheckbox,
   },
   data() {
+    // console.log("creating item with ", this.item);
     return {
       mouseIn: false,
       persistentOptions: false,

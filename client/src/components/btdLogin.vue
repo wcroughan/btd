@@ -193,7 +193,7 @@ export default {
 .warning {
   display: flex;
   justify-content: center;
-  color: red;
+  color: darkred;
   margin-bottom: 15px;
   align-items: center;
 }

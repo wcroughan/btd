@@ -68,12 +68,6 @@ export default {
 
     const allPossibleGroups = futureGroups.concat(pastGroups);
 
-    //TODO:
-    //add a variable output here that points to the correct list in state, then can just change that and listinfos should react
-    //also break up "later" input months up to a year (maybe just a few months?) out, then next year, then later
-    //Also have category for yesterday, last week etc.
-    //Theoretically these groups should never have to change when displayig different categories, then can just update which list drawing from
-
     // console.log(timeDividers, titles, futureGroups);
     // console.log(ptimeDividers, pastTitles, pastGroups);
     // console.log(allPossibleGroups);

@@ -6,9 +6,37 @@
       :title="listInfo.title"
     />
     <div class="sectionbody">
-      <transition-group name="listitems">
+      <!-- <transition-group name="listitems">
         <btd-list-item v-for="item in items" :item="item" :key="item._id" />
-      </transition-group>
+      </transition-group> -->
+      <draggable
+        v-model="itemIdxs"
+        :item-key="(v) => v"
+        handle=".list-item-handle"
+        tag="transition-group"
+        :component-data="{
+          name: !drag ? 'flip-list' : null,
+        }"
+        v-bind="dragOptions"
+        @start="drag = true"
+        @end="drag = false"
+      >
+        <template #item="{ element }">
+          <div class="list-item">
+            <div class="list-item-handle">
+              <div class="handlebar" />
+              <div class="handlebar" />
+              <div class="handlebar" />
+              <div class="handlebar" />
+            </div>
+            <btd-list-item class="list-item-content" :item="items[element]" />
+            <div class="list-item-delete" @click="deleteItem(element.id)">
+              <div class="deletebar delete1" />
+              <div class="deletebar delete2" />
+            </div>
+          </div>
+        </template>
+      </draggable>
     </div>
     <div class="sectionfooter" v-if="doneItems.length > 0">
       <transition name="doneitems-trans">
@@ -38,12 +66,15 @@
 <script>
 import btdListHeader from "./btdListHeader.vue";
 import btdListItem from "./btdListItem.vue";
+import _ from "underscore";
+import draggable from "vuedraggable";
 
 export default {
   name: "BtdAggregatedListItem",
   components: {
     btdListHeader,
     btdListItem,
+    draggable,
   },
   props: {
     listInfo: Object,
@@ -51,9 +82,17 @@ export default {
   data() {
     return {
       showDoneItems: true,
+      drag: false,
+      itemIdxs: _.range(0, this.listInfo.getItems().length),
     };
   },
   computed: {
+    dragOptions() {
+      return {
+        animation: 200,
+        ghostClass: "ghost",
+      };
+    },
     items() {
       return this.listInfo.getItems();
     },
@@ -138,5 +177,56 @@ export default {
 }
 .listitems-move {
   transition: transform 0.25s ease;
+}
+
+.flip-list-move {
+  transition: transform 0.5s ease;
+}
+
+.ghost {
+  opacity: 0.5;
+}
+.list-item {
+  display: flex;
+  width: 100%;
+}
+.list-item-content {
+  flex-grow: 1;
+}
+.list-item-handle {
+  display: flex;
+  flex-direction: column;
+  min-width: 30px;
+  min-height: 30px;
+  justify-content: center;
+}
+.handlebar {
+  background-color: black;
+  width: 20px;
+  min-height: 1px;
+  margin: 1px 0px;
+}
+
+.deletebar {
+  position: absolute;
+  background-color: red;
+  min-width: 20px;
+  min-height: 2px;
+  right: 0px;
+}
+.list-item-delete {
+  position: relative;
+  min-width: 30px;
+  min-height: 30px;
+}
+.list-item-delete:hover > .deletebar {
+  background-color: lightcoral;
+}
+.delete1 {
+  transform: translateY(15px) translateX(-5px) rotate(45deg);
+  top: 0px;
+}
+.delete2 {
+  transform: translateY(15px) translateX(-5px) rotate(-45deg);
 }
 </style>
