@@ -77,7 +77,7 @@ export default {
                 },
                 snoozedOnDate: null,
             }
-            console.log("returning default item ", item)
+            // console.log("returning default item ", item)
             return item
         }
     },
@@ -86,7 +86,7 @@ export default {
             state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
         },
         deleteItemLocal(state, id) {
-            console.log(state.todoItems)
+            // console.log(state.todoItems)
             state.todoItems.splice(state.todoItems.findIndex(i => i._id === id), 1);
         },
         addItemLocal(state, item) {
@@ -119,7 +119,7 @@ export default {
     actions: {
         refreshItems({ rootState, commit }) {
             api_util.getItems(rootState.auth.authInfo.authTkn).then((items) => {
-                console.log("got items", items.data)
+                // console.log("got items", items.data)
                 // console.log(typeof items.data.dueDate)
                 commit('setItems', items.data)
                 commit('setLoadingStatus', { loadingItems: false })
@@ -170,9 +170,10 @@ export default {
             );
         },
         updateItem({ commit, rootState, dispatch }, item) {
-            console.log("TODO: updating an item could move it between lists")
+            // console.log("TODO: updating an item could move it between lists")
             api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then(() => {
                 commit('updateItemLocal', item)
+                dispatch('refreshCurrentList')
                 dispatch('refreshStreakInfo')
             });
         },

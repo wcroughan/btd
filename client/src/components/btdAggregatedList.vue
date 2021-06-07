@@ -74,7 +74,9 @@ export default {
     //Also have category for yesterday, last week etc.
     //Theoretically these groups should never have to change when displayig different categories, then can just update which list drawing from
 
-    // console.log(timeDividers, titles, allPossibleGroups);
+    // console.log(timeDividers, titles, futureGroups);
+    // console.log(ptimeDividers, pastTitles, pastGroups);
+    // console.log(allPossibleGroups);
 
     return {
       allPossibleGroups,
@@ -105,7 +107,8 @@ export default {
                 return (
                   !i.isDone &&
                   i.dueDate.getTime() <= interval[1].getTime() &&
-                  i.dueDate.getTime() > interval[0].getTime()
+                  i.dueDate.getTime() > interval[0].getTime() &&
+                  i.dueDate.getTime() > new Date()
                 );
               });
             },

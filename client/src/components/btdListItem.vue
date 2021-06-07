@@ -17,11 +17,28 @@
         <div class="checkmark" />
       </div> -->
       <btd-checkbox
-        @change="handleCheckbox($event)"
         :id="item.id"
+        @change="handleCheckbox($event)"
         :checked="item.isDone"
       />
-
+      <btd-dropdown
+        menuAlign="left"
+        :closeOnAnyClick="true"
+        v-if="isOverdue && item.isDone"
+      >
+        <template v-slot:button>
+          <img
+            class="warning-icon"
+            title="overdue"
+            src="../assets/warning.png"
+          />
+        </template>
+        <template v-slot:content>
+          <section class="dropdown-option">
+            <button @click="markNotOverdueClicked">Mark as not overdue</button>
+          </section>
+        </template>
+      </btd-dropdown>
       <btd-item-title-display :text="item.text" :isDone="item.isDone" />
     </label>
     <btd-dropdown
@@ -46,6 +63,9 @@
         <section class="dropdown-option">
           <button @click="snoozeButtonClicked">Snooze</button>
         </section>
+        <section class="dropdown-option" v-if="isOverdue && item.isDone">
+          <button @click="markNotOverdueClicked">Mark as not overdue</button>
+        </section>
       </template>
     </btd-dropdown>
     <btd-item-edit-modal
@@ -64,6 +84,8 @@ import BtdDropdown from "./btdDropdown.vue";
 import { mapActions } from "vuex";
 import BtdCheckbox from "./btdCheckbox.vue";
 import btdItemEditModal from "./btdItemEditModal.vue";
+import { itemIsOverdue } from "../utility/misc_util.js";
+import date_util from "../utility/date_util";
 
 export default {
   name: "btdListItem",
@@ -85,19 +107,22 @@ export default {
     type: String,
     item: Object,
   },
+  computed: {
+    isOverdue() {
+      return itemIsOverdue(this.item);
+    },
+  },
   methods: {
     menuMounted() {
-      console.log("menuMounted");
       this.menuShowing = true;
     },
     menuUnmounted() {
-      console.log("menuUnmounted");
       this.menuShowing = false;
     },
     ...mapActions("todolist", ["updateItem", "deleteItem"]),
-    handleCheckbox(event) {
+    handleCheckbox(newval) {
       const i = { ...this.item };
-      i.isDone = event.target.checked;
+      i.isDone = newval;
       if (i.isDone) {
         i.doneDate = new Date();
       } else {
@@ -116,6 +141,12 @@ export default {
     },
     editButtonClicked() {
       this.showAddItemModal = true;
+    },
+    markNotOverdueClicked() {
+      const i = { ...this.item };
+      i.overriddenDueDate = i.dueDate;
+      i.dueDate = date_util.getTomorrow();
+      this.updateItem(i);
     },
   },
   mounted() {
@@ -148,6 +179,9 @@ export default {
 }
 
 .menu-icon {
+  max-height: 20px;
+}
+.warning-icon {
   max-height: 20px;
 }
 

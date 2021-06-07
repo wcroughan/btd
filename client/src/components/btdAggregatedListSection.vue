@@ -59,7 +59,7 @@ export default {
     },
     doneItems() {
       const ret = this.listInfo.getDoneItems();
-      console.log("doneItems: ", ret);
+      //   console.log("doneItems: ", ret);
       return ret;
     },
   },

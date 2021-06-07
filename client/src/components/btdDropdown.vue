@@ -1,6 +1,6 @@
 <template>
   <div class="btd-dropdown">
-    <div @click="showMenu = !showMenu">
+    <div @click="buttonClickHandler">
       <slot name="button" />
     </div>
     <div class="back-mask" v-if="showMenu" @click="maskClickHandler"></div>
@@ -47,6 +47,12 @@ export default {
     },
   },
   methods: {
+    buttonClickHandler(event) {
+      this.showMenu = !this.showMenu;
+      event.stopPropagation();
+      event.preventDefault();
+      console.log(event);
+    },
     menuClickHandler() {
       if (this.closeOnAnyClick) this.showMenu = false;
     },

@@ -2,7 +2,6 @@ const _ = require('underscore');
 const bson = require('bson')
 
 module.exports = {
-
     getUniqueItemId(items) {
         if (items.length === 0) return 0;
         const ids = items.map(v => v.id);
@@ -20,6 +19,7 @@ module.exports = {
         if (item.createdDate !== undefined) item.createdDate = new Date(item.createdDate)
         if (item.doneDate !== undefined) item.doneDate = new Date(item.doneDate)
         if (item.snoozedOnDate !== undefined) item.snoozedOnDate = new Date(item.snoozedOnDate)
+        if (item.overriddenDueDate !== undefined) item.overriddenDueDate = new Date(item.overriddenDueDate)
         if (item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = new Date(item.repeatInfo.end.endon)
     },
     convertDatesToTimes(item) {
@@ -28,7 +28,13 @@ module.exports = {
         if (item.createdDate !== undefined) item.createdDate = item.createdDate.getTime();
         if (item.doneDate !== undefined) item.doneDate = item.doneDate.getTime();
         if (item.snoozedOnDate !== undefined) item.snoozedOnDate = item.snoozedOnDate.getTime();
+        if (item.overriddenDueDate !== undefined) item.overriddenDueDate = item.overriddenDueDate.getTime();
         if (item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = item.repeatInfo.end.endon.getTime();
+    },
+    itemIsOverdue(item) {
+        return item.isDone ?
+            item.doneDate.getTime() > item.dueDate.getTime() :
+            item.dueDate.getTime() < (new Date()).getTime()
     }
 
 }

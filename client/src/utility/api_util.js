@@ -8,7 +8,7 @@ module.exports = {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "items" + `?${params}`;
-        console.log(req);
+        // console.log(req);
         if (callback !== undefined) {
             axios.get(req).then((res) => {
                 res.data.forEach(convertTimesToDates)
