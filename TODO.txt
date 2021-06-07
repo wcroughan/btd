@@ -1,12 +1,12 @@
 Next shipped update:
 - instead of all these moves, just have a snooze option with a modal
-- header: Add menu items on left to view previous items, upcoming items, and repeating items
 - aesthetics for modal for adding/editing items
 - backend logic for repeats and display
 - ability to mark an item as not overdue
 - Long press to rearrange items. Can just implement always as rearrangable with handle, have v-if/else b/w handle and checkbox (and maybe on right side between ellipses menu and select checkmark for things like deleting many)
 - streak calculation should just count days where there were tasks. Maybe aggregate: select within streak range, project onto donedate, count unique values?
-- no items screen looks like garbage
+- updating an item could move it between lists. Note this just needs to be immediately removed where relevant ... updating the other list will happen automatically when user switches back
+- glitch with checkboxes now, probably a v-model thing
 
 
 Should implement at some point:

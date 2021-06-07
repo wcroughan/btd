@@ -23,6 +23,9 @@ export default {
     btdNoListsFiller,
     btdAggregatedList,
   },
+  data() {
+    return {};
+  },
   computed: {
     ...mapState("todolist", ["loadingItems"]),
     ...mapGetters("todolist", ["numTodoItems"]),
@@ -38,13 +41,13 @@ export default {
     };
   },
   methods: {
-    ...mapActions("todolist", ["refreshItems"]),
+    ...mapActions("todolist", ["refreshCurrentList"]),
   },
   mounted() {
-    this.refreshItems();
+    this.refreshCurrentList();
     setInterval(() => {
       console.log("refreshing items");
-      this.refreshItems();
+      this.refreshCurrentList();
     }, 1000 * 60 * 5);
   },
 };

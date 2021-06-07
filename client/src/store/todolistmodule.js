@@ -34,6 +34,7 @@ export default {
                 todayGood: false,
                 len: 0
             },
+            currentList: "active"
         }
     },
     getters: {
@@ -110,6 +111,9 @@ export default {
         },
         setStreakInfo(state, payload) {
             state.streakInfo = { ...payload };
+        },
+        setCurrentList(state, payload) {
+            state.currentList = payload;
         }
     },
     actions: {
@@ -133,6 +137,23 @@ export default {
                 commit('setLoadingStatus', { loadingUpcomingItems: false })
             })
         },
+        refreshCurrentList({ dispatch, state }) {
+            switch (state.currentList) {
+                case "active":
+                    dispatch('refreshItems');
+                    return;
+                case "past":
+                    dispatch('refreshPastItems');
+                    return;
+                case "upcoming":
+                    dispatch('refreshUpcomingItems');
+                    return;
+            }
+        },
+        loadAndSetCurrentList({ dispatch, commit }, payload) {
+            commit('setCurrentList', payload);
+            dispatch('refreshCurrentList')
+        },
         refreshStreakInfo({ rootState, commit }) {
             api_util.getStreakInfo(rootState.auth.authInfo.authTkn).then((info) => {
                 commit('setStreakInfo', info.data)
@@ -149,6 +170,7 @@ export default {
             );
         },
         updateItem({ commit, rootState, dispatch }, item) {
+            console.log("TODO: updating an item could move it between lists")
             api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then(() => {
                 commit('updateItemLocal', item)
                 dispatch('refreshStreakInfo')

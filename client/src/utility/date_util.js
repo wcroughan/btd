@@ -10,6 +10,9 @@ module.exports = {
     getTomorrow() {
         return this.tomorrow(this.getToday())
     },
+    getYesterday() {
+        return this.yesterday(this.getToday())
+    },
     // dayOfWeekShortAbbr(date) {
     //     const vals = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     //     return vals[date.getDay()];
@@ -41,6 +44,11 @@ module.exports = {
     plusOneMonth(date) {
         const ret = new Date(date);
         ret.setMonth(ret.getMonth() + 1);
+        return ret;
+    },
+    offsetByDays(date, n) {
+        const ret = new Date(date);
+        ret.setDate(ret.getDate() + n);
         return ret;
     },
     apiDateStr(date) {

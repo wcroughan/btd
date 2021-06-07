@@ -9,6 +9,21 @@
           <section class="dropdown-option">
             <button @click="logout">Sign out</button>
           </section>
+          <section class="dropdown-option" v-if="currentList !== 'past'">
+            <button @click="loadAndSetCurrentList('past')">
+              View past items
+            </button>
+          </section>
+          <section class="dropdown-option" v-if="currentList !== 'active'">
+            <button @click="loadAndSetCurrentList('active')">
+              View active items
+            </button>
+          </section>
+          <section class="dropdown-option" v-if="currentList !== 'upcoming'">
+            <button @click="loadAndSetCurrentList('upcoming')">
+              View upcoming items
+            </button>
+          </section>
         </template>
       </btd-dropdown>
     </div>
@@ -57,7 +72,7 @@
 <script>
 import BtdDropdown from "./btdDropdown.vue";
 import BtdStreakInfo from "./btdStreakInfo.vue";
-import { mapActions, mapGetters, mapMutations } from "vuex";
+import { mapActions, mapGetters, mapMutations, mapState } from "vuex";
 import BtdItemEditModal from "./btdItemEditModal.vue";
 // import { nextTick } from "@vue/runtime-core";
 
@@ -72,13 +87,17 @@ export default {
   },
   computed: {
     ...mapGetters("todolist", ["generateDefaultItem"]),
+    ...mapState("todolist", ["currentList"]),
   },
   methods: {
     dropdownContentMounted() {
       this.$refs.quickAddInput.focus();
     },
+    viewPastItems() {},
+    viewActiveItems() {},
+    viewUpcomingItems() {},
     ...mapMutations("todolist", ["logout"]),
-    ...mapActions("todolist", ["addItem"]),
+    ...mapActions("todolist", ["addItem", "loadAndSetCurrentList"]),
     quickAddMoreOptions() {
       this.$refs.quickaddmenu.hideMenu();
       this.modalItem = this.generateDefaultItem();

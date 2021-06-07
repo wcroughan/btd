@@ -31,7 +31,7 @@ export default {
     if (today.getDay() < 6) {
       const sunday = date_util.plusOneWeek(date_util.getMonday(today));
       timeDividers.push(sunday);
-      titles.push("This Week");
+      titles.push("Later This Week");
     }
     const nextWeek = date_util.plusOneWeek(
       date_util.plusOneWeek(date_util.getMonday(today))
@@ -40,27 +40,68 @@ export default {
     titles.push("Next Week");
     timeDividers.push(new Date(3000, 0, 0, 0, 0, 0, 0));
     titles.push("Later");
-
-    const allPossibleGroups = _.zip(
+    const futureGroups = _.zip(
       timeDividers.slice(0, timeDividers.length - 1),
       timeDividers.slice(1, timeDividers.length),
       titles
     );
 
+    const yesterday = date_util.getYesterday();
+    const ptimeDividers = [today, yesterday];
+    const pastTitles = ["Yesterday"];
+    if (today.getDay() > 2) {
+      const sunday = date_util.getMonday(today);
+      ptimeDividers.push(sunday);
+      pastTitles.push("Earlier This Week");
+    }
+    const lastWeek = date_util.offsetByDays(date_util.getMonday(today), -7);
+    ptimeDividers.push(lastWeek);
+    pastTitles.push("Last Week");
+    ptimeDividers.push(new Date(0));
+    pastTitles.push("Earlier");
+
+    const pastGroups = _.zip(
+      ptimeDividers.slice(1, ptimeDividers.length),
+      ptimeDividers.slice(0, ptimeDividers.length - 1),
+      pastTitles
+    );
+
+    const allPossibleGroups = futureGroups.concat(pastGroups);
+
+    //TODO:
+    //add a variable output here that points to the correct list in state, then can just change that and listinfos should react
+    //also break up "later" input months up to a year (maybe just a few months?) out, then next year, then later
+    //Also have category for yesterday, last week etc.
+    //Theoretically these groups should never have to change when displayig different categories, then can just update which list drawing from
+
     // console.log(timeDividers, titles, allPossibleGroups);
 
     return {
-      //   timeDividers,
       allPossibleGroups,
     };
   },
   computed: {
     ...mapState({
+      currentList(state) {
+        return state.todolist.currentList;
+      },
       listInfos(state) {
+        let list;
+        switch (this.currentList) {
+          case "active":
+            list = state.todolist.todoItems;
+            break;
+          case "past":
+            list = state.todolist.pastItems;
+            break;
+          case "upcoming":
+            list = state.todolist.upcomingItems;
+            break;
+        }
         const ret = this.allPossibleGroups.map((interval) => {
           return {
             getItems: () => {
-              return state.todolist.todoItems.filter((i) => {
+              return list.filter((i) => {
                 return (
                   !i.isDone &&
                   i.dueDate.getTime() <= interval[1].getTime() &&
@@ -69,7 +110,7 @@ export default {
               });
             },
             getDoneItems: () => {
-              return state.todolist.todoItems.filter((i) => {
+              return list.filter((i) => {
                 return (
                   i.isDone &&
                   i.doneDate.getTime() <= interval[1].getTime() &&
@@ -83,7 +124,7 @@ export default {
         ret.unshift({
           title: "Overdue",
           getItems: () => {
-            const ret = state.todolist.todoItems.filter((i) => {
+            const ret = list.filter((i) => {
               return !i.isDone && i.dueDate.getTime() <= new Date();
             });
             // console.log("overdue items returning: ", ret);

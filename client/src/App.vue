@@ -50,7 +50,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   /* text-align: center; */
   color: #002447;
-  margin-top: 80px;
+  margin-top: 100px;
   /* background-color: #53d3d1; */
 }
 body {
