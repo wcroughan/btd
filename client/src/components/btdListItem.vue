@@ -6,16 +6,6 @@
     @mouseleave="mouseIn = false"
   >
     <label :for="item.id">
-      <!-- <input
-        class="ogcheck"
-        :id="item.id"
-        type="checkbox"
-        @change="handleCheckbox($event)"
-        :checked="item.isDone"
-      />
-      <div class="ogreplace">
-        <div class="checkmark" />
-      </div> -->
       <btd-checkbox
         :id="item.id"
         @update:modelValue="handleCheckbox($event)"
