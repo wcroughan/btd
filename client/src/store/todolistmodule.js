@@ -177,13 +177,20 @@ export default {
                 dispatch('refreshStreakInfo')
             });
         },
+        // async updateItems({ commit, rootState, dispatch }, items) {
+        //     for (let i = 0; i < items.length; i++) {
+        //         const item = items[i];
+        //         await api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item);
+        //         commit('updateItemLocal', item)
+        //     }
+        //     dispatch('refreshCurrentList')
+        //     dispatch('refreshStreakInfo')
+        // },
         deleteItem({ commit, rootState, dispatch }, id) {
             api_util.deleteItem(rootState.auth.authInfo.authTkn, id).then(() => {
                 commit('deleteItemLocal', id)
                 dispatch('refreshStreakInfo')
             });
-
-
         }
     },
     namespaced: true

@@ -57,6 +57,9 @@
         <section class="dropdown-option" v-if="isOverdue && item.isDone">
           <button @click="markNotOverdueClicked">Mark as not overdue</button>
         </section>
+        <section class="dropdown-option">
+          <button @click="rearrangeClicked">Rearrange Items</button>
+        </section>
       </template>
     </btd-dropdown>
     <btd-item-edit-modal
@@ -93,6 +96,8 @@ export default {
       persistentOptions: false,
       menuShowing: false,
       showAddItemModal: false,
+      longClickTimer: null,
+      longClickReqHoldTime: 1000,
     };
   },
   props: {
@@ -107,6 +112,7 @@ export default {
       default: false,
     },
   },
+  emits: ["dragModeEnabled"],
   computed: {
     isOverdue() {
       return itemIsOverdue(this.item);
@@ -147,6 +153,9 @@ export default {
       i.overriddenDueDate = i.dueDate;
       i.dueDate = date_util.getTomorrow();
       this.updateItem(i);
+    },
+    rearrangeClicked() {
+      this.$emit("dragModeEnabled", true);
     },
   },
   mounted() {

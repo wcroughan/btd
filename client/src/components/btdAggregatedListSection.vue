@@ -5,13 +5,18 @@
       :numComplete="doneItems.length"
       :title="listInfo.title"
     />
+    <div class="done-rearrange-container">
+      <button @click="dragModeEnabled = false" v-if="dragModeEnabled">
+        Done Rearranging
+      </button>
+    </div>
     <div class="sectionbody">
       <!-- <transition-group name="listitems">
         <btd-list-item v-for="item in items" :item="item" :key="item._id" />
       </transition-group> -->
       <draggable
-        v-model="itemIdxs"
-        :item-key="(v) => v"
+        v-model="items"
+        :item-key="(v) => v._id"
         handle=".list-item-handle"
         tag="transition-group"
         :component-data="{
@@ -31,13 +36,14 @@
             </div>
             <btd-list-item
               class="list-item-content"
-              :item="items[element]"
+              :item="element"
               :hideCheckbox="dragModeEnabled"
               :hideMenu="dragModeEnabled"
+              @dragModeEnabled="dragModeEnabled = $event"
             />
             <div
               class="list-item-delete"
-              @click="deleteItem(element.id)"
+              @click="deleteItem(element._id)"
               v-if="dragModeEnabled"
             >
               <div class="deletebar delete1" />
@@ -75,8 +81,9 @@
 <script>
 import btdListHeader from "./btdListHeader.vue";
 import btdListItem from "./btdListItem.vue";
-import _ from "underscore";
+// import _ from "underscore";
 import draggable from "vuedraggable";
+import { mapActions } from "vuex";
 
 export default {
   name: "BtdAggregatedListItem",
@@ -92,8 +99,8 @@ export default {
     return {
       showDoneItems: true,
       drag: false,
-      itemIdxs: _.range(0, this.listInfo.getItems().length),
-      dragModeEnabled: true,
+      dragModeEnabled: false,
+      itemOrders: this.listInfo.getItems().map((i) => i.displayOrder),
     };
   },
   computed: {
@@ -103,14 +110,24 @@ export default {
         ghostClass: "ghost",
       };
     },
-    items() {
-      return this.listInfo.getItems();
+    items: {
+      get() {
+        return this.listInfo.getItems();
+      },
+      set(val) {
+        console.log("TODO send item updates to state");
+        val.forEach((v, i) => (v.displayOrder = this.itemOrders[i]));
+        this.updateItems(val);
+      },
     },
     doneItems() {
       const ret = this.listInfo.getDoneItems();
       //   console.log("doneItems: ", ret);
       return ret;
     },
+  },
+  methods: {
+    ...mapActions("todolist", ["updateItems"]),
   },
   created() {
     // console.log("creating section with info: ", this.listInfo);
@@ -141,7 +158,8 @@ export default {
   height: 1em;
 }
 
-.sectionfooter > button {
+/* .sectionfooter > button { */
+button {
   position: relative;
   color: rgb(60, 60, 211);
   border-width: 0;
@@ -238,5 +256,10 @@ export default {
 }
 .delete2 {
   transform: translateY(15px) translateX(-5px) rotate(-45deg);
+}
+
+.done-rearrange-container {
+  display: flex;
+  justify-content: flex-start;
 }
 </style>
