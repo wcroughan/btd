@@ -23,14 +23,23 @@
       >
         <template #item="{ element }">
           <div class="list-item">
-            <div class="list-item-handle">
+            <div class="list-item-handle" v-if="dragModeEnabled">
               <div class="handlebar" />
               <div class="handlebar" />
               <div class="handlebar" />
               <div class="handlebar" />
             </div>
-            <btd-list-item class="list-item-content" :item="items[element]" />
-            <div class="list-item-delete" @click="deleteItem(element.id)">
+            <btd-list-item
+              class="list-item-content"
+              :item="items[element]"
+              :hideCheckbox="dragModeEnabled"
+              :hideMenu="dragModeEnabled"
+            />
+            <div
+              class="list-item-delete"
+              @click="deleteItem(element.id)"
+              v-if="dragModeEnabled"
+            >
               <div class="deletebar delete1" />
               <div class="deletebar delete2" />
             </div>
@@ -84,6 +93,7 @@ export default {
       showDoneItems: true,
       drag: false,
       itemIdxs: _.range(0, this.listInfo.getItems().length),
+      dragModeEnabled: true,
     };
   },
   computed: {

@@ -10,6 +10,7 @@
         :id="item.id"
         @update:modelValue="handleCheckbox($event)"
         :modelValue="item.isDone"
+        v-show="!hideCheckbox"
       />
       <btd-dropdown
         menuAlign="left"
@@ -36,7 +37,7 @@
       class="menu-button"
       ref="itemOptionsMenu"
       :closeOnAnyClick="true"
-      v-show="persistentOptions || mouseIn || menuShowing"
+      v-show="!hideMenu && (persistentOptions || mouseIn || menuShowing)"
       :onContentMounted="menuMounted"
       :onContentUnmounted="menuUnmounted"
     >
@@ -97,6 +98,14 @@ export default {
   props: {
     type: String,
     item: Object,
+    hideCheckbox: {
+      type: Boolean,
+      default: false,
+    },
+    hideMenu: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     isOverdue() {
