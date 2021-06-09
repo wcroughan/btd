@@ -2,10 +2,8 @@ Next shipped update:
 - snooze modal
     - What should buttons say if snoozing an item that isn't today? "tomorrow" doesn't really make sense
     - aesthetics
-    - end of day vs time of day, should preserve the time
 - backend logic for repeats and display
 - When editing repeating item, confirm whether applies to all, just this one, all following
-- auth cookie login doesn't seem to be working
 
 
 Should implement at some point:

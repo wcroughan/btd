@@ -45,7 +45,8 @@ export default {
                     .split("=")[1];
                 if (authTkn.length > 0) {
                     api_util.checkAuthToken(authTkn, (res) => {
-                        if (res.success && res.authenticated) {
+                        if (res.data.success && res.data.authenticated) {
+                            // console.log("success!")
                             const info = {
                                 loggedIn: true,
                                 authTkn,
@@ -55,6 +56,7 @@ export default {
                             commit('setAuthInfo', info);
                         } else {
                             // console.log("checked but server said no")
+                            // console.log(res)
                             commit('logout');
                         }
                     });
