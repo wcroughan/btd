@@ -4,6 +4,7 @@
       :numItems="items.length + doneItems.length"
       :numComplete="doneItems.length"
       :title="listInfo.title"
+      @dragModeEnabled="dragModeEnabled = $event"
     />
     <div class="done-rearrange-container">
       <button @click="dragModeEnabled = false" v-if="dragModeEnabled">

@@ -67,6 +67,12 @@
       :initialItem="item"
       @closeModal="showAddItemModal = false"
     />
+    <btd-snooze-modal
+      v-if="showSnoozeModal"
+      :item="item"
+      @closeModal="showSnoozeModal = false"
+      @snoozeDateChosen="snooze"
+    />
   </div>
 </template>
 
@@ -80,6 +86,7 @@ import BtdCheckbox from "./btdCheckbox.vue";
 import btdItemEditModal from "./btdItemEditModal.vue";
 import { itemIsOverdue } from "../utility/misc_util.js";
 import date_util from "../utility/date_util";
+import BtdSnoozeModal from "./btdSnoozeModal.vue";
 
 export default {
   name: "btdListItem",
@@ -88,6 +95,7 @@ export default {
     btdItemTitleDisplay,
     BtdDropdown,
     BtdCheckbox,
+    BtdSnoozeModal,
   },
   data() {
     // console.log("creating item with ", this.item);
@@ -96,6 +104,7 @@ export default {
       persistentOptions: false,
       menuShowing: false,
       showAddItemModal: false,
+      showSnoozeModal: false,
       longClickTimer: null,
       longClickReqHoldTime: 1000,
     };
@@ -143,7 +152,10 @@ export default {
       });
     },
     snoozeButtonClicked() {
-      console.log("TODO");
+      this.showSnoozeModal = true;
+    },
+    snooze(snoozeInfo) {
+      console.log(snoozeInfo);
     },
     editButtonClicked() {
       this.showAddItemModal = true;

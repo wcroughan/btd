@@ -37,6 +37,11 @@
             {{ markAllText }}
           </button>
         </section>
+        <section class="dropdown-option">
+          <button @click="$emit('dragModeEnabled', true)">
+            Rearrange Items
+          </button>
+        </section>
       </template>
     </btd-dropdown>
   </div>
@@ -62,6 +67,7 @@ export default {
     numComplete: Number,
     title: String,
   },
+  emits: ["dragModeEnabled"],
   computed: {
     isComplete() {
       return this.numItems === this.numComplete;

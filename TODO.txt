@@ -1,5 +1,6 @@
 Next shipped update:
 - snooze modal
+    - What should buttons say if snoozing an item that isn't today? "tomorrow" doesn't really make sense
 - backend logic for repeats and display
 - When editing repeating item, confirm whether applies to all, just this one, all following
 
