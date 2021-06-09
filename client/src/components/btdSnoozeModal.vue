@@ -37,6 +37,22 @@ export default {
         newDisplayDate: date_util.getTomorrow(),
       },
     ];
+    const d = date_util.getToday();
+    if (d.getDay() < 4) {
+      quickOptions.push({
+        text: "This weekend",
+        newDueDate: date_util.offsetByDays(date_util.getMonday(), 7),
+        newDisplayDate: date_util.offsetByDays(date_util.getMonday(), 5),
+      });
+    }
+
+    if (d.getDay() !== 0) {
+      quickOptions.push({
+        text: "Next week",
+        newDueDate: date_util.offsetByDays(date_util.getMonday(), 8),
+        newDisplayDate: date_util.offsetByDays(date_util.getMonday(), 7),
+      });
+    }
 
     return {
       quickOptions,

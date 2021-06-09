@@ -9,6 +9,9 @@
           <section class="dropdown-option">
             <button @click="logout">Sign out</button>
           </section>
+          <section class="dropdown-option">
+            <button @click="refreshCurrentList">Refresh</button>
+          </section>
           <section class="dropdown-option" v-if="currentList !== 'past'">
             <button @click="loadAndSetCurrentList('past')">
               View past items
@@ -97,7 +100,11 @@ export default {
     viewActiveItems() {},
     viewUpcomingItems() {},
     ...mapMutations("todolist", ["logout"]),
-    ...mapActions("todolist", ["addItem", "loadAndSetCurrentList"]),
+    ...mapActions("todolist", [
+      "addItem",
+      "loadAndSetCurrentList",
+      "refreshCurrentList",
+    ]),
     quickAddMoreOptions() {
       this.$refs.quickaddmenu.hideMenu();
       this.modalItem = this.generateDefaultItem();

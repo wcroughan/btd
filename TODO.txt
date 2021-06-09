@@ -1,19 +1,20 @@
 Next shipped update:
 - snooze modal
     - What should buttons say if snoozing an item that isn't today? "tomorrow" doesn't really make sense
+    - aesthetics
+    - end of day vs time of day, should preserve the time
 - backend logic for repeats and display
 - When editing repeating item, confirm whether applies to all, just this one, all following
+- auth cookie login doesn't seem to be working
 
 
 Should implement at some point:
-- figure out this reactivity stuff so can just use date object directly in btdCalendar as opposed to converting to and from a string
 - allow swipe left to mark (un)done
 - backend needs to handle weird input without crashing (like weird auth tokens that ObjectID won't accept)
 - keyboard shortcuts!
 - center aligned dropdowns get all screwy with animations
 - in repeat section, automatically set parameters to match the relevant date
 - Add button in each category
-- add a refresh button somewhere
 - calendar doesn't fit on mobile. Make calendar work again under streak info
 - streak calculation should just count days where there were tasks. Maybe aggregate: select within streak range, project onto donedate, count unique values?
 
@@ -25,3 +26,4 @@ Nice to have, not need to have:
 - done items can jiggle when hovered and not hovered (recreate with 4 not done and 1 done)
 - there's probably some bugs when people switch between time zones
 - confetti when completed a day
+- sound effect when something's completed

@@ -155,7 +155,11 @@ export default {
       this.showSnoozeModal = true;
     },
     snooze(snoozeInfo) {
-      console.log(snoozeInfo);
+      //   console.log(snoozeInfo);
+      const i = { ...this.item };
+      i.dueDate = snoozeInfo.newDueDate;
+      i.displayDate = snoozeInfo.newDisplayDate;
+      this.updateItem(i);
     },
     editButtonClicked() {
       this.showAddItemModal = true;
