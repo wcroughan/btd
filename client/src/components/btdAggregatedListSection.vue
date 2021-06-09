@@ -15,8 +15,8 @@
         <btd-list-item v-for="item in items" :item="item" :key="item._id" />
       </transition-group> -->
       <draggable
-        v-model="items"
-        :item-key="(v) => v._id"
+        v-model="itemIdsForDraggable"
+        :item-key="(v) => v"
         handle=".list-item-handle"
         tag="transition-group"
         :component-data="{
@@ -36,19 +36,19 @@
             </div>
             <btd-list-item
               class="list-item-content"
-              :item="element"
+              :item="itemForId(element)"
               :hideCheckbox="dragModeEnabled"
               :hideMenu="dragModeEnabled"
               @dragModeEnabled="dragModeEnabled = $event"
             />
-            <div
+            <!-- <div
               class="list-item-delete"
-              @click="deleteItem(element._id)"
+              @click="deleteItem(element)"
               v-if="dragModeEnabled"
             >
               <div class="deletebar delete1" />
               <div class="deletebar delete2" />
-            </div>
+            </div> -->
           </div>
         </template>
       </draggable>
@@ -84,6 +84,7 @@ import btdListItem from "./btdListItem.vue";
 // import _ from "underscore";
 import draggable from "vuedraggable";
 import { mapActions } from "vuex";
+import clone from "just-clone";
 
 export default {
   name: "BtdAggregatedListItem",
@@ -101,6 +102,7 @@ export default {
       drag: false,
       dragModeEnabled: false,
       itemOrders: this.listInfo.getItems().map((i) => i.displayOrder),
+      itemIds: this.listInfo.getItems().map((i) => i._id),
     };
   },
   computed: {
@@ -110,27 +112,51 @@ export default {
         ghostClass: "ghost",
       };
     },
-    items: {
-      get() {
-        return this.listInfo.getItems();
-      },
-      set(val) {
-        console.log("TODO send item updates to state");
-        val.forEach((v, i) => (v.displayOrder = this.itemOrders[i]));
-        this.updateItems(val);
-      },
+    items() {
+      return this.listInfo.getItems();
     },
     doneItems() {
       const ret = this.listInfo.getDoneItems();
       //   console.log("doneItems: ", ret);
       return ret;
     },
+    itemIdsForDraggable: {
+      get() {
+        return this.itemIds;
+      },
+      set(val) {
+        const newitems = clone(this.items);
+        val.forEach(
+          (v, i) =>
+            (newitems.find((ni) => ni._id === v).displayOrder = this.items[
+              i
+            ].displayOrder)
+        );
+        console.log("updating items because draggable");
+        this.updateItems(newitems);
+        this.itemIds = val;
+      },
+    },
   },
   methods: {
+    itemForId(id) {
+      return this.items.find((v) => v._id === id);
+    },
     ...mapActions("todolist", ["updateItems"]),
   },
   created() {
     // console.log("creating section with info: ", this.listInfo);
+  },
+  watch: {
+    items(newval) {
+      this.itemIds = newval.map((i) => i._id);
+      if (newval.some((v) => v.displayOrder === undefined)) {
+        const newitems = clone(newval);
+        newitems.forEach((v, i) => (v.displayOrder = i));
+        console.log("updating items because watch");
+        this.updateItems(newitems);
+      }
+    },
   },
 };
 </script>
@@ -225,7 +251,7 @@ button {
   display: flex;
   flex-direction: column;
   min-width: 30px;
-  min-height: 30px;
+  min-height: 24px;
   justify-content: center;
 }
 .handlebar {

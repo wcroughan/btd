@@ -40,7 +40,7 @@ module.exports = function (db) {
             // console.log(__line, detail.$or[1].displayDate.$lte)
             const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
             const results = await cursor.toArray();
-            console.log(__line, results);
+            // console.log(__line, results);
             // console.log(__line, results[0].displayDate, typeof results[0].displayDate)
             res.status(200).json(results)
         },
@@ -69,7 +69,7 @@ module.exports = function (db) {
             res.status(200).json(results)
         },
         async pushItemToServer(req, res, next) {
-            // console.log(__line, req.body)
+            console.log(__line, "push req body:", req.body)
             if (req.body._id !== undefined) {
                 //updating an existing item, just delete it first
                 const deldetail = {
@@ -77,17 +77,13 @@ module.exports = function (db) {
                     _id: ObjectID(req.body._id)
                 }
                 const delresult = await db.collection("items").deleteOne(deldetail);
-                console.log(delresult)
+                console.log(__line, "deleted", delresult.deletedCount)
             }
             const entryVar = req.body;
             entryVar.userid = req.uid;
-            // if (entryVar.displayDate !== undefined) entryVar.displayDate = new Date(entryVar.displayDate)
-            // if (entryVar.dueDate !== undefined) entryVar.dueDate = new Date(entryVar.dueDate)
             convertTimesToDates(entryVar);
-            console.log(__line, entryVar.displayDate, typeof entryVar.displayDate)
-            // console.log("TODO also add other item properties?")
             if (entryVar._id !== undefined) entryVar._id = ObjectID(entryVar._id)
-            console.log("adding ", entryVar._id, typeof entryVar._id)
+            console.log("adding ", entryVar._id)
             const result = await db.collection("items").insertOne(entryVar);
             console.log(result.insertedId);
             const retid = result.insertedId || "tmpval";

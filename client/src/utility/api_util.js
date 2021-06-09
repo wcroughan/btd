@@ -53,6 +53,7 @@ module.exports = {
         }
     },
     async pushItemToServer(auth_token, item, callback) {
+        console.log("pushing", item)
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + "item/" + `?${params}`;

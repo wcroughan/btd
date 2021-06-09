@@ -97,23 +97,27 @@ export default {
         const ret = this.allPossibleGroups.map((interval) => {
           return {
             getItems: () => {
-              return list.filter((i) => {
-                return (
-                  !i.isDone &&
-                  i.dueDate.getTime() <= interval[1].getTime() &&
-                  i.dueDate.getTime() > interval[0].getTime() &&
-                  i.dueDate.getTime() > new Date()
-                );
-              });
+              return list
+                .filter((i) => {
+                  return (
+                    !i.isDone &&
+                    i.dueDate.getTime() <= interval[1].getTime() &&
+                    i.dueDate.getTime() > interval[0].getTime() &&
+                    i.dueDate.getTime() > new Date()
+                  );
+                })
+                .sort((a, b) => a.displayOrder - b.displayOrder);
             },
             getDoneItems: () => {
-              return list.filter((i) => {
-                return (
-                  i.isDone &&
-                  i.doneDate.getTime() <= interval[1].getTime() &&
-                  i.doneDate.getTime() > interval[0].getTime()
-                );
-              });
+              return list
+                .filter((i) => {
+                  return (
+                    i.isDone &&
+                    i.doneDate.getTime() <= interval[1].getTime() &&
+                    i.doneDate.getTime() > interval[0].getTime()
+                  );
+                })
+                .sort((a, b) => a.displayOrder - b.displayOrder);
             },
             title: interval[2],
           };
@@ -121,9 +125,11 @@ export default {
         ret.unshift({
           title: "Overdue",
           getItems: () => {
-            const ret = list.filter((i) => {
-              return !i.isDone && i.dueDate.getTime() <= new Date();
-            });
+            const ret = list
+              .filter((i) => {
+                return !i.isDone && i.dueDate.getTime() <= new Date();
+              })
+              .sort((a, b) => a.displayOrder - b.displayOrder);
             // console.log("overdue items returning: ", ret);
             return ret;
           },

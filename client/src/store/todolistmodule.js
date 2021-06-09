@@ -85,6 +85,11 @@ export default {
         updateItemLocal(state, item) {
             state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
         },
+        updateItemsLocal(state, items) {
+            items.forEach(item => {
+                state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
+            })
+        },
         deleteItemLocal(state, id) {
             // console.log(state.todoItems)
             state.todoItems.splice(state.todoItems.findIndex(i => i._id === id), 1);
@@ -177,15 +182,14 @@ export default {
                 dispatch('refreshStreakInfo')
             });
         },
-        // async updateItems({ commit, rootState, dispatch }, items) {
-        //     for (let i = 0; i < items.length; i++) {
-        //         const item = items[i];
-        //         await api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item);
-        //         commit('updateItemLocal', item)
-        //     }
-        //     dispatch('refreshCurrentList')
-        //     dispatch('refreshStreakInfo')
-        // },
+        async updateItems({ commit, rootState, dispatch }, items) {
+            for (let i = 0; i < items.length; i++) {
+                await api_util.pushItemToServer(rootState.auth.authInfo.authTkn, items[i]);
+            }
+            commit('updateItemsLocal', items)
+            dispatch('refreshCurrentList')
+            dispatch('refreshStreakInfo')
+        },
         deleteItem({ commit, rootState, dispatch }, id) {
             api_util.deleteItem(rootState.auth.authInfo.authTkn, id).then(() => {
                 commit('deleteItemLocal', id)

@@ -1,11 +1,6 @@
 Next shipped update:
 - snooze modal
 - backend logic for repeats and display
-- Long press to rearrange items. Can just implement always as rearrangable with handle, have v-if/else b/w handle and checkbox (and maybe on right side between ellipses menu and select checkmark for things like deleting many)
-    - hide handle and delete o/w
-    - long press should activate?
-    - lots of bugs with how I'm doing it now. Mark one as done to trigger
-    - How to save order for next time loaded?
 - When editing repeating item, confirm whether applies to all, just this one, all following
 
 
