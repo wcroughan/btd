@@ -5,7 +5,6 @@ module.exports = function (db) {
 
     router.get('/test', controllers.getTest);
     router.get('/daysinfo', controllers.getDaysInfo);
-    router.get('/streaklength', controllers.getStreakLength);
 
     router.get('/items', controllers.getItems);
     router.get('/pastitems', controllers.getPastItems);

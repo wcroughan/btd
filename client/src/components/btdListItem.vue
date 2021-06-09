@@ -164,6 +164,7 @@ export default {
           this.item.dueDate.getHours(),
           this.item.dueDate.getMinutes()
         );
+      i.snoozedOnDate = new Date();
       this.updateItem(i);
     },
     editButtonClicked() {

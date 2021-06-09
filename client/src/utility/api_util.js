@@ -128,18 +128,4 @@ module.exports = {
             return ret;
         }
     },
-    async getStreakLength(auth_token, date, callback) {
-        const reqParamObj = { auth_token, date: date_util.apiDateStr(date) };
-        const params = new URLSearchParams(reqParamObj);
-        const req = api_root + "streaklength/" + `?${params}`;
-        // console.log(req);
-        if (callback !== undefined) {
-            axios.get(req).then((res) => {
-                callback(res);
-            });
-        } else {
-            const ret = await axios.get(req);
-            return ret;
-        }
-    }
 }
