@@ -24,6 +24,7 @@ Next shipped update:
         - If mongodb returns fewer and more can be made and would be displayed, make more first before returning
         - If returns that number or fewer and no more would be displayed, indicate that in return msg
 - Edit modal: when editing repeating item, confirm whether applies to all, just this one, all following
+- bug on phone when editing last word left off
 
 
 Should implement at some point:
