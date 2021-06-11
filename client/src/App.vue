@@ -56,4 +56,12 @@ export default {
 body {
   background-color: #a6f1ef;
 }
+
+button {
+  color: rgb(60, 60, 211);
+  border-width: 0;
+  font-weight: bold;
+  font-size: 1em;
+  background-color: inherit;
+}
 </style>

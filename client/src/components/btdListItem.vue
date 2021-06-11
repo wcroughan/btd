@@ -159,11 +159,13 @@ export default {
       const i = { ...this.item };
       i.dueDate = snoozeInfo.newDueDate;
       i.displayDate = snoozeInfo.newDisplayDate;
-      if (this.item.dueDateMode === "dueattime")
+      if (this.item.dueDateMode === "dueattime") {
         i.dueDate.setHours(
           this.item.dueDate.getHours(),
           this.item.dueDate.getMinutes()
         );
+        i.dueDate.setDate(i.dueDate.getDate() - 1);
+      }
       i.snoozedOnDate = new Date();
       this.updateItem(i);
     },

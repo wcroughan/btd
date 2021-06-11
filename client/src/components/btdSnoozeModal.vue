@@ -11,10 +11,39 @@
           {{ option.text }}
         </button>
         <div class="custom-option">
-          <h4>Choose time</h4>
-          ASDFqwer
+          <h4>Custom time:</h4>
+          <label for="cdate"
+            >Due date:<input id="cdate" type="date" v-model="cdatestr"
+          /></label>
+          <div class="duetimecontainer">
+            <span>Due time:</span>
+            <div class="duetimeoptions">
+              <label for="duetimeeod"
+                ><input
+                  id="duetimeeod"
+                  value="duetimeeod"
+                  type="radio"
+                  v-model="cdatetimeoption"
+                />End of day</label
+              >
+              <label for="duetimetime"
+                ><input
+                  id="duetimetime"
+                  type="radio"
+                  value="duetimetime"
+                  v-model="cdatetimeoption" />Time:
+                <input type="time" v-model="ctimestr"
+              /></label>
+            </div>
+          </div>
         </div>
-        <button class="cancel-button" @click="cancel">Cancel</button>
+        <div class="buttoncontainer">
+          <div class="buttonspacer" />
+          <div class="buttonspacer2">
+            <button @click="cancel" class="cancel-button">Cancel</button>
+            <button @click="finish">Snooze</button>
+          </div>
+        </div>
       </div>
     </div>
   </teleport>
@@ -56,6 +85,11 @@ export default {
 
     return {
       quickOptions,
+      cdatestr: date_util.calendarInputDateStr(
+        date_util.tomorrow(date_util.getTomorrow())
+      ),
+      ctimestr: "17:00",
+      cdatetimeoption: "duetimeeod",
     };
   },
   computed: {},
@@ -116,8 +150,27 @@ export default {
 h4 {
   margin: 0px;
   margin-top: 7px;
+  padding-bottom: 10px;
 }
 
+.buttoncontainer {
+  display: flex;
+  padding-top: 10px;
+}
+.buttonspacer {
+  flex-grow: 1;
+}
+.buttonspacer2 {
+  flex-grow: 0;
+}
+
+button {
+  padding-bottom: 20px;
+}
+/* button:last-child {
+  padding-top: 20px;
+  padding-bottom: 0px;
+} */
 .buttoncontainer {
   display: flex;
 }
@@ -126,5 +179,26 @@ h4 {
 }
 .buttonspacer2 {
   flex-grow: 0;
+}
+.cancel-button {
+  font-weight: normal;
+  padding-right: 30px;
+  color: rgb(100, 100, 100);
+}
+
+.custom-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.duetimecontainer {
+  display: flex;
+}
+.duetimecontainer > span {
+  min-width: 80px;
+}
+.duetimeoptions {
+  display: flex;
+  flex-direction: column;
 }
 </style>
