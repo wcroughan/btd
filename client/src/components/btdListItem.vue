@@ -159,13 +159,22 @@ export default {
       const i = { ...this.item };
       i.dueDate = snoozeInfo.newDueDate;
       i.displayDate = snoozeInfo.newDisplayDate;
-      if (this.item.dueDateMode === "dueattime") {
+      if (
+        snoozeInfo.dueDateMode === undefined &&
+        this.item.dueDateMode === "dueattime"
+      ) {
         i.dueDate.setHours(
           this.item.dueDate.getHours(),
           this.item.dueDate.getMinutes()
         );
         i.dueDate.setDate(i.dueDate.getDate() - 1);
       }
+      if (snoozeInfo.dueDateMode !== undefined)
+        this.item.dueDateMode = snoozeInfo.dueDateMode;
+      if (snoozeInfo.dueDateMode !== undefined)
+        this.item.dueDateMode = snoozeInfo.dueDateMode;
+      console.log("TODO keep doing this kinda stuff");
+
       i.snoozedOnDate = new Date();
       this.updateItem(i);
     },

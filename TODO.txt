@@ -1,6 +1,5 @@
 Next shipped update:
 - snooze modal
-    - custom input section should be a grid layout so inputs are aligned. Add another radio section that's when to display, either x days before or custom day/time
     - What should buttons say if snoozing an item that isn't today? "tomorrow" doesn't really make sense
     - aesthetics
 - backend logic for repeats and display
