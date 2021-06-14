@@ -25,6 +25,7 @@
         "cors": "^2.8.5",
         "dotenv": "^9.0.2",
         "express": "^4.17.1",
+        "just-clone": "^3.2.1",
         "mongodb": "^3.6.6",
         "nodemon": "^2.0.7",
         "underscore": "^1.13.1",

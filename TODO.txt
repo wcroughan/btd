@@ -1,7 +1,5 @@
 Next shipped update:
-- snooze modal
-    - What should buttons say if snoozing an item that isn't today? "tomorrow" doesn't really make sense
-    - aesthetics
+- repeat dialog, if weekly, add option to select which week days. Also make weekly the default
 - backend logic for repeats and display
     - possible add/edits for repeating items:
         - add new item which repeats.
@@ -23,6 +21,9 @@ Next shipped update:
         - If returns that number, and more can be made that would be displayed, indicate this in return msg
         - If mongodb returns fewer and more can be made and would be displayed, make more first before returning
         - If returns that number or fewer and no more would be displayed, indicate that in return msg
+
+    - remember in update function to update user list of unfinished stuff
+    - todolistmodule needs to update it's logic around api call results when adding repeating item
 - Edit modal: when editing repeating item, confirm whether applies to all, just this one, all following
 - bug on phone when editing last word left off
 

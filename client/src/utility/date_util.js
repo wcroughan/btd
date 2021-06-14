@@ -28,7 +28,11 @@ module.exports = {
         return ret;
     },
     getMonday(date) {
-        const ret = new Date(date);
+        let ret;
+        if (date === undefined)
+            ret = this.getToday();
+        else
+            ret = new Date(date);
         const day = ret.getDay();
         const diff = ret.getDate() - day + (day == 0 ? -6 : 1);
         ret.setDate(diff);
@@ -49,6 +53,21 @@ module.exports = {
     offsetByDays(date, n) {
         const ret = new Date(date);
         ret.setDate(ret.getDate() + n);
+        // console.log("obd: ", date, n, ret)
+        return ret;
+    },
+    offsetByUnits(date, n, unit) {
+        const ret = new Date(date);
+        if (unit === "weeks") {
+            ret.setDate(date.getDate() + 7 * n);
+        } else if (unit === "months") {
+            ret.setMonth(date.getMonth() + n);
+        } else if (unit === "years") {
+            ret.setYear(date.getYear() + n);
+        } else if (unit === "days") {
+            ret.setDate(date.getDate() + n);
+        }
+        console.log(`delaying ${date} by ${n} ${unit}. Output: ${ret}`)
         return ret;
     },
     apiDateStr(date) {
@@ -73,7 +92,7 @@ module.exports = {
     },
     updateDateFromTimeInputStr(date, str) {
         const s = str.split(':');
-        date.setHours(s[0], s[1]);
+        date.setHours(s[0], s[1], 0, 0);
     },
     getDateFromIdStr(str) {
         const yr = parseInt(str.substring(0, 4));
@@ -91,5 +110,17 @@ module.exports = {
         const ret = new Date(d);
         ret.setHours(0, 0, 0, 0)
         return ret;
+    },
+    getWeekdayNumber(name) {
+        let d = 0;
+        switch (name) {
+            case "Monday": d = 1; break;
+            case "Tuesday": d = 2; break;
+            case "Wednesday": d = 3; break;
+            case "Thursday": d = 4; break;
+            case "Friday": d = 5; break;
+            case "Saturday": d = 6; break;
+        }
+        return d;
     }
 }

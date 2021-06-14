@@ -3,14 +3,17 @@
     <div class="snooze-modal">
       <div class="non-menu-mask" />
       <div class="modal-content">
-        <button
-          v-for="(option, idx) in quickOptions"
-          :key="idx"
-          @click="snoozeChosen(option)"
-        >
-          {{ option.text }}
-        </button>
-        <div class="custom-option">
+        <div class="non-custom-options" v-if="!showCustomOption">
+          <button
+            v-for="(option, idx) in quickOptions"
+            :key="idx"
+            @click="snoozeChosen(option)"
+          >
+            {{ option.text }}
+          </button>
+          <button @click="showCustomOption = true">Custom time</button>
+        </div>
+        <div v-if="showCustomOption" class="custom-option">
           <h4>Custom time:</h4>
           <div />
           <label for="cdate">Due date:</label>
@@ -25,8 +28,8 @@
                 v-model="cdatetimeoption"
               />End of day</label
             >
-            <label for="duetimetime"
-              ><input
+            <label for="duetimetime">
+              <input
                 id="duetimetime"
                 type="radio"
                 value="duetimetime"
@@ -34,16 +37,8 @@
               <input type="time" v-model="ctimestr"
             /></label>
           </div>
-          <span>Show:</span>
+          <span>Show item:</span>
           <div class="showtimeoptions">
-            <label for="showtimenow"
-              ><input
-                id="showtimenow"
-                value="showtimenow"
-                type="radio"
-                v-model="showTimeOptions"
-              />Now</label
-            >
             <label for="showtimexbefore">
               <input
                 id="showtimexbefore"
@@ -72,17 +67,32 @@
                 value="showtimeattime"
                 v-model="showTimeOptions"
               />
-              At this time:
+              At
               <input id="showdate" type="date" v-model="showdatestr" />
               <input id="showtime" type="time" v-model="showtimestr" />
             </label>
+            <label for="showtimenow"
+              ><input
+                id="showtimenow"
+                value="showtimenow"
+                type="radio"
+                v-model="showTimeOptions"
+              />Now</label
+            >
           </div>
         </div>
         <div class="buttoncontainer">
+          <button
+            @click="showCustomOption = false"
+            class="back-button"
+            v-if="showCustomOption"
+          >
+            Back
+          </button>
           <div class="buttonspacer" />
           <div class="buttonspacer2">
             <button @click="cancel" class="cancel-button">Cancel</button>
-            <button @click="finish">Snooze</button>
+            <button @click="finish" v-if="showCustomOption">Snooze</button>
           </div>
         </div>
       </div>
@@ -124,14 +134,22 @@ export default {
       });
     }
 
+    let ctimestr = "17:00";
+    let cdatetimeoption = "duetimeeod";
+    if (this.item.dueDateMode === "duetimetime") {
+      ctimestr = date_util.timeInputValueStr(this.item.dueDate);
+      cdatetimeoption = "duetimetime";
+    }
+
     return {
+      showCustomOption: false,
       quickOptions,
       cdatestr: date_util.calendarInputDateStr(
         date_util.tomorrow(date_util.getTomorrow())
       ),
-      ctimestr: "17:00",
-      cdatetimeoption: "duetimeeod",
-      showTimeOptions: "showtimenow",
+      ctimestr,
+      cdatetimeoption,
+      showTimeOptions: "showtimexbefore",
       xbeforenum: 1,
       xbeforeunit: "days",
       showdatestr: date_util.calendarInputDateStr(date_util.getTomorrow()),
@@ -148,7 +166,33 @@ export default {
       this.$emit("closeModal", false);
     },
     finish() {
+      const dueDateMode = this.cdatetimeoption;
+      const newDueDate = new Date();
+      date_util.updateDateFromCalendarInputStr(newDueDate, this.cdatestr);
+      if (dueDateMode === "duetimeeod") {
+        newDueDate.setDate(newDueDate.getDate() + 1);
+        newDueDate.setHours(0, 0, 0, 0);
+      } else {
+        date_util.updateDateFromTimeInputStr(newDueDate, this.ctimestr);
+      }
+
+      let newDisplayDate = new Date();
+      if (this.showTimeOptions === "showtimexbefore") {
+        newDisplayDate = date_util.offsetByUnits(
+          newDueDate,
+          -1 * this.xbeforenum,
+          this.xbeforeunit
+        );
+      } else if (this.showTimeOptions === "showtimeattime") {
+        date_util.updateDateFromCalendarInputStr(
+          newDisplayDate,
+          this.showdatestr
+        );
+        date_util.updateDateFromTimeInputStr(newDisplayDate, this.showtimestr);
+      }
+
       const customOption = {
+        dueDateMode,
         newDueDate,
         newDisplayDate,
       };
@@ -189,15 +233,18 @@ export default {
   /* min-height: 300px; */
   z-index: 2;
   background-color: white;
-  display: flex;
-  flex-direction: column;
   padding: 15px 20px;
 }
 
-.modal-content > * {
+/* .modal-content > * {
   border-radius: 15px;
   border: 1px solid grey;
   margin: 5px;
+} */
+
+.non-custom-options {
+  display: flex;
+  flex-direction: column;
 }
 
 .numberinput {
@@ -230,15 +277,6 @@ button {
   padding-top: 20px;
   padding-bottom: 0px;
 } */
-.buttoncontainer {
-  display: flex;
-}
-.buttonspacer {
-  flex-grow: 1;
-}
-.buttonspacer2 {
-  flex-grow: 0;
-}
 .cancel-button {
   font-weight: normal;
   padding-right: 30px;

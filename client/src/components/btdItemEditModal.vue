@@ -84,7 +84,6 @@
                   <option value="2nd">2nd</option>
                   <option value="3rd">3rd</option>
                   <option value="4th">4th</option>
-                  <option value="5th">5th</option>
                 </select>
                 <select v-model="item.repeatInfo.xweekday.weekday">
                   <option value="Monday">Monday</option>
@@ -95,6 +94,7 @@
                   <option value="Saturday">Saturday</option>
                   <option value="Sunday">Sunday</option>
                 </select>
+                of the month
               </div>
             </label>
             <div class="repeatsubsection">
@@ -110,7 +110,7 @@
                 <input
                   type="number"
                   class="numberinput"
-                  min="1"
+                  min="2"
                   v-model.number="item.repeatInfo.end.endafterx"
                 />
                 Occurences

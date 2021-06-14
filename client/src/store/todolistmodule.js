@@ -67,7 +67,7 @@ export default {
                         endon: date_util.plusOneMonth(date_util.getToday())
                     },
                     show: {
-                        showMode: "showweekday",
+                        showMode: "xunits",
                         xunits: {
                             x: 1,
                             unit: "days"
@@ -168,6 +168,7 @@ export default {
             // item.id = misc_util.getUniqueItemId(state.todoItems)
             // state.todoItems.push(item)
             api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then((res) => {
+                console.log("UNIMPLEMENTED for repeating items")
                 item._id = res.data.id;
                 commit('addItemLocal', item)
                 dispatch('refreshStreakInfo')

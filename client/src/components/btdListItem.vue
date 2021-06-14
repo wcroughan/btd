@@ -155,7 +155,7 @@ export default {
       this.showSnoozeModal = true;
     },
     snooze(snoozeInfo) {
-      //   console.log(snoozeInfo);
+      console.log(snoozeInfo);
       const i = { ...this.item };
       i.dueDate = snoozeInfo.newDueDate;
       i.displayDate = snoozeInfo.newDisplayDate;
@@ -170,10 +170,7 @@ export default {
         i.dueDate.setDate(i.dueDate.getDate() - 1);
       }
       if (snoozeInfo.dueDateMode !== undefined)
-        this.item.dueDateMode = snoozeInfo.dueDateMode;
-      if (snoozeInfo.dueDateMode !== undefined)
-        this.item.dueDateMode = snoozeInfo.dueDateMode;
-      console.log("TODO keep doing this kinda stuff");
+        i.dueDateMode = snoozeInfo.dueDateMode;
 
       i.snoozedOnDate = new Date();
       this.updateItem(i);
