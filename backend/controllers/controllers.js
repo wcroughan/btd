@@ -102,7 +102,7 @@ module.exports = function (db) {
 
         //now set displayDate
         if (ret.repeatInfo.show.showMode === "xunits") {
-            ret.displayDate = date_util.offsetByUnits(ret.dueDate, ret.repeatInfo.show.xunits.x, ret.repeatInfo.show.xunits.unit)
+            ret.displayDate = date_util.offsetByUnits(ret.dueDate, -1 * ret.repeatInfo.show.xunits.x, ret.repeatInfo.show.xunits.unit)
         } else {
             ret.displayDate = new Date(ret.dueDate);
             ret.displayDate.setDay(date_util.getWeekdayNumber(ret.repeatInfo.show.weekday));
@@ -134,6 +134,7 @@ module.exports = function (db) {
         const allUploadItems = [];
 
         let newItem = clone(item);
+        delete newItem._id;
         newItem.repeatRootId = rootid;
         newItem.repeatN = 1;
         let completedChain = false;
@@ -171,14 +172,14 @@ module.exports = function (db) {
                 }
             }
         }
-        await db.collection("users").update(chainFilter, chainPushOperation);
+        await db.collection("users").updateOne(chainFilter, chainPushOperation);
 
         //then upload all the created items
         const insertResult = await db.collection("items").insertMany(allUploadItems);
         console.log(insertResult)
 
         //then return the uploaded ids
-        return [];
+        return insertResult.insertedIds;
     }
     pushItemToServer = async function (req, res, next) {
         console.log(__line, "push req body:", req.body)
@@ -232,14 +233,14 @@ module.exports = function (db) {
             console.log(result.insertedId);
             const retid = result.insertedId || "tmpval";
 
-            res.status(200).json({ id: retid });
+            res.status(200).json({ id: retid, singleId: true });
             return;
         }
 
         if (req.body._id === undefined) {
             //adding a new repeating item
             const insertedIds = await this.pushRepeatingItemToServer(entryVar);
-            res.status(200).json({ ids: insertedIds });
+            res.status(200).json({ ids: insertedIds, singleId: false });
             return;
         }
 
@@ -254,16 +255,31 @@ module.exports = function (db) {
                 }
             }
         }
-        await db.collection("users").update(chainFilter, chainPullOperation);
+        await db.collection("users").updateOne(chainFilter, chainPullOperation);
 
         if (req.body.repeatUpdateType === "future") {
             const insertedIds = await this.pushRepeatingItemToServer(entryVar);
-            res.status(200).json({ ids: insertedIds });
+            res.status(200).json({ ids: insertedIds, singleId: false });
             return;
         }
 
         console.log(__line, "couldn't parse item update correctly, nothing was uploaded but some stuff may have been deleted")
         res.status(200).json({ success: false });
+    }
+    pushOrderToServer = async function (req, res, next) {
+        const updateFilter = {
+            userid: req.uid,
+            _id: req.body._id,
+        }
+        const updateOperation = {
+            $set: {
+                displayOrder: req.body.displayOrder
+            }
+        }
+
+        await db.collection("items").updateOne(updateFilter, updateOperation);
+
+        res.status(200).json({ success: true });
     }
     deleteItemFromServer = async function (req, res, next) {
         const detail = {
@@ -413,6 +429,7 @@ module.exports = function (db) {
         getPastItems,
         getUpcomingItems,
         pushItemToServer,
+        pushOrderToServer,
         deleteItemFromServer,
         getStreakInfo,
         getTest,

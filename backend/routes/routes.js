@@ -10,6 +10,7 @@ module.exports = function (db) {
     router.get('/pastitems', controllers.getPastItems);
     router.get('/streak', controllers.getStreakInfo);
     router.put('/item', controllers.pushItemToServer);
+    router.put('/itemorder', controllers.pushOrderToServer);
     router.delete('/item/:id', controllers.deleteItemFromServer);
 
     return router;

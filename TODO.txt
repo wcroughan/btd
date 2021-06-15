@@ -1,4 +1,7 @@
 Next shipped update:
+- shit ... I think marking a repeat root as done will mark all repeats as done?
+- Adding a repeating item that causes more list sections to appear throws an error, something to do with the draggable component
+- repeating items aren't showing up in the completed list
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default
 - backend logic for repeats and display
     - possible add/edits for repeating items:
@@ -23,7 +26,6 @@ Next shipped update:
         - If returns that number or fewer and no more would be displayed, indicate that in return msg
 
     - remember in update function to update user list of unfinished stuff
-    - todolistmodule needs to update it's logic around api call results when adding repeating item
 - Edit modal: when editing repeating item, confirm whether applies to all, just this one, all following
 - bug on phone when editing last word left off
 

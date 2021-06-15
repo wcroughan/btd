@@ -129,12 +129,11 @@ export default {
         const newitems = clone(this.items);
         val.forEach(
           (v, i) =>
-            (newitems.find((ni) => ni._id === v).displayOrder = this.items[
-              i
-            ].displayOrder)
+            (newitems.find((ni) => ni._id === v).displayOrder =
+              this.items[i].displayOrder)
         );
         console.log("updating items because draggable");
-        this.updateItems(newitems);
+        this.updateItemDisplayOrders(newitems);
         this.itemIds = val;
       },
     },
@@ -143,7 +142,7 @@ export default {
     itemForId(id) {
       return this.items.find((v) => v._id === id);
     },
-    ...mapActions("todolist", ["updateItems"]),
+    ...mapActions("todolist", ["updateItemDisplayOrders"]),
   },
   created() {
     // console.log("creating section with info: ", this.listInfo);
@@ -155,7 +154,7 @@ export default {
         const newitems = clone(newval);
         newitems.forEach((v, i) => (v.displayOrder = i));
         console.log("updating items because watch");
-        this.updateItems(newitems);
+        this.updateItemDisplayOrders(newitems);
       }
     },
   },

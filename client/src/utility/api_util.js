@@ -65,6 +65,23 @@ module.exports = {
             return ret;
         }
     },
+    async updateItemOrder(auth_token, item, callback) {
+        console.log("pushing order", item)
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "itemorder/" + `?${params}`;
+        const body = {
+            _id: item._id,
+            displayOrder: item.displayOrder
+        }
+        // console.log(req);
+        if (callback !== undefined) {
+            axios.put(req, body).then(callback);
+        } else {
+            const ret = await axios.put(req, body);
+            return ret;
+        }
+    },
     async deleteItem(auth_token, id, callback) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);

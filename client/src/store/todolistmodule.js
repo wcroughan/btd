@@ -90,6 +90,11 @@ export default {
                 state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
             })
         },
+        updateItemOrdersLocal(state, items) {
+            items.forEach(item => {
+                state.todoItems[state.todoItems.findIndex(i => i._id === item._id)].displayOrder = item.displayOrder;
+            })
+        },
         deleteItemLocal(state, id) {
             // console.log(state.todoItems)
             state.todoItems.splice(state.todoItems.findIndex(i => i._id === id), 1);
@@ -168,9 +173,14 @@ export default {
             // item.id = misc_util.getUniqueItemId(state.todoItems)
             // state.todoItems.push(item)
             api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then((res) => {
-                console.log("UNIMPLEMENTED for repeating items")
-                item._id = res.data.id;
+                if (res.data.singleId) {
+                    item._id = res.data.id;
+                } else {
+                    item._id = res.data.ids[0];
+                }
                 commit('addItemLocal', item)
+                if (!res.data.singleId)
+                    dispatch('refreshCurrentList')
                 dispatch('refreshStreakInfo')
             }
             );
@@ -190,6 +200,12 @@ export default {
             commit('updateItemsLocal', items)
             dispatch('refreshCurrentList')
             dispatch('refreshStreakInfo')
+        },
+        async updateItemDisplayOrders({ commit, rootState }, items) {
+            for (let i = 0; i < items.length; i++) {
+                api_util.updateItemOrder(rootState.auth.authInfo.authTkn, items[i]);
+            }
+            commit('updateItemOrdersLocal', items)
         },
         deleteItem({ commit, rootState, dispatch }, id) {
             api_util.deleteItem(rootState.auth.authInfo.authTkn, id).then(() => {
