@@ -83,11 +83,23 @@ export default {
     },
     mutations: {
         updateItemLocal(state, item) {
-            state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
+            const si = state.todoItems[state.todoItems.findIndex(i => i._id === item._id)]
+
+            state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = {
+                ...si,
+                ...item
+            }
+            // state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
         },
         updateItemsLocal(state, items) {
             items.forEach(item => {
-                state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
+                // state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
+                const si = state.todoItems[state.todoItems.findIndex(i => i._id === item._id)]
+
+                state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = {
+                    ...si,
+                    ...item
+                }
             })
         },
         updateItemOrdersLocal(state, items) {
@@ -185,10 +197,9 @@ export default {
             }
             );
         },
-        updateItem({ commit, rootState, dispatch }, item) {
-            // console.log("TODO: updating an item could move it between lists")
-            api_util.pushItemToServer(rootState.auth.authInfo.authTkn, item).then(() => {
-                commit('updateItemLocal', item)
+        updateItem({ commit, rootState, dispatch }, update) {
+            api_util.pushUpdateToServer(rootState.auth.authInfo.authTkn, update).then(() => {
+                commit('updateItemLocal', update)
                 dispatch('refreshCurrentList')
                 dispatch('refreshStreakInfo')
             });

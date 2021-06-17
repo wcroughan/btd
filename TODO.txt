@@ -1,7 +1,6 @@
 Next shipped update:
-- shit ... I think marking a repeat root as done will mark all repeats as done?
+- Need to add controller.js update capacity for updating all future items
 - Adding a repeating item that causes more list sections to appear throws an error, something to do with the draggable component
-- repeating items aren't showing up in the completed list
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default
 - backend logic for repeats and display
     - possible add/edits for repeating items:

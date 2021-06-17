@@ -20,7 +20,7 @@ module.exports = {
         if (item.doneDate !== undefined) item.doneDate = new Date(item.doneDate)
         if (item.snoozedOnDate !== undefined) item.snoozedOnDate = new Date(item.snoozedOnDate)
         if (item.overriddenDueDate !== undefined) item.overriddenDueDate = new Date(item.overriddenDueDate)
-        if (item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = new Date(item.repeatInfo.end.endon)
+        if (item.repeatInfo !== undefined && item.repeatInfo.end !== undefined && item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = new Date(item.repeatInfo.end.endon)
     },
     convertDatesToTimes(item) {
         if (item.displayDate !== undefined) item.displayDate = item.displayDate.getTime();
@@ -29,7 +29,7 @@ module.exports = {
         if (item.doneDate !== undefined) item.doneDate = item.doneDate.getTime();
         if (item.snoozedOnDate !== undefined) item.snoozedOnDate = item.snoozedOnDate.getTime();
         if (item.overriddenDueDate !== undefined) item.overriddenDueDate = item.overriddenDueDate.getTime();
-        if (item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = item.repeatInfo.end.endon.getTime();
+        if (item.repeatInfo !== undefined && item.repeatInfo.end !== undefined && item.repeatInfo.end.endon !== undefined) item.repeatInfo.end.endon = item.repeatInfo.end.endon.getTime();
     },
     itemIsOverdue(item) {
         return item.isDone ?

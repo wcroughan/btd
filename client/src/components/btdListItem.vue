@@ -136,13 +136,14 @@ export default {
     },
     ...mapActions("todolist", ["updateItem", "deleteItem"]),
     handleCheckbox(newval) {
-      const i = { ...this.item };
-      i.isDone = newval;
+      const i = {
+        _id: this.item._id,
+        isDone: newval,
+      };
       if (i.isDone) {
         i.doneDate = new Date();
-      } else {
-        delete i.doneDate;
       }
+
       this.updateItem(i);
     },
     deleteButtonClicked() {
@@ -156,9 +157,13 @@ export default {
     },
     snooze(snoozeInfo) {
       console.log(snoozeInfo);
-      const i = { ...this.item };
-      i.dueDate = snoozeInfo.newDueDate;
-      i.displayDate = snoozeInfo.newDisplayDate;
+      const i = {
+        _id: this.item._id,
+        dueDate: snoozeInfo.newDueDate,
+        displayDate: snoozeInfo.newDisplayDate,
+        snoozedOnDate: new Date(),
+      };
+
       if (
         snoozeInfo.dueDateMode === undefined &&
         this.item.dueDateMode === "dueattime"
@@ -172,16 +177,17 @@ export default {
       if (snoozeInfo.dueDateMode !== undefined)
         i.dueDateMode = snoozeInfo.dueDateMode;
 
-      i.snoozedOnDate = new Date();
       this.updateItem(i);
     },
     editButtonClicked() {
       this.showAddItemModal = true;
     },
     markNotOverdueClicked() {
-      const i = { ...this.item };
-      i.overriddenDueDate = i.dueDate;
-      i.dueDate = date_util.getTomorrow();
+      const i = {
+        _id: this.item._id,
+        overriddenDueDate: this.item.dueDate,
+        dueDate: date_util.getTomorrow(),
+      };
       this.updateItem(i);
     },
     rearrangeClicked() {

@@ -182,53 +182,18 @@ module.exports = function (db) {
         return insertResult.insertedIds;
     }
     pushItemToServer = async function (req, res, next) {
-        console.log(__line, "push req body:", req.body)
-
+        console.log(__line, "adding new item:", req.body);
 
         if (req.body._id !== undefined) {
-            //updating an existing item, delete it first
-            const deldetail = {
-                userid: req.uid,
-                _id: ObjectID(req.body._id)
-            }
-
-            // let repeatRootItem = null;
-            if (req.body.repeats && req.body.repeatUpdateType === "future") {
-                delete deldetail._id;
-                deldetail.repeatRootId = req.body.repeatRootId;
-                deldetail.repeatIndex = {
-                    $gte: req.body.repeatIndex
-                }
-
-                const rootDetail = {
-                    userid: req.uid,
-                    _id: ObjectID(req.body.repeatRootId)
-                }
-                // repeatRootItem = await db.collection("items").findOne(rootDetail);
-                // } else if (req.body.repeats && req.body.repeatUpdateType === "all") {
-                //     delete deldetail._id;
-                //     deldetail.repeatRootId = req.body.repeatRootId;
-
-                //     const rootDetail = {
-                //         userid: req.uid,
-                //         _id: ObjectID(req.body.repeatRootId)
-                //     }
-                //     repeatRootItem = await db.collection("items").findOne(rootDetail);
-            }
-
-            const delresult = await db.collection("items").deleteMany(deldetail);
-            console.log(__line, "deleted", delresult.deletedCount)
-
+            console.log(__line, "_id Shouldn't be defined here!")
+            return;
         }
 
         const entryVar = req.body;
-        delete entryVar.repeatUpdateType;
         entryVar.userid = req.uid;
         convertTimesToDates(entryVar);
-        if (entryVar._id !== undefined) entryVar._id = ObjectID(entryVar._id)
 
-        if (!req.body.repeats || req.body.repeatUpdateType === "single") {
-            console.log("adding ", entryVar._id)
+        if (!req.body.repeats) {
             const result = await db.collection("items").insertOne(entryVar);
             console.log(result.insertedId);
             const retid = result.insertedId || "tmpval";
@@ -237,34 +202,27 @@ module.exports = function (db) {
             return;
         }
 
-        if (req.body._id === undefined) {
-            //adding a new repeating item
-            const insertedIds = await this.pushRepeatingItemToServer(entryVar);
-            res.status(200).json({ ids: insertedIds, singleId: false });
-            return;
+        //adding a new repeating item
+        const insertedIds = await this.pushRepeatingItemToServer(entryVar);
+        res.status(200).json({ ids: insertedIds, singleId: false });
+    }
+    updateItem = async function (req, res, next) {
+        const updateFilter = {
+            _id: ObjectID(req.body._id),
+            userid: req.uid
         }
-
-        //If this was in unfinished chain, will be replaced if necessary. Delete
-        const chainFilter = {
-            _id: req.uid
-        }
-        const chainPullOperation = {
-            $pull: {
-                unfinishedChains: {
-                    rootId: req.body.repeatRoodId
-                }
+        const updateOperation = {
+            $set: {
+                ...req.body
             }
         }
-        await db.collection("users").updateOne(chainFilter, chainPullOperation);
 
-        if (req.body.repeatUpdateType === "future") {
-            const insertedIds = await this.pushRepeatingItemToServer(entryVar);
-            res.status(200).json({ ids: insertedIds, singleId: false });
-            return;
-        }
+        delete updateOperation.$set._id;
+        convertTimesToDates(updateOperation.$set);
+        console.log(__line, "Updating with updateOperation:", updateOperation)
 
-        console.log(__line, "couldn't parse item update correctly, nothing was uploaded but some stuff may have been deleted")
-        res.status(200).json({ success: false });
+        await db.collection("items").updateOne(updateFilter, updateOperation)
+        res.status(200).json({ success: true });
     }
     pushOrderToServer = async function (req, res, next) {
         const updateFilter = {
@@ -429,6 +387,7 @@ module.exports = function (db) {
         getPastItems,
         getUpcomingItems,
         pushItemToServer,
+        updateItem,
         pushOrderToServer,
         deleteItemFromServer,
         getStreakInfo,

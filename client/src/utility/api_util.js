@@ -65,6 +65,19 @@ module.exports = {
             return ret;
         }
     },
+    async pushUpdateToServer(auth_token, update, callback) {
+        console.log("updating", update)
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + `item/${update._id}?${params}`;
+        // console.log(req);
+        if (callback !== undefined) {
+            axios.put(req, update).then(callback);
+        } else {
+            const ret = await axios.put(req, update);
+            return ret;
+        }
+    },
     async updateItemOrder(auth_token, item, callback) {
         console.log("pushing order", item)
         const reqParamObj = { auth_token };

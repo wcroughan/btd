@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+// import { mapActions } from "vuex";
 import date_util from "../utility/date_util";
 
 export default {
@@ -158,7 +158,7 @@ export default {
   },
   computed: {},
   methods: {
-    ...mapActions("todolist", ["updateItem"]),
+    // ...mapActions("todolist", ["updateItem"]),
     snoozeChosen(option) {
       this.$emit("snoozeDateChosen", option);
     },
