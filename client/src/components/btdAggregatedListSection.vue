@@ -154,7 +154,7 @@ export default {
         const newitems = clone(newval);
         newitems.forEach((v, i) => (v.displayOrder = i));
         console.log("updating items because watch");
-        this.updateItemDisplayOrders(newitems);
+        // this.updateItemDisplayOrders(newitems);
       }
     },
   },

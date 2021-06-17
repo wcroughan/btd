@@ -2,7 +2,8 @@ const date_util = require('./../../client/src/utility/date_util.js');
 const _ = require('underscore')
 const { convertTimesToDates } = require('./../../client/src/utility/misc_util.js')
 var ObjectID = require('mongodb').ObjectID;
-const clone = require('just-clone')
+const clone = require('just-clone');
+const { updateDateFromTimeInputStr } = require('./../../client/src/utility/date_util.js');
 
 Object.defineProperty(global, '__stack', {
     get: function () {
@@ -208,32 +209,145 @@ module.exports = function (db) {
     }
     updateItem = async function (req, res, next) {
         if (req.body.repeatUpdateType === "future") {
+            console.log(__line, "updating many documents with body", req.body)
+            const item = db.collection("items").findOne({ _id: req.body._id, userid: req.uid });
             //If future chain exists, save that item as the endpoint condition, and then delete the chain
             const chainFilter = {
-                _id: item.userid
+                _id: ObjectID(item.userid)
             }
             const chainPushOperation = {
                 $pull: {
                     unfinishedChains: {
-                        rootId: req.body.repeatRootId,
+                        rootId: ObjectID(item.repeatRootId),
                     }
                 }
             }
             const chainres = await db.collection("users").findOneAndUpdate(chainFilter, chainPushOperation);
-            let oldLastItem = null;
+            let oldLastItem = undefined;
             if (chainres !== null) {
-                oldLastItem = chainres.unfinishedChains.find(i => i.rootId === req.body.repeatRootId).lastCreatedItem;
+                oldLastItem = chainres.unfinishedChains.find(i => i.rootId === item.repeatRootId).lastCreatedItem;
             }
 
             //update the root repeat to stop now at this item
-            const oldRoot = await db.collection("items").findOne({ _id: req.body.repeatRoodId });
+            const oldRoot = await db.collection("items").findOne({ _id: ObjectID(item.repeatRoodId) });
             if (oldRoot.repeatInfo.end.endMode === "endon") {
-
-            } else if (oldRoot.repeatInfo.end.endMode === "endafterx") {
-
+                const origRootUpdateFilt = {
+                    _id: ObjectID(item.repeatRootId)
+                }
+                const origRootUpdateOp = {
+                    $set: {
+                        "repeatInfo.end.endon": new Date((new Date(item.dueDate)).getTime() - 1)
+                    }
+                }
+                await db.collection("items").updateOne(origRootUpdateFilt, origRootUpdateOp);
+            } else if (oldRoot.repeatInfo.end.endMode === "endafterx" || oldRoot.repeatInfo.end.endMode === "never") {
+                const origRootUpdateFilt = {
+                    _id: ObjectID(item.repeatRootId)
+                }
+                const origRootUpdateOp = {
+                    $set: {
+                        "repeatInfo.end.endafterx": item.repeatN - 1,
+                        "repeatInfo.end.endMode": "endafterx"
+                    }
+                }
+                await db.collection("items").updateOne(origRootUpdateFilt, origRootUpdateOp);
+            } else {
+                console.log("Unknown endmode", oldRoot.repeatInfo.end.endMode)
             }
 
             //Run update on the current item, then get next item and iterate
+            const firstFilt = {
+                userid: req.uid,
+                _id: ObjectID(req.body._id)
+            }
+            const firstOp = {
+                $set: {
+                    ...req.body,
+                    repeatN: 1,
+                    repeatRootId: ObjectID(req.body._id)
+                }
+            }
+            const firstConfig = {
+                returnNewDocument: true
+            }
+            delete firstOp.$set._id;
+            delete firstOp.$set.repeatUpdateType;
+            const newRoot = await db.collection("items").findOneAndUpdate(firstFilt, firstOp, firstConfig)
+
+            const updateFields = ["repeatRootId", "repeatN", "dueDate", "displayDate"];
+            for (const key in req.body) {
+                if (!(["_id", "repeatUpdateType"].includes(key))) {
+                    updateFields.push(key)
+                }
+            }
+
+            let nextItem = newRoot;
+            let oldn = item.repeatN + 1;
+            let chainIsComplete = false;
+            let lastCreatedItem = newRoot;
+            while (True) {
+                nextItem = nextItemInRepeatChain(nextItem);
+
+                if (nextItem.repeatInfo.end.endMode === "endon" && nextItem.dueDate.getTime() > nextItem.repeatInfo.end.endon.getTime()) {
+                    chainIsComplete = true;
+                    break;
+                }
+
+                if (nextItem.repeatInfo.end.endMode === "endafterx" && nextItem.repeatN > nextItem.repeatInfo.end.endafterx) {
+                    chainIsComplete = true;
+                    break;
+                }
+
+                if (nextItem.repeatN > REPEAT_ADD_BATCH_SIZE) {
+                    break;
+                }
+
+                if (oldLastItem !== undefined && oldn > oldLastItem.repeatN) {
+                    break;
+                }
+
+                const updateOps = {};
+                updateFields.forEach(k => {
+                    updateOps[k] = nextItem[k]
+                })
+                const nextItemFilt = {
+                    userid: req.uid,
+                    repeatN: oldn,
+                    repeatRootId: ObjectID(item.repeatRootId),
+                    overrideRepeat: false
+                }
+                const nextItemOp = {
+                    $set: {
+                        ...updateOps,
+                    }
+                }
+                const nextItemConfig = {
+                    returnNewDocument: true
+                }
+
+                db.collection("items").findOneAndUpdate(nextItemFilt, nextItemOp, nextItemConfig);
+
+                oldn++;
+            }
+
+            if (!chainIsComplete) {
+                const chainFilter = {
+                    _id: item.userid
+                }
+                const chainPushOperation = {
+                    $push: {
+                        unfinishedChains: {
+                            rootId: ObjectID(item._id),
+                            lastCreatedItem
+                        }
+                    }
+                }
+                await db.collection("users").updateOne(chainFilter, chainPushOperation);
+            }
+
+            res.status(200).json({ success: true });
+            return;
+
         }
 
         const updateFilter = {
@@ -247,10 +361,16 @@ module.exports = function (db) {
         }
 
         delete updateOperation.$set._id;
+        delete updateOperation.$set.repeatUpdateType;
+        delete updateOperation.$set.userid;
         convertTimesToDates(updateOperation.$set);
+        if (req.body.repeatUpdateType === "single") {
+            updateOperation.$set.overrideRepeat = true;
+        }
         console.log(__line, "Updating with updateOperation:", updateOperation)
 
         await db.collection("items").updateOne(updateFilter, updateOperation)
+        // console.log(result)
         res.status(200).json({ success: true });
     }
     pushOrderToServer = async function (req, res, next) {
