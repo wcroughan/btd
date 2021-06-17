@@ -207,6 +207,35 @@ module.exports = function (db) {
         res.status(200).json({ ids: insertedIds, singleId: false });
     }
     updateItem = async function (req, res, next) {
+        if (req.body.repeatUpdateType === "future") {
+            //If future chain exists, save that item as the endpoint condition, and then delete the chain
+            const chainFilter = {
+                _id: item.userid
+            }
+            const chainPushOperation = {
+                $pull: {
+                    unfinishedChains: {
+                        rootId: req.body.repeatRootId,
+                    }
+                }
+            }
+            const chainres = await db.collection("users").findOneAndUpdate(chainFilter, chainPushOperation);
+            let oldLastItem = null;
+            if (chainres !== null) {
+                oldLastItem = chainres.unfinishedChains.find(i => i.rootId === req.body.repeatRootId).lastCreatedItem;
+            }
+
+            //update the root repeat to stop now at this item
+            const oldRoot = await db.collection("items").findOne({ _id: req.body.repeatRoodId });
+            if (oldRoot.repeatInfo.end.endMode === "endon") {
+
+            } else if (oldRoot.repeatInfo.end.endMode === "endafterx") {
+
+            }
+
+            //Run update on the current item, then get next item and iterate
+        }
+
         const updateFilter = {
             _id: ObjectID(req.body._id),
             userid: req.uid
