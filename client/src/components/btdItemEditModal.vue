@@ -184,7 +184,25 @@
           <div class="buttonspacer" />
           <div class="buttonspacer2">
             <button @click="cancel">Cancel</button>
-            <button @click="finishAndAddItem">
+            <btd-dropdown v-if="editingExistingItem && item.repeats">
+              <template v-slot:button>
+                <button @click="finishAndAddItem">Save</button>
+              </template>
+              <template v-slot:content>
+                <h4>Apply changes to</h4>
+                <section class="dropdown-option">
+                  <button @click="finishAndAddItem('single')">
+                    Just this occurence
+                  </button>
+                </section>
+                <section class="dropdown-option">
+                  <button @click="finishAndAddItem('future')">
+                    All future occurences
+                  </button>
+                </section>
+              </template>
+            </btd-dropdown>
+            <button v-else @click="finishAndAddItem">
               {{ editingExistingItem ? "Save" : "Add" }}
             </button>
           </div>
@@ -199,11 +217,13 @@ import clone from "just-clone";
 import btdCheckbox from "./btdCheckbox.vue";
 import date_util from "../utility/date_util";
 import { mapActions } from "vuex";
+import btdDropdown from "./btdDropdown.vue";
 
 export default {
   name: "BtdItemEditModal",
   components: {
     btdCheckbox,
+    btdDropdown,
   },
   props: ["initialItem"],
   emits: ["closeModal"],
@@ -247,7 +267,7 @@ export default {
   },
   methods: {
     ...mapActions("todolist", ["addItem", "updateItem"]),
-    finishAndAddItem() {
+    finishAndAddItem(updateType) {
       date_util.updateDateFromCalendarInputStr(
         this.item.dueDate,
         this.duedatestr
@@ -261,8 +281,10 @@ export default {
           this.duetimestr
         );
       }
-      if (this.editingExistingItem) this.updateItem(this.item);
-      else this.addItem(this.item);
+      if (this.editingExistingItem) {
+        this.item.repeatUpdateType = updateType;
+        this.updateItem(this.item);
+      } else this.addItem(this.item);
       this.$emit("closeModal", true);
     },
     cancel() {
@@ -347,6 +369,7 @@ h4 {
 }
 .buttonspacer2 {
   flex-grow: 0;
+  display: flex;
 }
 .formsection {
   margin-top: 15px;
