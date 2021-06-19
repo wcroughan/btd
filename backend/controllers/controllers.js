@@ -73,6 +73,7 @@ module.exports = function (db) {
     }
 
     nextItemInRepeatChain = function (item) {
+        console.log(__line, item);
         const ret = clone(item);
         ret.repeatN++;
 
@@ -126,7 +127,7 @@ module.exports = function (db) {
         }
         const rootUpdateOperation = {
             $set: {
-                repeatRoodId: rootid,
+                repeatRootId: rootid,
                 repeatN: 1
             }
         }
@@ -210,7 +211,8 @@ module.exports = function (db) {
     updateItem = async function (req, res, next) {
         if (req.body.repeatUpdateType === "future") {
             console.log(__line, "updating many documents with body", req.body)
-            const item = db.collection("items").findOne({ _id: req.body._id, userid: req.uid });
+            const item = await db.collection("items").findOne({ _id: ObjectID(req.body._id), userid: ObjectID(req.uid) });
+            console.log(__line, item)
             //If future chain exists, save that item as the endpoint condition, and then delete the chain
             const chainFilter = {
                 _id: ObjectID(item.userid)
@@ -223,13 +225,23 @@ module.exports = function (db) {
                 }
             }
             const chainres = await db.collection("users").findOneAndUpdate(chainFilter, chainPushOperation);
+            console.log(__line, chainres)
             let oldLastItem = undefined;
-            if (chainres !== null) {
-                oldLastItem = chainres.unfinishedChains.find(i => i.rootId === item.repeatRootId).lastCreatedItem;
+            if (chainres.value === null) {
+                console.log(__line, "Couldn't find relevant user??")
+                res.status(200).json({ success: false });
+                return;
+            }
+            if (chainres.value !== null) {
+                const thischain = chainres.value.unfinishedChains.find(i => i.rootId === item.repeatRootId)
+                if (thischain !== undefined)
+                    oldLastItem = thischain.lastCreatedItem;
             }
 
             //update the root repeat to stop now at this item
-            const oldRoot = await db.collection("items").findOne({ _id: ObjectID(item.repeatRoodId) });
+            console.log(__line, item.repeatRootId)
+            const oldRoot = await db.collection("items").findOne({ _id: ObjectID(item.repeatRootId) });
+            console.log(__line, oldRoot)
             if (oldRoot.repeatInfo.end.endMode === "endon") {
                 const origRootUpdateFilt = {
                     _id: ObjectID(item.repeatRootId)
@@ -239,7 +251,8 @@ module.exports = function (db) {
                         "repeatInfo.end.endon": new Date((new Date(item.dueDate)).getTime() - 1)
                     }
                 }
-                await db.collection("items").updateOne(origRootUpdateFilt, origRootUpdateOp);
+                const rr = await db.collection("items").updateOne(origRootUpdateFilt, origRootUpdateOp);
+                console.log(__line, rr)
             } else if (oldRoot.repeatInfo.end.endMode === "endafterx" || oldRoot.repeatInfo.end.endMode === "never") {
                 const origRootUpdateFilt = {
                     _id: ObjectID(item.repeatRootId)
@@ -250,14 +263,15 @@ module.exports = function (db) {
                         "repeatInfo.end.endMode": "endafterx"
                     }
                 }
-                await db.collection("items").updateOne(origRootUpdateFilt, origRootUpdateOp);
+                const rr = await db.collection("items").updateOne(origRootUpdateFilt, origRootUpdateOp);
+                console.log(__line, rr)
             } else {
                 console.log("Unknown endmode", oldRoot.repeatInfo.end.endMode)
             }
 
             //Run update on the current item, then get next item and iterate
             const firstFilt = {
-                userid: req.uid,
+                userid: ObjectID(req.uid),
                 _id: ObjectID(req.body._id)
             }
             const firstOp = {
@@ -272,7 +286,11 @@ module.exports = function (db) {
             }
             delete firstOp.$set._id;
             delete firstOp.$set.repeatUpdateType;
+            delete firstOp.$set.userid;
+            convertTimesToDates(firstOp.$set);
+            console.log(__line, firstFilt, firstOp.$set.repeatInfo.end)
             const newRoot = await db.collection("items").findOneAndUpdate(firstFilt, firstOp, firstConfig)
+            console.log(__line, newRoot, newRoot.value.repeatInfo.end)
 
             const updateFields = ["repeatRootId", "repeatN", "dueDate", "displayDate"];
             for (const key in req.body) {
@@ -281,28 +299,32 @@ module.exports = function (db) {
                 }
             }
 
-            let nextItem = newRoot;
+            let nextItem = newRoot.value;
             let oldn = item.repeatN + 1;
             let chainIsComplete = false;
-            let lastCreatedItem = newRoot;
-            while (True) {
+            let lastCreatedItem = newRoot.value;
+            while (true) {
                 nextItem = nextItemInRepeatChain(nextItem);
 
                 if (nextItem.repeatInfo.end.endMode === "endon" && nextItem.dueDate.getTime() > nextItem.repeatInfo.end.endon.getTime()) {
+                    console.log(__line)
                     chainIsComplete = true;
                     break;
                 }
 
                 if (nextItem.repeatInfo.end.endMode === "endafterx" && nextItem.repeatN > nextItem.repeatInfo.end.endafterx) {
+                    console.log(__line)
                     chainIsComplete = true;
                     break;
                 }
 
                 if (nextItem.repeatN > REPEAT_ADD_BATCH_SIZE) {
+                    console.log(__line)
                     break;
                 }
 
                 if (oldLastItem !== undefined && oldn > oldLastItem.repeatN) {
+                    console.log(__line)
                     break;
                 }
 
@@ -311,10 +333,16 @@ module.exports = function (db) {
                     updateOps[k] = nextItem[k]
                 })
                 const nextItemFilt = {
-                    userid: req.uid,
+                    userid: ObjectID(req.uid),
                     repeatN: oldn,
                     repeatRootId: ObjectID(item.repeatRootId),
-                    overrideRepeat: false
+                    $or: [{
+                        overrideRepeat: {
+                            $exists: false
+                        }
+                    }, {
+                        overrideRepeat: true
+                    }]
                 }
                 const nextItemOp = {
                     $set: {
@@ -324,15 +352,17 @@ module.exports = function (db) {
                 const nextItemConfig = {
                     returnNewDocument: true
                 }
+                console.log(__line, nextItemFilt, nextItemOp)
 
-                db.collection("items").findOneAndUpdate(nextItemFilt, nextItemOp, nextItemConfig);
+                const rfu = await db.collection("items").findOneAndUpdate(nextItemFilt, nextItemOp, nextItemConfig);
+                console.log(__line, rfu)
 
                 oldn++;
             }
 
             if (!chainIsComplete) {
                 const chainFilter = {
-                    _id: item.userid
+                    _id: ObjectId(item.userid)
                 }
                 const chainPushOperation = {
                     $push: {
@@ -342,7 +372,8 @@ module.exports = function (db) {
                         }
                     }
                 }
-                await db.collection("users").updateOne(chainFilter, chainPushOperation);
+                const ruo = await db.collection("users").updateOne(chainFilter, chainPushOperation);
+                console.log(__line, ruo)
             }
 
             res.status(200).json({ success: true });
@@ -352,7 +383,7 @@ module.exports = function (db) {
 
         const updateFilter = {
             _id: ObjectID(req.body._id),
-            userid: req.uid
+            userid: ObjectID(req.uid)
         }
         const updateOperation = {
             $set: {
@@ -363,6 +394,7 @@ module.exports = function (db) {
         delete updateOperation.$set._id;
         delete updateOperation.$set.repeatUpdateType;
         delete updateOperation.$set.userid;
+        if (updateOperation.$set.repeatRootId !== undefined) updateOperation.$set.repeatRootId = ObjectID(updateOperation.$set.repeatRootId)
         convertTimesToDates(updateOperation.$set);
         if (req.body.repeatUpdateType === "single") {
             updateOperation.$set.overrideRepeat = true;

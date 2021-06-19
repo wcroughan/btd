@@ -1,4 +1,5 @@
 Next shipped update:
+- very confusing bug .... On controllers.js:293 prints a value of 0 for endafterx even though in mongo I can see that the value is 3. Also for text it prints the old value even though returnNewDocument
 - Need to add controller.js update capacity for updating all future items
 - Adding a repeating item that causes more list sections to appear throws an error, something to do with the draggable component
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default

@@ -186,7 +186,7 @@
             <button @click="cancel">Cancel</button>
             <btd-dropdown v-if="editingExistingItem && item.repeats">
               <template v-slot:button>
-                <button @click="finishAndAddItem">Save</button>
+                <button>Save</button>
               </template>
               <template v-slot:content>
                 <h4>Apply changes to</h4>

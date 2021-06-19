@@ -83,12 +83,20 @@ export default {
     },
     mutations: {
         updateItemLocal(state, item) {
-            const si = state.todoItems[state.todoItems.findIndex(i => i._id === item._id)]
+            console.log("uil: ", item)
+            const sidx = state.todoItems.findIndex(i => i._id === item._id);
+            const si = state.todoItems[sidx]
+            console.log("uil: ", si)
 
-            state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = {
-                ...si,
-                ...item
+            for (const key in item) {
+                if (!(["_id", "repeatUpdateType"].includes(key))) {
+                    si[key] = item[key]
+                }
             }
+            // state.todoItems[sidx] = {
+            //     ...si,
+            //     ...item
+            // }
             // state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
         },
         updateItemsLocal(state, items) {
@@ -96,10 +104,15 @@ export default {
                 // state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = { ...item };
                 const si = state.todoItems[state.todoItems.findIndex(i => i._id === item._id)]
 
-                state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = {
-                    ...si,
-                    ...item
+                for (const key in item) {
+                    if (!(["_id", "repeatUpdateType"].includes(key))) {
+                        si[key] = item[key]
+                    }
                 }
+                // state.todoItems[state.todoItems.findIndex(i => i._id === item._id)] = {
+                //     ...si,
+                //     ...item
+                // }
             })
         },
         updateItemOrdersLocal(state, items) {
