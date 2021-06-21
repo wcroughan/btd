@@ -208,7 +208,139 @@ module.exports = function (db) {
         const insertedIds = await this.pushRepeatingItemToServer(entryVar);
         res.status(200).json({ ids: insertedIds, singleId: false });
     }
+    extendChain = async function () { }
+    updateItemField = async function (updateField, fullBody, item) {
+        const singleFilt = {
+            userid: ObjectID(item.userid),
+            _id: ObjectID(fullBody._id)
+        }
+
+        const futureFilt = {
+            userid: ObjectID(item.userid),
+            repeatRootId: item.repeatRootId,
+            repeatN: {
+                $gte: item.repeatN
+            }
+        }
+
+        const allFilt = {
+            userid: ObjectID(item.userid),
+            repeatRootId: item.repeatRootId,
+        }
+
+        if (updateField === "isDone") {
+            const res = await db.collection("items").updateOne(singleFilt, { isDone: fullBody.isDone })
+            return "";
+        }
+        if (updateField === "doneDate") {
+            const res = await db.collection("items").updateOne(singleFilt, { doneDate: (new Date(fullBody.doneDate)).getTime() })
+            return "";
+        }
+        if (updateField === "dueDateMode") {
+            const res = await db.collection("items").updateOne(singleFilt, { dueDateMode: fullBody.dueDateMode })
+            return "";
+        }
+        if (updateField === "snoozedOnDate") {
+            const res = await db.collection("items").updateOne(singleFilt, { snoozedOnDate: fullBody.snoozedOnDate.getTime() })
+            return "";
+        }
+
+        if (updateField === "text") {
+            let f = singleFilt;
+            if (fullBody.repeatUpdateType === "future") f = futureFilt;
+            if (fullBody.repeatUpdateType === "all") f = allFilt;
+            const res = await db.collection("items").updateOne(f, { text: fullBody.text })
+            return "";
+        }
+
+        if (updateField === "dueDate") {
+            const diff = (new Date(fullBody.dueDate)).getTime() - (new Date(item.dueDate)).getTime();
+            let f = singleFilt;
+            if (fullBody.repeatUpdateType === "future") f = futureFilt;
+            if (fullBody.repeatUpdateType === "all") f = allFilt;
+            const res = await db.collection("items").updateOne(f, { dueDate: { $inc: diff } })
+            return "";
+        }
+
+        if (updateField === "displayDate") {
+            console.log(__line, "UNIMPLEMENTED")
+            return "";
+        }
+        if (updateField === "createdDate") {
+            console.log(__line, "UNIMPLEMENTED")
+            return "";
+        }
+        if (updateField === "userid") {
+            console.log(__line, "UNIMPLEMENTED")
+            return "";
+        }
+        if (updateField === "repeatRootId") {
+            console.log(__line, "UNIMPLEMENTED")
+            return "";
+        }
+        if (updateField === "repeatN") {
+            console.log(__line, "UNIMPLEMENTED")
+            return "";
+        }
+        if (updateField === "overrideRepeat") {
+            console.log(__line, "UNIMPLEMENTED")
+            return "";
+        }
+
+        if (updateField === "repeats") {
+            if (item.repeats === true && fullBody.repeats === false) {
+                const res = await db.collection("items").updateOne(singleFilt, { repeats: false })
+                const f = futureFilt;
+                f.repeatN++;
+                const r2 = await db.collection("items").deleteMany(f);
+
+                //if was unfinished chain, remove
+                const chainFilter = { _id: ObjectID(item.userid) }
+                const chainPushOperation = {
+                    $pull: {
+                        unfinishedChains: { rootId: ObjectID(item.repeatRootId), }
+                    }
+                }
+                const chainres = await db.collection("users").updateOne(chainFilter, chainPushOperation);
+
+                return "";
+            } else if (item.repeats === false && fullBody.repeats === true) {
+                return "extendChain";
+
+            }
+        }
+
+        if (updateField === "repeatInfo") {
+            console.log("UNIMPLEMENTED")
+            return "";
+        }
+
+        console.log(__line, "UNKNOWN Update field: ", updateField)
+        return "";
+
+    }
     updateItem = async function (req, res, next) {
+        //In this version, trying to specify how each field's update should function and handle them individually
+        const updateFields = [];
+        for (const key in req.body) {
+            if (!(["_id", "repeatUpdateType"].includes(key))) {
+                if (key === "repeatInfo")
+                    updateFields.push(key)
+                else
+                    updateFields.unshift(key)
+            }
+        }
+
+        console.log(__line, "updating document(s) with body", req.body)
+        const item = await db.collection("items").findOne({ _id: ObjectID(req.body._id), userid: ObjectID(req.uid) });
+        console.log(__line, item)
+
+        for (let uf of updateFields) {
+            await updateItemField(uf, req.body, item)
+        }
+
+    }
+    updateItemOld = async function (req, res, next) {
         if (req.body.repeatUpdateType === "future") {
             console.log(__line, "updating many documents with body", req.body)
             const item = await db.collection("items").findOne({ _id: ObjectID(req.body._id), userid: ObjectID(req.uid) });
@@ -282,12 +414,19 @@ module.exports = function (db) {
                 }
             }
             const firstConfig = {
-                returnNewDocument: true
+                returnOriginal: false
             }
             delete firstOp.$set._id;
             delete firstOp.$set.repeatUpdateType;
             delete firstOp.$set.userid;
             convertTimesToDates(firstOp.$set);
+
+            if (oldRoot.repeatInfo.end.endMode === "endafterx" && item.repeatInfo.end.endMode === "endafterx") {
+                if (firstOp.$set.repeatInfo === undefined) firstOp.$set.repeatInfo = {};
+                if (firstOp.$set.repeatInfo.end === undefined) firstOp.$set.repeatInfo.end = {};
+                firstOp.$set.repeatInfo.end.endafterx = oldRoot.repeatInfo.end.endafterx - item.repeatN + 1;
+            }
+
             console.log(__line, firstFilt, firstOp.$set.repeatInfo.end)
             const newRoot = await db.collection("items").findOneAndUpdate(firstFilt, firstOp, firstConfig)
             console.log(__line, newRoot, newRoot.value.repeatInfo.end)

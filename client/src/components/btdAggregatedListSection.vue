@@ -17,7 +17,7 @@
       </transition-group> -->
       <draggable
         v-model="itemIdsForDraggable"
-        :item-key="(v) => v"
+        :item-key="(v) => listInfo.title + v"
         handle=".list-item-handle"
         tag="transition-group"
         :component-data="{
