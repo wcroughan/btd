@@ -208,7 +208,169 @@ module.exports = function (db) {
         const insertedIds = await this.pushRepeatingItemToServer(entryVar);
         res.status(200).json({ ids: insertedIds, singleId: false });
     }
-    extendChain = async function () { }
+    extendChain = async function (id) {
+        //first get the item with _id === id
+        //Use repeatN+1 from that item as a starting point, generate future items and add them all. Then update chain if unfinished
+    }
+    updateItem = async function (req, res, next) {
+        const runSimpleSingleUpdate = function () {
+            const singleFilt = {
+                _id: ObjectID(req.query.id),
+                userid: ObjectID(req.uid)
+            }
+            const entryVar = {
+                $set: {
+                    ...req.body
+                }
+            }
+
+            delete entryVar.$set._id;
+            delete entryVar.$set.repeatUpdateType;
+            delete entryVar.$set.userid;
+            delete entryVar.$set.updateType;
+
+            const rssupres = await db.collection("items").updateOne(singleFilt, entryVar);
+            console.log(__line, rssupres)
+        }
+
+        if (req.body.updateType === "isdone" || req.body.updateType === "snooze" || req.body.repeatUpdateType === "single") {
+            runSimpleSingleUpdate();
+            res.status(200).json({ success: true });
+            return;
+        }
+
+        console.log("TODO: replace this with internal getter for items which fills in gaps based on repeatroot info")
+        const item = await db.collection("items").findOne({ _id: ObjectID(req.query.id), userid: ObjectID(req.uid) });
+        console.log(__line, item)
+        if (!item.repeats && req.body.repeats !== true) {
+            runSimpleSingleUpdate();
+            res.status(200).json({ success: true });
+            return;
+        }
+
+        const updateRootToEndHere = function () {
+            const rootfilt = {
+                _id: ObjectID(item.repeatRootId),
+                userid: ObjectID(req.uid),
+            }
+
+            const newRepeatInfo = item.repeatInfo;
+            if (item.repeatInfo.end.endMode === "endnever") {
+                newRepeatInfo.end.endMode = "endon";
+            }
+
+            if (newRepeatInfo.end.endMode === "endafterx") {
+                newRepeatInfo.end.endafterx = item.repeatN;
+            } else if (newRepeatInfo.end.endMode === "endon") {
+                newRepeatInfo.end.endon = item.dueDate;
+            }
+            const rootUpdateOp = {
+                repeatInfo: newRepeatInfo
+            }
+
+            const rootres = await db.collection("items").updateOne(rootfilt, rootUpdateOp);
+            console.log(__line, rootres)
+        }
+
+        if (item.repeats && req.body.repeats === false) {
+            //cancelling repeat
+            let rootid = req.query.id;
+            if (item.repeatN !== 1) {
+                //cancelling from partway down the chain. Update root to end here
+                updateRootToEndHere();
+                rootid = item.repeatRootId;
+
+                //now pass through rest of update, but take out things that are taken care of by the root update
+                delete req.body.repeatInfo;
+                delete req.body.repeats;
+            }
+
+            runSimpleSingleUpdate();
+
+            //now delete all future items
+            const delfilt = {
+                repeatRootId: ObjectID(rootid),
+                userid: ObjectID(req.uid),
+                repeatN: {
+                    $gt: item.repeatN
+                }
+            }
+            const delres = await db.collection("items").deleteMany(delfilt)
+            console.log(__line, delres)
+
+            //also check unfinished chains
+            const chainFilter = { _id: ObjectID(item.userid) }
+            const chainPushOperation = {
+                $pull: {
+                    unfinishedChains: { rootId: ObjectID(item.repeatRootId), }
+                }
+            }
+            const chainres = await db.collection("users").updateOne(chainFilter, chainPushOperation);
+            console.log(__line, chainres)
+
+            res.status(200).json({ success: true });
+            return;
+        }
+
+        if (req.body.repeats === true && !item.repeats) {
+            runSimpleSingleUpdate();
+            extendChain(item._id);
+
+            res.status(200).json({ success: true });
+            return;
+        }
+
+        //If you've made it this far, batman, you know the update applies to all future items, and it was and is still a repeating item
+        let rootid = req.query.id;
+        if (item.repeatN !== 1) {
+            updateRootToEndHere();
+            rootid = item.repeatRootId;
+        }
+
+        //check if chain was unfinished, if so get last item's repeatN
+        const userFilter = { _id: ObjectID(item.userid) }
+        const user = await db.collection("users").findOne(userFilter);
+        const thisChain = user.unfinishedChains.find(c => c.rootId === rootid);
+        let ufcLastItemN;
+        if (thisChain !== undefined) ufcLastItemN = thisChain.lastCreatedItem.repeatN;
+
+        //now loop through items starting with this one, update each
+        allUpdatePromises = []
+        let newN = 1;
+        let oldN = item.repeatN;
+        while (true) {
+            //update
+            const updateFilt = {
+                userid: ObjectID(req.uid),
+                repeatRootId: ObjectID(rootid),
+                repeatN: oldN,
+            }
+            const updateOp = {
+
+            }
+            console.log("TODO: populate op, run update, check other possible ending conditions (endon, endafterx)")
+
+            //check end conditions
+            if (oldN === ufcLastItemN)
+                break;
+
+            newN++;
+            oldN++;
+        }
+
+        if (ufcLastItemN !== undefined) {
+            //update last item in chain
+            //(can add this to promise array)
+        }
+
+        //collect all promises and resolve them
+        const allUpdateRes = await Promise.all(allUpdatePromises);
+        console.log(__line, allUpdateRes)
+
+        //and we're done!
+        res.status(200).json({ success: true });
+        return;
+    }
     updateItemField = async function (updateField, fullBody, item) {
         const singleFilt = {
             userid: ObjectID(item.userid),
@@ -236,20 +398,23 @@ module.exports = function (db) {
             const res = await db.collection("items").updateOne(singleFilt, { doneDate: (new Date(fullBody.doneDate)).getTime() })
             return "";
         }
-        if (updateField === "dueDateMode") {
-            const res = await db.collection("items").updateOne(singleFilt, { dueDateMode: fullBody.dueDateMode })
-            return "";
-        }
         if (updateField === "snoozedOnDate") {
             const res = await db.collection("items").updateOne(singleFilt, { snoozedOnDate: fullBody.snoozedOnDate.getTime() })
             return "";
         }
 
+        if (updateField === "dueDateMode") {
+            let f = singleFilt;
+            if (fullBody.repeatUpdateType === "future") f = futureFilt;
+            if (fullBody.repeatUpdateType === "all") f = allFilt;
+            const res = await db.collection("items").updateMany(f, { dueDateMode: fullBody.dueDateMode })
+            return "";
+        }
         if (updateField === "text") {
             let f = singleFilt;
             if (fullBody.repeatUpdateType === "future") f = futureFilt;
             if (fullBody.repeatUpdateType === "all") f = allFilt;
-            const res = await db.collection("items").updateOne(f, { text: fullBody.text })
+            const res = await db.collection("items").updateMany(f, { text: fullBody.text })
             return "";
         }
 
@@ -258,7 +423,7 @@ module.exports = function (db) {
             let f = singleFilt;
             if (fullBody.repeatUpdateType === "future") f = futureFilt;
             if (fullBody.repeatUpdateType === "all") f = allFilt;
-            const res = await db.collection("items").updateOne(f, { dueDate: { $inc: diff } })
+            const res = await db.collection("items").updateMany(f, { dueDate: { $inc: diff } })
             return "";
         }
 
@@ -306,7 +471,6 @@ module.exports = function (db) {
                 return "";
             } else if (item.repeats === false && fullBody.repeats === true) {
                 return "extendChain";
-
             }
         }
 
@@ -319,7 +483,7 @@ module.exports = function (db) {
         return "";
 
     }
-    updateItem = async function (req, res, next) {
+    updateItemUnfinishedv2 = async function (req, res, next) {
         //In this version, trying to specify how each field's update should function and handle them individually
         const updateFields = [];
         for (const key in req.body) {
@@ -335,8 +499,11 @@ module.exports = function (db) {
         const item = await db.collection("items").findOne({ _id: ObjectID(req.body._id), userid: ObjectID(req.uid) });
         console.log(__line, item)
 
+        const postactions = [];
         for (let uf of updateFields) {
-            await updateItemField(uf, req.body, item)
+            const uifres = await updateItemField(uf, req.body, item)
+            if (uifres !== "")
+                postactions.push(uifres);
         }
 
     }
