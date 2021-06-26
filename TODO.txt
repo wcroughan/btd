@@ -6,6 +6,7 @@ Next shipped update:
 - similar xingle/future logic for deletions
 - update add item, retrieve item logic for new repeating item method
     - things that should be added to repeats always: duedate, isdone, displaydate, anything else that's searched by
+- in frontend, pass repeatType. Also if not currently doing this, filter just things that have changed to pass
 - backend logic for repeats and display
     - possible add/edits for repeating items:
         - add new item which repeats.
