@@ -218,6 +218,7 @@ import btdCheckbox from "./btdCheckbox.vue";
 import date_util from "../utility/date_util";
 import { mapActions } from "vuex";
 import btdDropdown from "./btdDropdown.vue";
+import deepequal from "deep-equal";
 
 export default {
   name: "BtdItemEditModal",
@@ -267,7 +268,7 @@ export default {
   },
   methods: {
     ...mapActions("todolist", ["addItem", "updateItem"]),
-    finishAndAddItem(updateType) {
+    finishAndAddItem(repeatUpdateType) {
       date_util.updateDateFromCalendarInputStr(
         this.item.dueDate,
         this.duedatestr
@@ -282,8 +283,15 @@ export default {
         );
       }
       if (this.editingExistingItem) {
-        this.item.repeatUpdateType = updateType;
-        this.updateItem(this.item);
+        const upop = { _id: this.item._id };
+        for (const key in this.item) {
+          if (!deepequal(this.item[key], this.initialItem[key])) {
+            upop[key] = this.item[key];
+          }
+        }
+        upop.repeatUpdateType = repeatUpdateType;
+        upop.updateType = "fullitemedit";
+        this.updateItem(upop);
       } else this.addItem(this.item);
       this.$emit("closeModal", true);
     },

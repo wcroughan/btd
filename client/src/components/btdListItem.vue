@@ -144,6 +144,7 @@ export default {
         i.doneDate = new Date();
       }
 
+      i.updateType = "isDone";
       this.updateItem(i);
     },
     deleteButtonClicked() {
@@ -177,6 +178,7 @@ export default {
       if (snoozeInfo.dueDateMode !== undefined)
         i.dueDateMode = snoozeInfo.dueDateMode;
 
+      i.updateType = "snooze";
       this.updateItem(i);
     },
     editButtonClicked() {
@@ -188,6 +190,7 @@ export default {
         overriddenDueDate: this.item.dueDate,
         dueDate: date_util.getTomorrow(),
       };
+      i.updateType = "overrideOverdue";
       this.updateItem(i);
     },
     rearrangeClicked() {

@@ -127,12 +127,12 @@ export default {
       },
       set(val) {
         const newitems = clone(this.items);
+        // console.log(newitems);
         val.forEach(
-          (v, i) =>
-            (newitems.find((ni) => ni._id === v).displayOrder =
-              this.items[i].displayOrder)
+          (v, i) => (newitems.find((ni) => ni._id === v).displayOrder = i)
         );
-        console.log("updating items because draggable");
+        // console.log("updating items because draggable");
+        // console.log(newitems);
         this.updateItemDisplayOrders(newitems);
         this.itemIds = val;
       },

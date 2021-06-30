@@ -70,7 +70,7 @@ module.exports = {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
         const req = api_root + `item/${update._id}?${params}`;
-        // console.log(req);
+        console.log(req);
         if (callback !== undefined) {
             axios.put(req, update).then(callback);
         } else {
@@ -87,7 +87,7 @@ module.exports = {
             _id: item._id,
             displayOrder: item.displayOrder
         }
-        // console.log(req);
+        // console.log(body);
         if (callback !== undefined) {
             axios.put(req, body).then(callback);
         } else {
