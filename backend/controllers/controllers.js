@@ -26,6 +26,58 @@ const REPEAT_ADD_BATCH_SIZE = 20;
 
 
 module.exports = function (db) {
+    recursiveFillRepeatingItem = function (item, allitems) {
+        console.log(__line)
+        if (item.repeatRootId === undefined || "" + item.repeatRootId === "" + item._id) {
+            console.log(__line, item)
+            return item;
+        }
+        const parent = recursiveFillRepeatingItem(allitems.find(i => "" + i._id === "" + item.repeatRootId), allitems)
+        const res = {
+            ...parent,
+            ...item
+        }
+        console.log(__line, res)
+        return res;
+    }
+    constructRepeatedItems = async function (items) {
+        const allitems = clone(items);
+        let i = 0;
+        while (true) {
+            const rootIds = new Set();
+            allitems.forEach(i => {
+                if (i.repeats && !allitems.some(ai => "" + ai._id === "" + i.repeatRootId))
+                    rootIds.add(ObjectID(i.repeatRootId));
+            })
+            if (rootIds.size === 0)
+                break;
+
+            const filt = {
+                _id: {
+                    $in: [...rootIds]
+                }
+            }
+            console.log(__line, i, [...rootIds].map(v => "" + v))
+            const cursor = await db.collection("items").find(filt)
+            const results = await cursor.toArray();
+            allitems.concat(__line, results);
+
+            console.log(i, allitems.map(v => "" + v._id))
+
+            i++;
+            if (i > 100) {
+                console.log(__line, "asdfsadfsadf")
+                return;
+            }
+        }
+
+        _.range(0, items.length).forEach(i => {
+            console.log(__line, i, items[i])
+            items[i] = recursiveFillRepeatingItem(items[i], allitems)
+        })
+        // items.forEach(console.log)
+        console.log(__line, items)
+    }
     getItems = async function (req, res, next) {
         const detail = {
             userid: req.uid,
@@ -40,10 +92,12 @@ module.exports = function (db) {
                 }
             ]
         }
-        // console.log(__line, detail.$or[1].displayDate.$lte)
+        console.log(__line, detail.$or[1].displayDate.$lte)
         const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
         const results = await cursor.toArray();
         // console.log(__line, results);
+        await constructRepeatedItems(results);
+        console.log(__line, results);
         // console.log(__line, results[0].displayDate, typeof results[0].displayDate)
         res.status(200).json(results)
     }
@@ -56,6 +110,7 @@ module.exports = function (db) {
         // console.log(__line, detail.$or[1].displayDate.$lte.getTime())
         const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
         const results = await cursor.toArray();
+        await constructRepeatedItems(results);
         console.log(__line, results);
         res.status(200).json(results)
     }
@@ -68,6 +123,7 @@ module.exports = function (db) {
         // console.log(__line, detail.$or[1].displayDate.$lte.getTime())
         const cursor = await db.collection("items").find(detail).sort({ dueDate: 1 })
         const results = await cursor.toArray();
+        await constructRepeatedItems(results);
         console.log(__line, results);
         res.status(200).json(results)
     }
@@ -128,7 +184,7 @@ module.exports = function (db) {
         const rootUpdateOperation = {
             $set: {
                 repeatRootId: rootid,
-                repeatN: 1
+                repeatN: 0
             }
         }
         await db.collection("items").updateOne(rootUpdateFilter, rootUpdateOperation);
@@ -138,7 +194,7 @@ module.exports = function (db) {
         let newItem = clone(item);
         delete newItem._id;
         newItem.repeatRootId = rootid;
-        newItem.repeatN = 1;
+        newItem.repeatN = 0;
         let completedChain = false;
 
         while (true) {
@@ -183,6 +239,137 @@ module.exports = function (db) {
         //then return the uploaded ids
         return insertResult.insertedIds;
     }
+    getRepeatDates = function (firstDueDate, repeatInfo, n) {
+        console.log(__line, repeatInfo, n);
+        const ret = {
+            dueDate: null,
+            displayDate: null
+        }
+
+        if (repeatInfo.repeatMode === "everyx") {
+            ret.dueDate = date_util.offsetByUnits(firstDueDate, repeatInfo.everyx.frequency * n, repeatInfo.everyx.unit);
+        } else if (repeatInfo.repeatMode === "reponxweekday") {
+            ret.dueDate = new Date(firstDueDate)
+            ret.dueDate.setMonth(ret.dueDate.getMonth() + n);
+            const m = ret.dueDate.getMonth();
+            const d = date_util.getWeekdayNumber(repeatInfo.xweekday.weekday);
+            ret.dueDate.setDay(d)
+            if (m !== ret.dueDate.getMonth()) {
+                ret.dueDate.setDate(ret.dueDate.getDate() + 7);
+            }
+            //should now be on first specified weekday of the month after item
+            if (repeatInfo.xweekday.x === "2nd")
+                ret.dueDate.setDate(ret.dueDate.getDate() + 7);
+            else if (repeatInfo.xweekday.x === "3rd")
+                ret.dueDate.setDate(ret.dueDate.getDate() + 14);
+            else if (repeatInfo.xweekday.x === "4th")
+                ret.dueDate.setDate(ret.dueDate.getDate() + 21);
+            else if (repeatInfo.xweekday.x === "last") {
+                while (ret.dueDate.getMonth() === m)
+                    ret.dueDate.setDate(ret.dueDate.getDate() + 7);
+                ret.dueDate.setDate(ret.dueDate.getDate() - 7);
+            }
+        }
+
+        //now set displayDate
+        if (repeatInfo.show.showMode === "xunits") {
+            ret.displayDate = date_util.offsetByUnits(ret.dueDate, -1 * repeatInfo.show.xunits.x, repeatInfo.show.xunits.unit)
+        } else {
+            ret.displayDate = new Date(ret.dueDate);
+            ret.displayDate.setDay(date_util.getWeekdayNumber(repeatInfo.show.weekday));
+            if (ret.displayDate.getTime() > ret.dueDate.getTime())
+                ret.displayDate.setDate(ret.displayDate.getDate() - 7);
+        }
+
+        return ret;
+    }
+    //id should be the current end of the chain
+    extendChain = async function (id) {
+        //first get the item with _id === id
+        const filt = {
+            _id: ObjectID(id)
+        }
+        const item = await db.collection("items").findOne(filt)
+        console.log(__line, id, item)
+        let repeatInfo = item.repeatInfo;
+        let ii = item;
+        let firstDueDate = undefined;
+        if (item.repeatN === 0)
+            firstDueDate = item.dueDate;
+        else if (repeatInfo !== undefined) {
+            throw "assertion failed!"
+        }
+
+        const repeatRootId = item.repeatRootId;
+
+        while (repeatInfo === undefined) {
+            ii = await db.collection("items").findOne({ _id: ObjectID(ii.repeatRootId) })
+            repeatInfo = ii.repeatInfo;
+            if (firstDueDate === undefined) firstDueDate = ii.firstDueDate;
+        }
+
+        //Use repeatN+1 from that item as a starting point, generate future items and add them all. Then update chain if unfinished
+        let nextN = item.repeatN + 1;
+        let i = 0;
+        let chainFinished = false;
+        const allItems = [];
+        while (i < REPEAT_ADD_BATCH_SIZE) {
+            const newDates = getRepeatDates(firstDueDate, repeatInfo, nextN)
+            const nextDueDate = newDates.dueDate;
+            const nextDisplayDate = newDates.displayDate;
+
+            if (repeatInfo.end.endMode === "endon" && nextDueDate.getTime() > (new Date(repeatInfo.end.endon)).getTime()) {
+                chainFinished = true;
+                break;
+            }
+
+            const newItem = {
+                isDone: false,
+                repeatN: nextN,
+                dueDate: nextDueDate,
+                displayDate: nextDisplayDate,
+                userid: ObjectID(item.userid),
+                repeatRootId: ObjectID(repeatRootId)
+            }
+            allItems.push(newItem)
+
+            nextN++;
+            i++;
+
+            if (repeatInfo.end.endMode === "endafterx" && nextN >= repeatInfo.end.endafterx) {
+                chainFinished = true;
+                break;
+            }
+        }
+
+        const inres = await db.collection("items").insertMany(allItems);
+        console.log(__line, inres)
+
+        if (!chainFinished) {
+            const chainFilter = { _id: ObjectID(item.userid) }
+            const lastCreatedItem = allItems[allItems.length - 1];
+            console.log(__line, lastCreatedItem)
+            const chainPushOperation = {
+                $push: {
+                    unfinishedChains: {
+                        rootId: ObjectID(repeatRootId),
+                        lastCreatedItem
+                    }
+                }
+            }
+            const chainPullOperation = {
+                $pull: {
+                    unfinishedChains: { rootId: ObjectID(repeatRootId), }
+                }
+            }
+            const chainres1 = await db.collection("users").updateOne(chainFilter, chainPullOperation);
+            const chainres2 = await db.collection("users").updateOne(chainFilter, chainPushOperation);
+            console.log(__line, chainres1)
+            console.log(__line, chainres2)
+        }
+
+        return inres.insertedIds;
+    }
     pushItemToServer = async function (req, res, next) {
         console.log(__line, "adding new item:", req.body);
 
@@ -195,27 +382,29 @@ module.exports = function (db) {
         entryVar.userid = req.uid;
         convertTimesToDates(entryVar);
 
-        if (!req.body.repeats) {
-            const result = await db.collection("items").insertOne(entryVar);
-            console.log(result.insertedId);
-            const retid = result.insertedId || "tmpval";
+        if (req.body.repeats)
+            entryVar.repeatN = 0;
 
+        const result = await db.collection("items").insertOne(entryVar);
+        console.log(__line, result.insertedId);
+        const retid = result.insertedId || "tmpval";
+
+        if (!req.body.repeats) {
             res.status(200).json({ id: retid, singleId: true });
             return;
+        } else {
+            const upres = await db.collection("items").updateOne({ _id: ObjectID(retid) }, { $set: { repeatRootId: ObjectID(retid) } })
+            console.log(__line, upres)
         }
 
         //adding a new repeating item
-        const insertedIds = await this.pushRepeatingItemToServer(entryVar);
+        const insertedIds = await extendChain(retid);
         res.status(200).json({ ids: insertedIds, singleId: false });
     }
-    extendChain = async function (id) {
-        //first get the item with _id === id
-        //Use repeatN+1 from that item as a starting point, generate future items and add them all. Then update chain if unfinished
-    }
     updateItem = async function (req, res, next) {
-        const runSimpleSingleUpdate = function () {
+        const runSimpleSingleUpdate = async function () {
             const singleFilt = {
-                _id: ObjectID(req.query.id),
+                _id: ObjectID(req.params.id),
                 userid: ObjectID(req.uid)
             }
             const entryVar = {
@@ -233,22 +422,31 @@ module.exports = function (db) {
             console.log(__line, rssupres)
         }
 
+        if (req.body.updateType === "itemOrder") {
+            console.log(__line, "unimplemented");
+            status(200).json({ success: false })
+            return;
+        }
+
         if (req.body.updateType === "isdone" || req.body.updateType === "snooze" || req.body.repeatUpdateType === "single") {
-            runSimpleSingleUpdate();
+            await runSimpleSingleUpdate();
             res.status(200).json({ success: true });
             return;
         }
 
-        console.log("TODO: replace this with internal getter for items which fills in gaps based on repeatroot info")
-        const item = await db.collection("items").findOne({ _id: ObjectID(req.query.id), userid: ObjectID(req.uid) });
+        const itemarr = [];
+        itemarr.push(await db.collection("items").findOne({ _id: ObjectID(req.paramns.id), userid: ObjectID(req.uid) }));
+        constructRepeatedItems(itemarr)
+        const item = itemarr[0];
+
         console.log(__line, item)
         if (!item.repeats && req.body.repeats !== true) {
-            runSimpleSingleUpdate();
+            await runSimpleSingleUpdate();
             res.status(200).json({ success: true });
             return;
         }
 
-        const updateRootToEndHere = function () {
+        const updateRootToEndHere = async function () {
             const rootfilt = {
                 _id: ObjectID(item.repeatRootId),
                 userid: ObjectID(req.uid),
@@ -274,10 +472,10 @@ module.exports = function (db) {
 
         if (item.repeats && req.body.repeats === false) {
             //cancelling repeat
-            let rootid = req.query.id;
-            if (item.repeatN !== 1) {
+            let rootid = req.params.id;
+            if (item.repeatN !== 0) {
                 //cancelling from partway down the chain. Update root to end here
-                updateRootToEndHere();
+                await updateRootToEndHere();
                 rootid = item.repeatRootId;
 
                 //now pass through rest of update, but take out things that are taken care of by the root update
@@ -285,7 +483,7 @@ module.exports = function (db) {
                 delete req.body.repeats;
             }
 
-            runSimpleSingleUpdate();
+            await runSimpleSingleUpdate();
 
             //now delete all future items
             const delfilt = {
@@ -313,7 +511,7 @@ module.exports = function (db) {
         }
 
         if (req.body.repeats === true && !item.repeats) {
-            runSimpleSingleUpdate();
+            await runSimpleSingleUpdate();
             extendChain(item._id);
 
             res.status(200).json({ success: true });
@@ -321,9 +519,9 @@ module.exports = function (db) {
         }
 
         //If you've made it this far, batman, you know the update applies to all future items, and it was and is still a repeating item
-        let rootid = req.query.id;
-        if (item.repeatN !== 1) {
-            updateRootToEndHere();
+        let rootid = req.params.id;
+        if (item.repeatN !== 0) {
+            await updateRootToEndHere();
             rootid = item.repeatRootId;
         }
 
@@ -335,9 +533,19 @@ module.exports = function (db) {
         if (thisChain !== undefined) ufcLastItemN = thisChain.lastCreatedItem.repeatN;
 
         //now loop through items starting with this one, update each
+        let newRepeatInfo = item.repeatInfo;
+        if (req.body.repeatInfo !== undefined) {
+            newRepeatInfo = req.body.repeatInfo;
+        }
+        let firstDueDate = item.dueDate;
+        if (req.body.dueDate !== undefined) {
+            firstDueDate = req.body.dueDate;
+        }
+
         allUpdatePromises = []
-        let newN = 1;
+        let newN = 0;
         let oldN = item.repeatN;
+        let chainFinished = false;
         while (true) {
             //update
             const updateFilt = {
@@ -345,12 +553,37 @@ module.exports = function (db) {
                 repeatRootId: ObjectID(rootid),
                 repeatN: oldN,
             }
-            const updateOp = {
 
+            const newDates = getRepeatDates(firstDueDate, newRepeatInfo, newN)
+            const newDueDate = newDates.dueDate;
+            const newDisplayDate = newDates.displayDate;
+
+            if (newRepeatInfo.end.endMode === "endon" && newDueDate.getTime() > newRepeatInfo.end.endon.getTime()) {
+                chainFinished = true;
+                break;
             }
-            console.log("TODO: populate op, run update, check other possible ending conditions (endon, endafterx)")
 
-            //check end conditions
+
+            const updateOp = {
+                $set: {
+                    ...req.body,
+                    dueDate: newDueDate,
+                    displayDate: newDisplayDate,
+                    repeatN: newN
+                }
+            }
+            delete updateOp.$set._id;
+            delete updateOp.$set.repeatUpdateType;
+            delete updateOp.$set.userid;
+            delete updateOp.$set.updateType;
+
+            allUpdatePromises.push(db.collection("items").updateOne(updateFilt, updateOp));
+
+            if (newRepeatInfo.end.endMode === "endafterx" && newN >= newRepeatInfo.end.endafterx) {
+                chainFinished = true;
+                break;
+            }
+
             if (oldN === ufcLastItemN)
                 break;
 
@@ -361,6 +594,51 @@ module.exports = function (db) {
         if (ufcLastItemN !== undefined) {
             //update last item in chain
             //(can add this to promise array)
+            if (chainFinished) {
+                //pull
+                const chainFilter = { _id: ObjectID(item.userid) }
+                const chainPullOperation = {
+                    $pull: {
+                        unfinishedChains: { rootId: ObjectID(item.repeatRootId), }
+                    }
+                }
+                allUpdatePromises.push(db.collection("users").updateOne(chainFilter, chainPullOperation));
+            } else {
+                //update
+                const chainFilter = {
+                    _id: ObjectID(item.userid),
+                    "unfinishedChains.rootId": ObjectID(item.repeatRootId)
+                }
+                const lastCreatedItemResult = await allUpdatePromises[allUpdatePromises.length - 1];
+                console.log(__line, lastCreatedItemResult)
+                console.log(__line, "TODO")
+
+                const lastCreatedItem = undefined;
+                const chainUpdateOp = {
+                    $set: {
+                        "unfinishedChains.$.rootId": ObjectID(item._id),
+                        "unfinishedChains.$.lastCreatedItem": lastCreatedItem
+                    }
+                }
+                console.log(__line, "TODO")
+                allUpdatePromises.push(db.collection("users").updateOne(chainFilter, chainUpdateOp))
+            }
+        } else if (!chainFinished) {
+            //push new chain
+            const chainFilter = { _id: ObjectID(item.userid) }
+            const lastCreatedItemResult = await allUpdatePromises[allUpdatePromises.length - 1];
+            console.log(__line, lastCreatedItemResult)
+            console.log(__line, "TODO")
+            const lastCreatedItem = undefined;
+            const chainPushOperation = {
+                $push: {
+                    unfinishedChains: {
+                        rootId: ObjectID(item._id),
+                        lastCreatedItem
+                    }
+                }
+            }
+            allUpdatePromises.push(db.collection("users").updateOne(chainFilter, chainPushOperation));
         }
 
         //collect all promises and resolve them
@@ -576,7 +854,7 @@ module.exports = function (db) {
             const firstOp = {
                 $set: {
                     ...req.body,
-                    repeatN: 1,
+                    repeatN: 0,
                     repeatRootId: ObjectID(req.body._id)
                 }
             }
@@ -668,7 +946,7 @@ module.exports = function (db) {
 
             if (!chainIsComplete) {
                 const chainFilter = {
-                    _id: ObjectId(item.userid)
+                    _id: ObjectID(item.userid)
                 }
                 const chainPushOperation = {
                     $push: {
@@ -727,6 +1005,24 @@ module.exports = function (db) {
         res.status(200).json({ success: true });
     }
     deleteItemFromServer = async function (req, res, next) {
+        if (req.query.repeatUpdateType === "future") {
+            const filt = {
+                _id: ObjectID(req.params.id),
+                userid: ObjectID(req.uid)
+            }
+            const item = await db.collection("items").findOne(filt)
+            const detail = {
+                userid: ObjectID(req.uid),
+                repeatRootId: ObjectID(item.repeatRootId),
+                repeatN: { $gte: item.repeatN }
+            }
+            const result = await db.collection("items").deleteMany(detail);
+            console.log(__line, result)
+
+            res.status(200).json({ success: true })
+            return;
+        }
+
         const detail = {
             _id: ObjectID(req.params.id),
             userid: ObjectID(req.uid)
@@ -747,7 +1043,7 @@ module.exports = function (db) {
             }
         }
         const overdueCount = await db.collection("items").countDocuments(overdueDetail);
-        console.log(__line, overdueCount);
+        // console.log(__line, overdueCount);
         if (overdueCount > 0) {
             res.status(200).json({
                 todayGood: false,

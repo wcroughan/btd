@@ -1,12 +1,8 @@
 Next shipped update:
-- finish controllers.js 351 onward
 - Adding a repeating item that causes more list sections to appear throws an error, something to do with the draggable component
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default
 - When retrieving lists, check if need to extend repeats
-- similar xingle/future logic for deletions
-- update add item, retrieve item logic for new repeating item method
-    - things that should be added to repeats always: duedate, isdone, displaydate, anything else that's searched by
-- in frontend, pass repeatType. Also if not currently doing this, filter just things that have changed to pass
+- in frontend, pass updateType. Also if not currently doing this, filter just things that have changed to pass
 - backend logic for repeats and display
     - possible add/edits for repeating items:
         - add new item which repeats.
