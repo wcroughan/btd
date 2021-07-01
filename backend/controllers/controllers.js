@@ -27,9 +27,9 @@ const REPEAT_ADD_BATCH_SIZE = 20;
 
 module.exports = function (db) {
     recursiveFillRepeatingItem = function (item, allitems) {
-        console.log(__line)
+        // console.log(__line)
         if (item.repeatRootId === undefined || "" + item.repeatRootId === "" + item._id) {
-            console.log(__line, item)
+            // console.log(__line, item)
             return item;
         }
         const parent = recursiveFillRepeatingItem(allitems.find(i => "" + i._id === "" + item.repeatRootId), allitems)
@@ -37,7 +37,7 @@ module.exports = function (db) {
             ...parent,
             ...item
         }
-        console.log(__line, res)
+        // console.log(__line, res)
         return res;
     }
     constructRepeatedItems = async function (items) {
@@ -46,23 +46,26 @@ module.exports = function (db) {
         while (true) {
             const rootIds = new Set();
             allitems.forEach(i => {
-                if (i.repeats && !allitems.some(ai => "" + ai._id === "" + i.repeatRootId))
+                if (i.repeatRootId !== undefined && !allitems.some(ai => "" + ai._id === "" + i.repeatRootId))
                     rootIds.add(ObjectID(i.repeatRootId));
             })
-            if (rootIds.size === 0)
+            if (rootIds.size === 0) {
+                // console.log(__line, items)
                 break;
+            }
 
             const filt = {
                 _id: {
                     $in: [...rootIds]
                 }
             }
-            console.log(__line, i, [...rootIds].map(v => "" + v))
+            // console.log(__line, i, [...rootIds].map(v => "" + v))
             const cursor = await db.collection("items").find(filt)
             const results = await cursor.toArray();
-            allitems.concat(__line, results);
+            // console.log(__line, results)
+            allitems.push(...results);
 
-            console.log(i, allitems.map(v => "" + v._id))
+            // console.log(__line, i, allitems.map(v => "" + v._id))
 
             i++;
             if (i > 100) {
@@ -72,11 +75,11 @@ module.exports = function (db) {
         }
 
         _.range(0, items.length).forEach(i => {
-            console.log(__line, i, items[i])
+            // console.log(__line, i, items[i])
             items[i] = recursiveFillRepeatingItem(items[i], allitems)
         })
         // items.forEach(console.log)
-        console.log(__line, items)
+        // console.log(__line, items)
     }
     getItems = async function (req, res, next) {
         const detail = {
@@ -97,7 +100,7 @@ module.exports = function (db) {
         const results = await cursor.toArray();
         // console.log(__line, results);
         await constructRepeatedItems(results);
-        console.log(__line, results);
+        // console.log(__line, results);
         // console.log(__line, results[0].displayDate, typeof results[0].displayDate)
         res.status(200).json(results)
     }
@@ -402,7 +405,10 @@ module.exports = function (db) {
         res.status(200).json({ ids: insertedIds, singleId: false });
     }
     updateItem = async function (req, res, next) {
+        console.log(__line, req.body);
+
         const runSimpleSingleUpdate = async function () {
+            console.log(__line, req.params, req.uid)
             const singleFilt = {
                 _id: ObjectID(req.params.id),
                 userid: ObjectID(req.uid)
@@ -418,6 +424,8 @@ module.exports = function (db) {
             delete entryVar.$set.userid;
             delete entryVar.$set.updateType;
 
+            convertTimesToDates(entryVar.$set);
+
             const rssupres = await db.collection("items").updateOne(singleFilt, entryVar);
             console.log(__line, rssupres)
         }
@@ -428,15 +436,15 @@ module.exports = function (db) {
             return;
         }
 
-        if (req.body.updateType === "isdone" || req.body.updateType === "snooze" || req.body.repeatUpdateType === "single") {
+        if (["isDone", "snooze", "overrideOverdue"].includes(req.body.updateType) || req.body.repeatUpdateType === "single") {
             await runSimpleSingleUpdate();
             res.status(200).json({ success: true });
             return;
         }
 
         const itemarr = [];
-        itemarr.push(await db.collection("items").findOne({ _id: ObjectID(req.paramns.id), userid: ObjectID(req.uid) }));
-        constructRepeatedItems(itemarr)
+        itemarr.push(await db.collection("items").findOne({ _id: ObjectID(req.params.id), userid: ObjectID(req.uid) }));
+        await constructRepeatedItems(itemarr)
         const item = itemarr[0];
 
         console.log(__line, item)
@@ -463,8 +471,11 @@ module.exports = function (db) {
                 newRepeatInfo.end.endon = item.dueDate;
             }
             const rootUpdateOp = {
-                repeatInfo: newRepeatInfo
+                $set: {
+                    repeatInfo: newRepeatInfo
+                }
             }
+            convertTimesToDates(rootUpdateOp.$set)
 
             const rootres = await db.collection("items").updateOne(rootfilt, rootUpdateOp);
             console.log(__line, rootres)
@@ -576,6 +587,7 @@ module.exports = function (db) {
             delete updateOp.$set.repeatUpdateType;
             delete updateOp.$set.userid;
             delete updateOp.$set.updateType;
+            convertTimesToDates(updateOp.$set);
 
             allUpdatePromises.push(db.collection("items").updateOne(updateFilt, updateOp));
 
@@ -614,6 +626,7 @@ module.exports = function (db) {
                 console.log(__line, "TODO")
 
                 const lastCreatedItem = undefined;
+                convertTimesToDates(lastCreatedItem);
                 const chainUpdateOp = {
                     $set: {
                         "unfinishedChains.$.rootId": ObjectID(item._id),
@@ -630,6 +643,7 @@ module.exports = function (db) {
             console.log(__line, lastCreatedItemResult)
             console.log(__line, "TODO")
             const lastCreatedItem = undefined;
+            convertTimesToDates(lastCreatedItem);
             const chainPushOperation = {
                 $push: {
                     unfinishedChains: {
@@ -992,7 +1006,7 @@ module.exports = function (db) {
     pushOrderToServer = async function (req, res, next) {
         const updateFilter = {
             userid: req.uid,
-            _id: req.body._id,
+            _id: ObjectID(req.body._id),
         }
         const updateOperation = {
             $set: {
@@ -1000,7 +1014,8 @@ module.exports = function (db) {
             }
         }
 
-        await db.collection("items").updateOne(updateFilter, updateOperation);
+        const orderres = await db.collection("items").updateOne(updateFilter, updateOperation);
+        // console.log(__line, orderres)
 
         res.status(200).json({ success: true });
     }

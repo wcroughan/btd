@@ -8,6 +8,7 @@ module.exports = function (db) {
 
     router.get('/items', controllers.getItems);
     router.get('/pastitems', controllers.getPastItems);
+    router.get('/upcomingitems', controllers.getUpcomingItems);
     router.get('/streak', controllers.getStreakInfo);
     router.put('/item', controllers.pushItemToServer);
     router.put('/item/:id', controllers.updateItem);

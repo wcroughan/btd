@@ -1,33 +1,16 @@
 Next shipped update:
-- Adding a repeating item that causes more list sections to appear throws an error, something to do with the draggable component
+- Flaw in updateitem: I tihnk can be made much simpler. If edit applies to all future, just run single update, setrepeatN to 0 also,  and then update future ones with repeatN, repeatRootId. Note also need to change logic with single update if repeatN is 0
+
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default
 - When retrieving lists, check if need to extend repeats
-- in frontend, pass updateType. Also if not currently doing this, filter just things that have changed to pass
 - backend logic for repeats and display
-    - possible add/edits for repeating items:
-        - add new item which repeats.
-            - In this case, just go ahead and add all of them. After adding first, store that item's id as repeatRootId in all repitition entries
-            - If repeat never ends, make and upload them up to SOME_DATE_OFFSET in the future or SOME_NUMBER_OF_STORED_REPEATS, whichever limit is hit first
-                - Then in user bd, store _id of repeating root item in list along with which limit was hit and other info needed to make more in the future easily
-        - Edit item, impacts all items in repeat group
-            - Find all items that aren't done in repeat group (can search by repeatRootId) and update them all accordingly
-            - Make sure to update user limit info if hit a limit this time or last time this group was edited
-        - Edit item, impacts all future items in repeat group
-            - Same but also add search criteria for future relative to this item
-            - When making edits, should calculate info for a new repeat group that these are now a part of (i.e. the last 5 repeats get a new group with only 5 occurences until done).
-                - Root item is one being edited
-                - Also update old group to end at the new appropriate time
-        - Edit item, impacts just this one
-            - Remove from repeat group. Leave original group alone, so if edits are made the equivalent item here would get recreated.
-                - This might need to be changed in the future? Not sure what the best way to do this is
     - always request up to SOME_LIMIT items (using aggregate to sort and then limit).
         - If returns that number, and more can be made that would be displayed, indicate this in return msg
         - If mongodb returns fewer and more can be made and would be displayed, make more first before returning
         - If returns that number or fewer and no more would be displayed, indicate that in return msg
-
-    - remember in update function to update user list of unfinished stuff
-- Edit modal: when editing repeating item, confirm whether applies to all, just this one, all following
 - bug on phone when editing last word left off
+- When deleting, ask if applies to future
+- streak info
 
 
 Should implement at some point:
