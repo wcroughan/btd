@@ -422,26 +422,31 @@ module.exports = function (db) {
             return;
         }
 
-
-
         const itemarr = [];
         itemarr.push(await db.collection("items").findOne({ _id: ObjectID(req.params.id), userid: ObjectID(req.uid) }));
         await constructRepeatedItems(itemarr)
         const item = itemarr[0];
 
-        const updateRootToEndHere = async function () {
+        console.log(__line, item)
+        if (!item.repeats && req.body.repeats !== true) {
+            await runSimpleSingleUpdate();
+            res.status(200).json({ success: true });
+            return;
+        }
+
+        const updateRootToEndHere = async function (repeatInfo) {
             const rootfilt = {
-                _id: ObjectID(item.repeatRootId),
+                _id: ObjectID(item.reprootId),
                 userid: ObjectID(req.uid),
             }
 
-            const newRepeatInfo = item.repeatInfo;
-            if (item.repeatInfo.end.endMode === "endnever") {
+            const newRepeatInfo = clone(repeatInfo);
+            if (repeatInfo.end.endMode === "endnever") {
                 newRepeatInfo.end.endMode = "endon";
             }
 
             if (newRepeatInfo.end.endMode === "endafterx") {
-                newRepeatInfo.end.endafterx = item.repeatN;
+                newRepeatInfo.end.endafterx = item.repeatN + 1;
             } else if (newRepeatInfo.end.endMode === "endon") {
                 newRepeatInfo.end.endon = item.dueDate;
             }
@@ -452,27 +457,42 @@ module.exports = function (db) {
             }
             convertTimesToDates(rootUpdateOp.$set)
 
-            const rootres = await db.collection("items").updateOne(rootfilt, rootUpdateOp);
+            const rootres = await db.collection("reproots").updateOne(rootfilt, rootUpdateOp);
             console.log(__line, rootres)
-        }
-
-        console.log(__line, item)
-        if (!item.repeats && req.body.repeats !== true) {
-            await runSimpleSingleUpdate();
-            res.status(200).json({ success: true });
-            return;
         }
 
 
         if (item.repeats && req.body.repeats === false) {
             //cancelling repeat
-            let rootid = req.params.id;
-            if (item.repeatN !== 0) {
+            const reproot = await db.collection("reproots").findOne({ _id: ObjectID(item.reprootId) });
+            if (item.repeatN !== 0 || (reproot.parent !== null && reproot.parent !== undefined)) {
                 //cancelling from partway down the chain. Update root to end here
-                await updateRootToEndHere();
-                rootid = item.repeatRootId;
+                await updateRootToEndHere(reproot.repeatInfo);
 
                 //now pass through rest of update, but take out things that are taken care of by the root update
+                delete req.body.repeatInfo;
+                delete req.body.repeats;
+            } else {
+                //Starting at the beginning, need to convert repeating item into a true single item
+                //update item based on reproot
+                const upop = {
+                    $set: {
+                        ...reproot,
+                        dueDate: new Date(reproot.firstDueDate),
+                        displayDate: new Date(),
+                        isDone: item.isDone,
+                    }
+                }
+                delete upop.$set._id;
+                delete upop.$set.parent;
+                delete upop.$set.repeatInfo;
+                delete upop.$set.firstDueDate;
+                convertTimesToDates(upop.$set)
+                await db.collection("items").updateOne({ _id: ObjectID(item._id) }, upop);
+
+                //delete reproot
+                await db.collection("reproots").deleteOne({ _id: ObjectID(reproot._id) });
+
                 delete req.body.repeatInfo;
                 delete req.body.repeats;
             }
@@ -511,7 +531,38 @@ module.exports = function (db) {
 
         if (req.body.repeats === true && !item.repeats) {
             await runSimpleSingleUpdate();
-            extendChain(item._id);
+
+            //create a new reproot
+            const newReproot = clone(item);
+            delete newReproot.isDone;
+            delete newReproot.dueDate;
+            delete newReproot.displayDate;
+            delete newReproot._id;
+            newReproot.repeatInfo = req.body.repeatInfo;
+            newReproot.firstDueDate = item.dueDate;
+            const reprootRes = await db.collection("reproots").insertOne(newReproot)
+            const reprootId = reprootRes.insertedId;
+            console.log(__line, reprootId)
+
+            //delete a bunch of fields in the single entry and have it point to new reproot
+            const upop = {
+                $set: {
+                    repeatN: 0,
+                    reprootId,
+                },
+                $unset: {
+                    text: "",
+                    dueDateMode: "",
+                    createdDate: "",
+                    repeats: "",
+                }
+            }
+
+            const upres = await db.collection("items").updateOne({ _id: ObjectID(item._id) }, upop)
+            console.log(__line, upres)
+
+            //extend chain to generate more items
+            extendChain(reprootId, 1);
 
             res.status(200).json({ success: true });
             return;
@@ -546,7 +597,7 @@ module.exports = function (db) {
             newReproot = splitRepeatChain(item.reprootId, item.repeatN)
 
         applyUpdateToReproot(newReproot, req.body);
-
+        recalculateRepeatingDates(newReproot);
 
 
 

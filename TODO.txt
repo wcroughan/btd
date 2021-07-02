@@ -1,7 +1,8 @@
 Next shipped update:
-- controllers updateRootToEndHere, repeat canceled with repeatN = 0 correct?, vice versa def wrong (need to add reproot entry), 
-    - applyUpdateToReproot: applies update, and also recurses through children reproots and applies there
+- controllers 
+    - applyUpdateToReproot: applies update, and also recurses through children reproots and unsets there so they always trace back (althoguh I guess repeatInfo needs to actually be set). Also remember correspondence between firstDueDate and dueDate, possibly others
     - splitRepeatChain: if n == 0, do nothing, otherwise insert a node into the linked list that is reproots. Note need to add field for relative N and also update all the items that should point to new reproot now
+    - recalculateRepeatingDates sets all the duedate and displaydate fields of single items. Maybe could pass actual data instead of an id if it's available?
 - also controllers getItems logic hasn't been updated at all
 
 - terrible font on single vs future update dropdown
@@ -26,6 +27,7 @@ Should implement at some point:
 - Add button in each category
 - calendar doesn't fit on mobile. Make calendar work again under streak info
 - streak calculation should just count days where there were tasks. Maybe aggregate: select within streak range, project onto donedate, count unique values?
+- in current logic, single updates that also have changes to repeat schedule ignore those changes. Can probably solve quickly by separating repeatInfo and showInfo
 
 
 Nice to have, not need to have:
