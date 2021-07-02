@@ -1,5 +1,6 @@
 Next shipped update:
-- Flaw in updateitem: I tihnk can be made much simpler. If edit applies to all future, just run single update, setrepeatN to 0 also,  and then update future ones with repeatN, repeatRootId. Note also need to change logic with single update if repeatN is 0
+- controllers 526 onward
+
 
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default
 - When retrieving lists, check if need to extend repeats

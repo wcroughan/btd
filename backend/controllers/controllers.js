@@ -286,33 +286,18 @@ module.exports = function (db) {
 
         return ret;
     }
-    //id should be the current end of the chain
-    extendChain = async function (id) {
+    extendChain = async function (reprootId, n) {
         //first get the item with _id === id
         const filt = {
-            _id: ObjectID(id)
+            _id: ObjectID(reprootId)
         }
-        const item = await db.collection("items").findOne(filt)
-        console.log(__line, id, item)
-        let repeatInfo = item.repeatInfo;
-        let ii = item;
-        let firstDueDate = undefined;
-        if (item.repeatN === 0)
-            firstDueDate = item.dueDate;
-        else if (repeatInfo !== undefined) {
-            throw "assertion failed!"
-        }
-
-        const repeatRootId = item.repeatRootId;
-
-        while (repeatInfo === undefined) {
-            ii = await db.collection("items").findOne({ _id: ObjectID(ii.repeatRootId) })
-            repeatInfo = ii.repeatInfo;
-            if (firstDueDate === undefined) firstDueDate = ii.firstDueDate;
-        }
+        const reproot = await db.collection("reproots").findOne(filt)
+        console.log(__line, reprootId, reproot)
+        const repeatInfo = reproot.repeatInfo;
+        const firstDueDate = reproot.firstDueDate;
 
         //Use repeatN+1 from that item as a starting point, generate future items and add them all. Then update chain if unfinished
-        let nextN = item.repeatN + 1;
+        let nextN = n;
         let i = 0;
         let chainFinished = false;
         const allItems = [];
@@ -332,7 +317,7 @@ module.exports = function (db) {
                 dueDate: nextDueDate,
                 displayDate: nextDisplayDate,
                 userid: ObjectID(item.userid),
-                repeatRootId: ObjectID(repeatRootId)
+                reprootId: ObjectID(reprootId)
             }
             allItems.push(newItem)
 
@@ -355,14 +340,14 @@ module.exports = function (db) {
             const chainPushOperation = {
                 $push: {
                     unfinishedChains: {
-                        rootId: ObjectID(repeatRootId),
-                        lastCreatedItem
+                        rootId: ObjectID(reprootId),
+                        nextN
                     }
                 }
             }
             const chainPullOperation = {
                 $pull: {
-                    unfinishedChains: { rootId: ObjectID(repeatRootId), }
+                    unfinishedChains: { rootId: ObjectID(reprootId), }
                 }
             }
             const chainres1 = await db.collection("users").updateOne(chainFilter, chainPullOperation);
@@ -384,24 +369,29 @@ module.exports = function (db) {
         const entryVar = req.body;
         entryVar.userid = req.uid;
         convertTimesToDates(entryVar);
-
-        if (req.body.repeats)
-            entryVar.repeatN = 0;
-
-        const result = await db.collection("items").insertOne(entryVar);
-        console.log(__line, result.insertedId);
-        const retid = result.insertedId || "tmpval";
+        delete entryVar.repeatInfo;
 
         if (!req.body.repeats) {
+            const result = await db.collection("items").insertOne(entryVar);
+            console.log(__line, result.insertedId);
+            const retid = result.insertedId || "tmpval";
+
             res.status(200).json({ id: retid, singleId: true });
             return;
-        } else {
-            const upres = await db.collection("items").updateOne({ _id: ObjectID(retid) }, { $set: { repeatRootId: ObjectID(retid) } })
-            console.log(__line, upres)
         }
 
+        entryVar.repeatInfo = req.body.repeatInfo;
+        entryVar.firstDueDate = new Date(req.body.dueDate);
+        delete entryVar.isDone;
+        delete entryVar.dueDate;
+        delete entryVar.displayDate;
+
+        const reprootRes = await db.collection("reproots").insertOne(entryVar);
+        console.log(__line, reprootRes);
+        const reprootId = reprootRes.insertedId;
+
         //adding a new repeating item
-        const insertedIds = await extendChain(retid);
+        const insertedIds = await extendChain(reprootId, 0);
         res.status(200).json({ ids: insertedIds, singleId: false });
     }
     updateItem = async function (req, res, next) {
@@ -423,6 +413,7 @@ module.exports = function (db) {
             delete entryVar.$set.repeatUpdateType;
             delete entryVar.$set.userid;
             delete entryVar.$set.updateType;
+            delete entryVar.$set.repeatInfo;
 
             convertTimesToDates(entryVar.$set);
 
@@ -436,23 +427,18 @@ module.exports = function (db) {
             return;
         }
 
-        if (["isDone", "snooze", "overrideOverdue"].includes(req.body.updateType) || req.body.repeatUpdateType === "single") {
+        if (["isDone", "snooze", "overrideOverdue"].includes(req.body.updateType)) {
             await runSimpleSingleUpdate();
             res.status(200).json({ success: true });
             return;
         }
+
+
 
         const itemarr = [];
         itemarr.push(await db.collection("items").findOne({ _id: ObjectID(req.params.id), userid: ObjectID(req.uid) }));
         await constructRepeatedItems(itemarr)
         const item = itemarr[0];
-
-        console.log(__line, item)
-        if (!item.repeats && req.body.repeats !== true) {
-            await runSimpleSingleUpdate();
-            res.status(200).json({ success: true });
-            return;
-        }
 
         const updateRootToEndHere = async function () {
             const rootfilt = {
@@ -480,6 +466,14 @@ module.exports = function (db) {
             const rootres = await db.collection("items").updateOne(rootfilt, rootUpdateOp);
             console.log(__line, rootres)
         }
+
+        console.log(__line, item)
+        if (!item.repeats && req.body.repeats !== true) {
+            await runSimpleSingleUpdate();
+            res.status(200).json({ success: true });
+            return;
+        }
+
 
         if (item.repeats && req.body.repeats === false) {
             //cancelling repeat
@@ -527,6 +521,20 @@ module.exports = function (db) {
 
             res.status(200).json({ success: true });
             return;
+        }
+
+        //ok item was and is repeating. First apply any due date changes. THen repeat info. THen the rest
+        //...does that work?
+        if (req.body.repeatUpdateType === "single") {
+            if (item.repeatN > 0) {
+                await runSimpleSingleUpdate();
+                res.status(200).json({ success: true });
+                return;
+            }
+
+            console.log(__line, "unimplmented")
+            res.status(200).json({ success: false });
+            return
         }
 
         //If you've made it this far, batman, you know the update applies to all future items, and it was and is still a repeating item
@@ -1019,6 +1027,64 @@ module.exports = function (db) {
 
         res.status(200).json({ success: true });
     }
+    removeUnfinishedChain = async function (reprootId, userid) {
+
+        const chainFilter = { _id: ObjectID(userid) }
+        const chainPullOperation = {
+            $pull: {
+                unfinishedChains: { rootId: ObjectID(reprootId), }
+            }
+        }
+        const chainres = await db.collection("users").updateOne(chainFilter, chainPullOperation);
+        console.log(__line, chainres)
+    }
+    deleteReproot = async function (reprootId, userid) {
+        const detail = {
+            userid: ObjectID(userid),
+            reprootId: ObjectID(reprootId),
+        }
+        const result = await db.collection("items").deleteMany(detail);
+        console.log(__line, result)
+
+        child = await db.collection("reproots").findOne({ parentId: ObjectID(reprootId) });
+        if (child !== null)
+            deleteReproot(child._id, userid)
+        else
+            removeUnfinishedChain(reprootId, userid)
+
+    }
+    updateReprootEnd = async function (reprootId, n) {
+        const rootfilt = { _id: ObjectID(reprootId) }
+        const reproot = await db.collection("reproots").findOne(rootfilt);
+        console.log(__line, reproot)
+
+        let updateOp = {};
+        if (reproot.repeatInfo.end.endMode === "endafterx") {
+            updateOp = {
+                $set: {
+                    "repeatInfo.end.endafterx": n
+                }
+            }
+        } else if (reproot.repeatInfo.end.endMode === "endon") {
+            const newEndDate = getRepeatDates(reproot.firstDueDate, reproot.repeatInfo, n - 1).dueDate
+            updateOp = {
+                $set: {
+                    "repeatInfo.end.endon": newEndDate
+                }
+            }
+        } else if (reproot.repeatInfo.end.endMode === "endnever") {
+            updateOp = {
+                $set: {
+                    "repeatInfo.end.endMode": "endafterx",
+                    "repeatInfo.end.endafterx": n
+                }
+            }
+        } else {
+            console.log(__line, "unknown end mode!")
+        }
+        const upres = await db.collection("reproots").updateOne(rootfilt, updateOp)
+        console.log(__line, upres);
+    }
     deleteItemFromServer = async function (req, res, next) {
         if (req.query.repeatUpdateType === "future") {
             const filt = {
@@ -1026,13 +1092,28 @@ module.exports = function (db) {
                 userid: ObjectID(req.uid)
             }
             const item = await db.collection("items").findOne(filt)
+            if (item.repeatN === 0) {
+                deleteReproot(item.reprootId, req.uid);
+                res.status(200).json({ success: true })
+                return;
+            }
+
             const detail = {
                 userid: ObjectID(req.uid),
-                repeatRootId: ObjectID(item.repeatRootId),
+                reprootId: ObjectID(item.reprootId),
                 repeatN: { $gte: item.repeatN }
             }
             const result = await db.collection("items").deleteMany(detail);
             console.log(__line, result)
+
+            updateReprootEnd(item.reprootId, item.repeatN)
+
+            let child = await db.collection("reproots").findOne({ parentId: ObjectID(item.reprootId) });
+            if (child !== null) {
+                deleteReproot(child._id, req.uid)
+            } else {
+                removeUnfinishedChain(item.reprootId, req.uid)
+            }
 
             res.status(200).json({ success: true })
             return;
