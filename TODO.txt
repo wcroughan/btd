@@ -1,7 +1,10 @@
 Next shipped update:
-- controllers 526 onward
+- controllers updateRootToEndHere, repeat canceled with repeatN = 0 correct?, vice versa def wrong (need to add reproot entry), 
+    - applyUpdateToReproot: applies update, and also recurses through children reproots and applies there
+    - splitRepeatChain: if n == 0, do nothing, otherwise insert a node into the linked list that is reproots. Note need to add field for relative N and also update all the items that should point to new reproot now
+- also controllers getItems logic hasn't been updated at all
 
-
+- terrible font on single vs future update dropdown
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default
 - When retrieving lists, check if need to extend repeats
 - backend logic for repeats and display

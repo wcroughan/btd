@@ -275,14 +275,7 @@ module.exports = function (db) {
         }
 
         //now set displayDate
-        if (repeatInfo.show.showMode === "xunits") {
-            ret.displayDate = date_util.offsetByUnits(ret.dueDate, -1 * repeatInfo.show.xunits.x, repeatInfo.show.xunits.unit)
-        } else {
-            ret.displayDate = new Date(ret.dueDate);
-            ret.displayDate.setDay(date_util.getWeekdayNumber(repeatInfo.show.weekday));
-            if (ret.displayDate.getTime() > ret.dueDate.getTime())
-                ret.displayDate.setDate(ret.displayDate.getDate() - 7);
-        }
+        ret.displayDate = getDisplayDate(repeatInfo, ret.dueDate);
 
         return ret;
     }
@@ -333,28 +326,13 @@ module.exports = function (db) {
         const inres = await db.collection("items").insertMany(allItems);
         console.log(__line, inres)
 
-        if (!chainFinished) {
-            const chainFilter = { _id: ObjectID(item.userid) }
-            const lastCreatedItem = allItems[allItems.length - 1];
-            console.log(__line, lastCreatedItem)
-            const chainPushOperation = {
-                $push: {
-                    unfinishedChains: {
-                        rootId: ObjectID(reprootId),
-                        nextN
-                    }
-                }
+        const finishedOp = {
+            $set: {
+                chainFinished,
+                lastN: allItems[allItems.length - 1].repeatN
             }
-            const chainPullOperation = {
-                $pull: {
-                    unfinishedChains: { rootId: ObjectID(reprootId), }
-                }
-            }
-            const chainres1 = await db.collection("users").updateOne(chainFilter, chainPullOperation);
-            const chainres2 = await db.collection("users").updateOne(chainFilter, chainPushOperation);
-            console.log(__line, chainres1)
-            console.log(__line, chainres2)
         }
+        const upres = await db.collection("reproots").updateOne(filt, finishedOp)
 
         return inres.insertedIds;
     }
@@ -393,6 +371,17 @@ module.exports = function (db) {
         //adding a new repeating item
         const insertedIds = await extendChain(reprootId, 0);
         res.status(200).json({ ids: insertedIds, singleId: false });
+    }
+    getDisplayDate = function (repeatInfo, dueDate) {
+        if (repeatInfo.show.showMode === "xunits")
+            return date_util.offsetByUnits(dueDate, -1 * repeatInfo.show.xunits.x, repeatInfo.show.xunits.unit)
+
+        const ret = new Date(dueDate);
+        ret.setDay(date_util.getWeekdayNumber(repeatInfo.show.weekday));
+        if (ret.getTime() > dueDate.getTime())
+            ret.setDate(ret.getDate() - 7);
+
+        return ret;
     }
     updateItem = async function (req, res, next) {
         console.log(__line, req.body);
@@ -492,7 +481,7 @@ module.exports = function (db) {
 
             //now delete all future items
             const delfilt = {
-                repeatRootId: ObjectID(rootid),
+                reprootId: ObjectID(item.reprootId),
                 userid: ObjectID(req.uid),
                 repeatN: {
                     $gt: item.repeatN
@@ -501,15 +490,20 @@ module.exports = function (db) {
             const delres = await db.collection("items").deleteMany(delfilt)
             console.log(__line, delres)
 
+            let child = await db.collection("reproots").findOne({ parentId: ObjectID(item.reprootId) });
+            if (child !== null)
+                deleteReproot(child._id, req.uid)
+
             //also check unfinished chains
-            const chainFilter = { _id: ObjectID(item.userid) }
-            const chainPushOperation = {
-                $pull: {
-                    unfinishedChains: { rootId: ObjectID(item.repeatRootId), }
+            const finishedFilt = { _id: ObjectID(item.reprootId) };
+            const finishedOp = {
+                $set: {
+                    chainFinished: true,
+                    lastN: item.repeatN
                 }
             }
-            const chainres = await db.collection("users").updateOne(chainFilter, chainPushOperation);
-            console.log(__line, chainres)
+            const upres = await db.collection("reproots").updateOne(finishedFilt, finishedOp)
+            console.log(__line, upres)
 
             res.status(200).json({ success: true });
             return;
@@ -523,21 +517,41 @@ module.exports = function (db) {
             return;
         }
 
-        //ok item was and is repeating. First apply any due date changes. THen repeat info. THen the rest
-        //...does that work?
+        //ok item was and is repeating. 
         if (req.body.repeatUpdateType === "single") {
-            if (item.repeatN > 0) {
-                await runSimpleSingleUpdate();
-                res.status(200).json({ success: true });
-                return;
+            if (req.body.repeatInfo !== undefined) {
+                const singleFilt = {
+                    _id: ObjectID(req.params.id),
+                    userid: ObjectID(req.uid)
+                }
+                const dd = new Date(req.body.dueDate || item.dueDate)
+                const entryVar = {
+                    $set: {
+                        displayDate: getDisplayDate(req.body.repeatInfo, dd)
+                    }
+                }
+
+                const upres = await db.collection("items").updateOne(singleFilt, entryVar);
+                console.log(__line, upres)
             }
 
-            console.log(__line, "unimplmented")
-            res.status(200).json({ success: false });
-            return
+            await runSimpleSingleUpdate();
+            res.status(200).json({ success: true });
+            return;
         }
 
         //If you've made it this far, batman, you know the update applies to all future items, and it was and is still a repeating item
+        let newReproot = item.reprootId;
+        if (item.repeatN !== 0)
+            newReproot = splitRepeatChain(item.reprootId, item.repeatN)
+
+        applyUpdateToReproot(newReproot, req.body);
+
+
+
+
+
+
         let rootid = req.params.id;
         if (item.repeatN !== 0) {
             await updateRootToEndHere();
@@ -1027,17 +1041,6 @@ module.exports = function (db) {
 
         res.status(200).json({ success: true });
     }
-    removeUnfinishedChain = async function (reprootId, userid) {
-
-        const chainFilter = { _id: ObjectID(userid) }
-        const chainPullOperation = {
-            $pull: {
-                unfinishedChains: { rootId: ObjectID(reprootId), }
-            }
-        }
-        const chainres = await db.collection("users").updateOne(chainFilter, chainPullOperation);
-        console.log(__line, chainres)
-    }
     deleteReproot = async function (reprootId, userid) {
         const detail = {
             userid: ObjectID(userid),
@@ -1049,8 +1052,6 @@ module.exports = function (db) {
         child = await db.collection("reproots").findOne({ parentId: ObjectID(reprootId) });
         if (child !== null)
             deleteReproot(child._id, userid)
-        else
-            removeUnfinishedChain(reprootId, userid)
 
     }
     updateReprootEnd = async function (reprootId, n) {
@@ -1109,11 +1110,8 @@ module.exports = function (db) {
             updateReprootEnd(item.reprootId, item.repeatN)
 
             let child = await db.collection("reproots").findOne({ parentId: ObjectID(item.reprootId) });
-            if (child !== null) {
+            if (child !== null)
                 deleteReproot(child._id, req.uid)
-            } else {
-                removeUnfinishedChain(item.reprootId, req.uid)
-            }
 
             res.status(200).json({ success: true })
             return;
