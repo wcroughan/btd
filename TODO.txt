@@ -4,6 +4,11 @@ Next shipped update:
     - splitRepeatChain: if n == 0, do nothing, otherwise insert a node into the linked list that is reproots. Note need to add field for relative N and also update all the items that should point to new reproot now
     - recalculateRepeatingDates sets all the duedate and displaydate fields of single items. Maybe could pass actual data instead of an id if it's available?
 - also controllers getItems logic hasn't been updated at all
+- Ugh need to be more rigorous about repeatInfo updates since it's copied.
+    - add a field that indicates if repeatInfo is same or different from parent
+    - When modifying repeatInfo, possibly traverse up to parent and also modify there, and to children
+    - updateRootToEndHere def need to traverse ... replace updateOne with findandmodify or whatever tha tfunciton is
+
 
 - terrible font on single vs future update dropdown
 - repeat dialog, if weekly, add option to select which week days. Also make weekly the default
@@ -28,6 +33,7 @@ Should implement at some point:
 - calendar doesn't fit on mobile. Make calendar work again under streak info
 - streak calculation should just count days where there were tasks. Maybe aggregate: select within streak range, project onto donedate, count unique values?
 - in current logic, single updates that also have changes to repeat schedule ignore those changes. Can probably solve quickly by separating repeatInfo and showInfo
+- acid transactions
 
 
 Nice to have, not need to have:

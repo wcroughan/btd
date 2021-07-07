@@ -383,6 +383,62 @@ module.exports = function (db) {
 
         return ret;
     }
+    splitRepeatChain = async function (reprootId, n) {
+        if (n === 0)
+            return;
+
+        const reproot = await db.collection("reproots").findOne({ _id: ObjectID(reprootId) });
+        // const firstItem = await db.collection("items").findOne({ reprootId: ObjectID(reprootId), repeatN: n });
+        const newrr = {
+            parent: ObjectID(repeatRootId),
+            firstDueDate: getRepeatDates(reproot.firstDueDate, reproot.repeatInfo, n).dueDate,
+            repeatInfo: reproot.repeatInfo,
+            repeatNOffset: n + (reproot.repeatNOffset || 0),
+        }
+        const inres = await db.collection("reproots").insertOne(newrr);
+        const newReprootId = inres.insertedId;
+
+        const upfilt = {
+            reprootId: ObjectID(reprootId),
+            repeatN: {
+                $gte: n
+            }
+        }
+        const upop = {
+            $set: {
+                reprootId: ObjectID(newReprootId)
+            },
+            $inc: {
+                repeatN: -n
+            }
+        }
+
+        const repupfilt = {
+            parent: ObjectID(reprootId),
+            _id: {
+                $not: ObjectID(newReprootId)
+            }
+        }
+        const repupop = {
+            $set: {
+                parent: ObjectID(newReprootId)
+            }
+        }
+
+        const upres = await Promise.all([
+            db.collection("items").updateMany(upfilt, upop),
+            db.collection("reproots").updateOne(repupfilt, repupop)
+        ])
+        console.log(__line, upres)
+
+        return newReprootId;
+    }
+    applyUpdateToReproot = async function (reproot, updateBody) {
+
+    }
+    recalculateRepeatingDates = async function (reproot) {
+
+    }
     updateItem = async function (req, res, next) {
         console.log(__line, req.body);
 
