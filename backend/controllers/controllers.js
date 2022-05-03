@@ -242,7 +242,8 @@ module.exports = function (db) {
 
         },
         async getDaysInfo(req, res, next) {
-            // console.log(__line, req.query);
+            console.log("DAYS INFO");
+            console.log(__line, req.query);
             const projection = {
                 isDone: 1,
                 isSkipped: 1,
@@ -369,6 +370,5 @@ module.exports = function (db) {
 
 
     }
-
 
 }

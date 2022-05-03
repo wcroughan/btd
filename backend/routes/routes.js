@@ -13,5 +13,7 @@ module.exports = function (db) {
     router.put('/list/append_item/:id', controllers.appendItem);
     router.delete('/list/:id', controllers.deleteListFromServer);
 
+    console.log("CREATED ROUTER");
+
     return router;
 }
