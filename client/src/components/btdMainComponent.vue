@@ -70,13 +70,14 @@ export default {
       this.selectedDate = date;
     },
     getListsFromServer(date) {
-      //   console.log(
-      //     "getting list for date",
-      //     date,
-      //     "with toke",
-      //     this.authToken.value
-      //   );
+      console.log(
+        "getting list for date",
+        date,
+        "with toke",
+        this.authToken.value
+      );
       api_util.getListsForDate(this.authToken.value, date, (res) => {
+        console.log("got lists:", res.data);
         if (this.selectedDate === date) {
           this.lists = res.data;
         }

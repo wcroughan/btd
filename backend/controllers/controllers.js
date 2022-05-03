@@ -100,7 +100,7 @@ module.exports = function (db) {
             // console.log(__line, req.params);
             const id1 = "day_" + req.params.id;
             const id2 = "week_" + date_util.apiDateStr(date_util.getMonday(date_util.getDateFromIdStr(req.params.id)));
-            // console.log(__line, "searching for ", id1, id2)
+            console.log(__line, "searching for ", id1, id2)
 
             const filterDetail = {
                 id: {
@@ -111,15 +111,15 @@ module.exports = function (db) {
 
             const cursor = await db.collection("lists").find(filterDetail).sort({ id: 1 });
             const results = await cursor.toArray();
-            // console.log(__line, results);
+            console.log(__line, results);
 
             if (results.length === 2) {
-                // console.log(__line, "got both lists, returning the following:", results);
+                console.log(__line, "got both lists, returning the following:", results);
                 res.status(200).json(results);
                 return;
             }
             const needIds = [];
-            // console.log(__line, "initial results:", results);
+            console.log(__line, "initial results:", results);
             if (!results.some((r) => r.id.includes("week_"))) {
                 const weekList = await getDefaultListInternal(req.uid, id2);
                 results.push(weekList);
@@ -130,7 +130,7 @@ module.exports = function (db) {
             }
 
             const resArray = results.sort((a, b) => (a.id > b.id) ? 1 : -1);
-            // console.log(__line, "got default lists, returning the following:", resArray);
+            console.log(__line, "got default lists, returning the following:", resArray);
             res.status(200).json(resArray);
         },
         async getSingleListForId(req, res, next) {
