@@ -11,5 +11,6 @@ git commit -m "$1"
 echo 5
 git push
 echo 6
-git push heroku main
+echo "NOTE: pushing branch v1StableUpdates to deploy!"
+git push heroku v1StableUpdates:main
 echo 7
