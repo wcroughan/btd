@@ -3,7 +3,13 @@
     <div class="non-menu-mask" />
     <div class="modal-content">
       <div class="modal-header">
-        <h1>Default {{ listType === "day" ? "Daily" : "Weekly" }} List</h1>
+        <h1>
+          {{
+            isDefault
+              ? "Default " + (listType === "day" ? "Daily" : "Weekly") + " List"
+              : listId
+          }}
+        </h1>
       </div>
       <div class="item-list">
         <draggable
@@ -67,6 +73,7 @@ export default {
     return {
       displayModal: false,
       listType: "",
+      isDefault: false,
       list: {},
       itemRefs: [],
       drag: false,
@@ -93,22 +100,38 @@ export default {
       this.list.items.splice(idx, 1);
     },
     show(type) {
+      // Note change here: if type contains "_", it's a specific list, otherwise it's a type
       //   console.log("showing modal with type", type);
-      this.listType = type;
+      if (type.includes("_")) {
+        this.isDefault = false;
+        this.listId = type.split("_")[1];
+        this.listType = type.split("_")[0];
+      } else {
+        this.isDefault = true;
+        this.listId = "";
+        this.listType = type;
+      }
       this.displayModal = true;
     },
     save() {
       this.displayModal = false;
-      this.list.id = this.listType + "_default";
-      delete this.list.start;
-      delete this.list.end;
-      delete this.list.isDone;
-      delete this.list.isSkipped;
-      this.list.items.forEach((i, idx) => {
-        i.isDone = false;
-        i.id = idx;
-      });
-      //   console.log(this.list);
+      if (this.isDefault) {
+        this.list.id = this.listType + "_default";
+        delete this.list.start;
+        delete this.list.end;
+        delete this.list.isDone;
+        delete this.list.isSkipped;
+        this.list.items.forEach((i, idx) => {
+          i.isDone = false;
+          i.id = idx;
+        });
+      } else {
+        this.list.id = this.listType + "_" + this.listId;
+        this.list.items.forEach((i, idx) => {
+          i.id = idx;
+        });
+      }
+      console.log(this.list);
       api_util.pushListToServer(this.authToken.value, this.list);
       this.listType = "";
       this.$emit("editMade");
@@ -116,11 +139,19 @@ export default {
     cancel() {
       //   console.log("hiding modal");
       this.displayModal = false;
+      this.listId = "";
       this.listType = "";
+    },
+    getDefaultListFromServer(type) {
+      //   console.log("default editor getting list from server:", type);
+      api_util.getDefaultList(this.authToken.value, type + "_edit", (list) => {
+        // console.log("got from server:", list);
+        this.list = list.data;
+      });
     },
     getListFromServer(type) {
       //   console.log("default editor getting list from server:", type);
-      api_util.getDefaultList(this.authToken.value, type + "_edit", (list) => {
+      api_util.getListForListId(this.authToken.value, type, (list) => {
         // console.log("got from server:", list);
         this.list = list.data;
       });
@@ -142,7 +173,8 @@ export default {
   watch: {
     listType(newval) {
       if (newval === "") return;
-      this.getListFromServer(newval);
+      if (this.isDefault) this.getDefaultListFromServer(newval);
+      else this.getListFromServer(newval + "_" + this.listId);
     },
   },
 };

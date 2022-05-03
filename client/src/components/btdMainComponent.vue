@@ -63,7 +63,7 @@ export default {
   //   },
   methods: {
     refreshList() {
-      this.getListsFromServer(this.selectedDate);
+      setTimeout(() => this.getListsFromServer(this.selectedDate), 50);
     },
     dayChosen(date) {
       //   console.log("main got date", date);
@@ -153,6 +153,9 @@ export default {
         this.checkIfListDone(listidx);
       } else if (type === "editDefaultList") {
         this.displayEditDefaultList(this.lists[listidx].id.split("_")[0]);
+        return;
+      } else if (type === "editList") {
+        this.displayEditDefaultList(this.lists[listidx].id);
         return;
       } else {
         console.log("unknown list update,", type);

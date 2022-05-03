@@ -5,6 +5,7 @@ module.exports = function (db) {
 
     router.get('/test', controllers.getTest);
     router.get('/list/:id', controllers.getListsForId);
+    router.get('/list/single/:id', controllers.getSingleListForId);
     router.get('/list/default/:id', controllers.getDefaultList);
     router.get('/daysinfo', controllers.getDaysInfo);
     router.get('/streaklength', controllers.getStreakLength);

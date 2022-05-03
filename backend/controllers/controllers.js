@@ -133,6 +133,31 @@ module.exports = function (db) {
             // console.log(__line, "got default lists, returning the following:", resArray);
             res.status(200).json(resArray);
         },
+        async getSingleListForId(req, res, next) {
+            const id1 = req.params.id;
+            // console.log(__line, req.params);
+            // console.log(__line, "searching for ", id1)
+
+            const filterDetail = {
+                id: id1,
+                userid: req.uid
+            };
+
+            const cursor = await db.collection("lists").find(filterDetail).sort({ id: 1 });
+            const results = await cursor.toArray();
+            // console.log(__line, results);
+
+            if (results.length === 0) {
+                const defList = await getDefaultListInternal(req.uid, id1);
+                results.push(defList);
+            }
+
+            if (results.length === 1) {
+                // console.log(__line, "got the list, returning the following:", results);
+                res.status(200).json(results[0]);
+                return;
+            }
+        },
         async pushListToServer(req, res, next) {
             // console.log(__line, req.params, req.body);
 

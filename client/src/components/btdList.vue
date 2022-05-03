@@ -9,6 +9,7 @@
       @setAllDone="setAllDone"
       @loadDefaultList="loadDefaultList"
       @editDefaultList="editDefaultList"
+      @editList="editList"
     />
     <div class="list-body">
       <transition-group name="list">
@@ -219,6 +220,9 @@ export default {
     },
     editDefaultList() {
       this.$emit("listUpdate", { type: "editDefaultList" });
+    },
+    editList() {
+      this.$emit("listUpdate", { type: "editList" });
     },
   },
 };

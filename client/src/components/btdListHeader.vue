@@ -52,6 +52,9 @@
         <section class="dropdown-option">
           <button @click="editDefaultClicked">Edit Default List</button>
         </section>
+        <section class="dropdown-option">
+          <button @click="editListClicked">Edit List</button>
+        </section>
       </template>
     </btd-dropdown>
   </div>
@@ -105,6 +108,10 @@ export default {
     editDefaultClicked() {
       this.$refs.menuDropdown.hideMenu();
       this.$emit("editDefaultList");
+    },
+    editListClicked() {
+      this.$refs.menuDropdown.hideMenu();
+      this.$emit("editList");
     },
   },
   mounted() {

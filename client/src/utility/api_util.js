@@ -14,6 +14,15 @@ module.exports = {
             callback(res);
         });
     },
+    getListForListId(auth_token, id, callback) {
+        const reqParamObj = { auth_token };
+        const params = new URLSearchParams(reqParamObj);
+        const req = api_root + "list/single/" + id + `?${params}`;
+        // console.log(req);
+        axios.get(req).then((res) => {
+            callback(res);
+        });
+    },
     pushListToServer(auth_token, list) {
         const reqParamObj = { auth_token };
         const params = new URLSearchParams(reqParamObj);
