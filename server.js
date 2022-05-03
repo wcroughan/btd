@@ -48,6 +48,7 @@ client.connect(err => {
 
             const apirouter = require('./backend/routes/routes')(btdb);
             app.use('/api/v1/', apirouter);
+            console.log("Started up API router", apirouter);
 
             app.use(express.static(path.join(__dirname, 'client/dist')));
             app.get('*', (req, res) => {
